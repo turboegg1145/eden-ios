@@ -93,11 +93,27 @@ jobs:
           unzip -l artifacts/Eden-iOS-arm64.ipa | head -20
 
       - name: Upload IPA artifact
+        # The account-wide Actions artifact quota can be exhausted; the release
+        # asset below is the durable delivery path. Keep trying so the artifact
+        # appears automatically once the quota resets.
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: Eden-iOS-arm64
           path: artifacts/Eden-iOS-arm64.ipa
           if-no-files-found: error
+
+      - name: Publish rolling CI release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view ci-latest >/dev/null 2>&1 || \
+            gh release create ci-latest --prerelease \
+              --title "CI latest" \
+              --notes "Rolling unsigned arm64 IPA built from main by ios-ipa.yml."
+          gh release upload ci-latest artifacts/Eden-iOS-arm64.ipa --clobber
+          gh release view ci-latest --json assets --jq '.assets[] | [.name,.size] | @tsv'
 
       - name: Attach IPA to tag release
         if: startsWith(github.ref, 'refs/tags/')
