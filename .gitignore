@@ -16,6 +16,7 @@ extracted/
 target/
 build/
 dist/
+artifacts/
 *.o
 *.a
 *.dylib

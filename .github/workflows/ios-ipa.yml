@@ -103,6 +103,62 @@ jobs:
           path: artifacts/Eden-iOS-arm64.ipa
           if-no-files-found: error
 
+      - name: Write IPA verification report
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          python3 - artifacts/Eden-iOS-arm64.ipa Payload/Eden.app/Eden <<'PY'
+          import datetime, hashlib, json, os, struct, subprocess, sys
+
+          ipa, binary = sys.argv[1], sys.argv[2]
+          data = open(binary, "rb").read()
+          magic, cpu, sub, ftype, ncmds, sizeofcmds, flags, _ = struct.unpack_from("<IiiIIIII", data, 0)
+          assert magic == 0xFEEDFACF, hex(magic)
+          off, min_os, code_signature = 32, None, None
+          for _ in range(ncmds):
+              cmd, size = struct.unpack_from("<II", data, off)
+              if cmd == 0x32:  # LC_BUILD_VERSION
+                  _, mv, sdk, _ = struct.unpack_from("<IIII", data, off + 8)
+                  min_os = f"{mv >> 16}.{mv & 0xffff}"
+              elif cmd == 0x1D:  # LC_CODE_SIGNATURE
+                  code_signature = struct.unpack_from("<II", data, off + 8)
+              off += size
+
+          def symbols(pattern):
+              out = subprocess.run(["nm", "-gU", binary], capture_output=True, text=True).stdout
+              return sorted({line.split()[-1] for line in out.splitlines()
+                             if line.strip() and pattern in line})
+
+          report = {
+              "generated_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              "repository": os.environ.get("GITHUB_REPOSITORY"),
+              "commit": os.environ.get("GITHUB_SHA"),
+              "run_id": os.environ.get("GITHUB_RUN_ID"),
+              "run_url": f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}",
+              "ipa": {
+                  "file": os.path.basename(ipa),
+                  "bytes": os.path.getsize(ipa),
+                  "sha256": hashlib.sha256(open(ipa, "rb").read()).hexdigest(),
+              },
+              "macho": {
+                  "file": "Payload/Eden.app/Eden",
+                  "bytes": len(data),
+                  "arch": "arm64" if cpu == 0x0100000C else hex(cpu),
+                  "min_os": min_os,
+                  "code_signature": bool(code_signature),
+              },
+              "entitlements": subprocess.run(
+                  ["ldid", "-e", binary], capture_output=True, text=True).stdout.strip(),
+              "engine_exports": symbols("_eden_engine_"),
+              "ffmpeg_symbols": symbols("_av"),
+          }
+          with open("reports/ipa_report.json", "w") as fh:
+              json.dump(report, fh, indent=2, sort_keys=True)
+              fh.write("\n")
+          print(json.dumps(report, indent=2, sort_keys=True))
+          PY
+          test -s reports/ipa_report.json
+
       - name: Publish rolling CI release asset
         env:
           GH_TOKEN: ${{ github.token }}
@@ -112,12 +168,15 @@ jobs:
             gh release create ci-latest --prerelease \
               --title "CI latest" \
               --notes "Rolling unsigned arm64 IPA built from main by ios-ipa.yml."
-          gh release upload ci-latest artifacts/Eden-iOS-arm64.ipa --clobber
+          gh release upload ci-latest \
+            artifacts/Eden-iOS-arm64.ipa reports/ipa_report.json --clobber
           gh release view ci-latest --json assets --jq '.assets[] | [.name,.size] | @tsv'
 
       - name: Attach IPA to tag release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/Eden-iOS-arm64.ipa
+          files: |
+            artifacts/Eden-iOS-arm64.ipa
+            reports/ipa_report.json
           generate_release_notes: true

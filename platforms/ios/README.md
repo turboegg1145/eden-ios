@@ -68,7 +68,18 @@ cd platforms/ios
 
 The same steps run in the cloud in `.github/workflows/ios-ipa.yml`
 (`macos-14`), which uploads `Eden-iOS-arm64.ipa` as a build artifact and
-attaches it to tag releases.
+attaches it to tag releases. Free accounts can exhaust the Actions artifact
+storage quota; the workflow therefore also publishes the IPA plus a generated
+`ipa_report.json` to the rolling `ci-latest` prerelease, which is the reliable
+download path:
+
+```bash
+gh release download ci-latest \
+  -p 'Eden-iOS-arm64.ipa' -p 'ipa_report.json' -D artifacts
+```
+
+When the artifact quota is available, `gh run download <run-id> --name
+Eden-iOS-arm64 -D artifacts` works as well.
 
 For TrollStore, install the resulting `Eden.app` (or its `.ipa`) directly.
 For a normal device, open the project in Xcode and select your team; the
