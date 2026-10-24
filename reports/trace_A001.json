@@ -1,52 +1,53 @@
 {
   "errors": [],
   "event_counts": {
-    "endScroll": 3,
-    "message": 73,
-    "panel": 9,
-    "playBGM": 1,
-    "playSE": 5,
-    "pragma": 2,
-    "scroll": 3,
-    "scrollEnd": 3,
-    "set": 1,
-    "stage": 36,
-    "transition": 37,
-    "transitionEnd": 36,
-    "wait": 15
+    "chain": 1,
+    "endScroll": 4,
+    "message": 315,
+    "panel": 24,
+    "playBGM": 11,
+    "playSE": 8,
+    "pragma": 7,
+    "scroll": 4,
+    "scrollEnd": 4,
+    "set": 3,
+    "stage": 128,
+    "transition": 128,
+    "transitionEnd": 128,
+    "wait": 25
   },
   "final": {
     "bgm": {
       "fade_frames": 0,
-      "file": "edenBGM016.ogg",
-      "volume": 100
+      "file": "edenBGM030.ogg",
+      "volume": 0
     },
     "ended": false,
-    "frames": 4000,
+    "frames": 8000,
     "last_error": null,
-    "message_id": 970,
+    "message_id": 570,
     "panel": {
       "image": null,
       "mask": null,
       "mode": 1
     },
-    "pc": 202,
-    "script": "A001.sc",
+    "pc": 105,
+    "script": "B001.sc",
     "stage": {
-      "image": "ev007a05_mugai_c.png",
+      "image": "ev015a02_mugai_a.png",
       "mask": null,
       "x": 0,
       "y": 0
     },
-    "state": "WaitTransition",
+    "state": "WaitFrames",
     "view": {
       "x": 0,
       "y": 0
     }
   },
-  "frames": 4000,
+  "frames": 8000,
   "game_dir": "/mnt/f/gal/【PC硬盘】【官中】eden",
-  "generated_unix": 1792859900,
+  "generated_unix": 1792871690,
   "messages": [
     {
       "frame": 186,
@@ -329,235 +330,1929 @@
       "voice": null
     },
     {
-      "frame": 3589,
+      "frame": 3558,
       "id": 580,
       "line": 130,
       "speaker": "亮",
       "voice": "ryo-A001-0007"
     },
     {
-      "frame": 3708,
+      "frame": 3677,
       "id": 590,
       "line": 137,
       "speaker": "诗音",
       "voice": "sio-A001-0013"
     },
     {
-      "frame": 3738,
+      "frame": 3707,
       "id": 600,
       "line": 140,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3738,
+      "frame": 3707,
       "id": 610,
       "line": 141,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3738,
+      "frame": 3707,
       "id": 620,
       "line": 142,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3768,
+      "frame": 3737,
       "id": 630,
       "line": 145,
       "speaker": "诗音",
       "voice": "sio-A001-0015"
     },
     {
-      "frame": 3768,
+      "frame": 3737,
       "id": 640,
       "line": 146,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3798,
+      "frame": 3767,
       "id": 650,
       "line": 149,
       "speaker": "诗音",
       "voice": "sio-A001-0017"
     },
     {
-      "frame": 3798,
+      "frame": 3767,
       "id": 660,
       "line": 150,
       "speaker": "诗音",
       "voice": "sio-A001-0019"
     },
     {
-      "frame": 3828,
+      "frame": 3797,
       "id": 670,
       "line": 153,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3828,
+      "frame": 3797,
       "id": 680,
       "line": 154,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3828,
+      "frame": 3797,
       "id": 690,
       "line": 155,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3828,
+      "frame": 3797,
       "id": 700,
       "line": 156,
       "speaker": "亮",
       "voice": "ryo-A001-0009"
     },
     {
-      "frame": 3828,
+      "frame": 3797,
       "id": 710,
       "line": 157,
       "speaker": "亮",
       "voice": "ryo-A001-0011"
     },
     {
-      "frame": 3858,
+      "frame": 3827,
       "id": 720,
       "line": 160,
       "speaker": "诗音",
       "voice": "sio-A001-0021"
     },
     {
-      "frame": 3858,
+      "frame": 3827,
       "id": 730,
       "line": 161,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3858,
+      "frame": 3827,
       "id": 740,
       "line": 162,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3858,
+      "frame": 3827,
       "id": 750,
       "line": 163,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3858,
+      "frame": 3827,
       "id": 760,
       "line": 164,
       "speaker": "亮",
       "voice": "ryo-A001-0013"
     },
     {
-      "frame": 3888,
+      "frame": 3857,
       "id": 770,
       "line": 167,
       "speaker": "诗音",
       "voice": "sio-A001-0023"
     },
     {
-      "frame": 3888,
+      "frame": 3857,
       "id": 780,
       "line": 168,
       "speaker": "亮",
       "voice": "ryo-A001-0015"
     },
     {
-      "frame": 3918,
+      "frame": 3887,
       "id": 790,
       "line": 171,
       "speaker": "诗音",
       "voice": "sio-A001-0025"
     },
     {
-      "frame": 3918,
+      "frame": 3887,
       "id": 800,
       "line": 172,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3918,
+      "frame": 3887,
       "id": 810,
       "line": 173,
       "speaker": "诗音",
       "voice": "sio-A001-0027"
     },
     {
-      "frame": 3918,
+      "frame": 3887,
       "id": 820,
       "line": 174,
       "speaker": "诗音",
       "voice": "sio-A001-0029"
     },
     {
-      "frame": 3948,
+      "frame": 3917,
       "id": 830,
       "line": 177,
       "speaker": "诗音",
       "voice": "sio-A001-0031"
     },
     {
-      "frame": 3948,
+      "frame": 3917,
       "id": 840,
       "line": 178,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3948,
+      "frame": 3917,
       "id": 850,
       "line": 179,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3948,
+      "frame": 3917,
       "id": 860,
       "line": 180,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3948,
+      "frame": 3917,
       "id": 870,
       "line": 181,
       "speaker": "亮",
       "voice": "ryo-A001-0017"
     },
     {
-      "frame": 3948,
+      "frame": 3917,
       "id": 880,
       "line": 182,
       "speaker": null,
       "voice": null
     },
     {
-      "frame": 3978,
+      "frame": 3947,
       "id": 890,
       "line": 185,
       "speaker": "诗音",
       "voice": "sio-A001-0033"
     },
     {
-      "frame": 3978,
+      "frame": 3947,
       "id": 900,
       "line": 186,
       "speaker": "诗音",
       "voice": "sio-A001-0035"
+    },
+    {
+      "frame": 3977,
+      "id": 910,
+      "line": 189,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 3977,
+      "id": 920,
+      "line": 190,
+      "speaker": "诗音",
+      "voice": "sio-A001-0037"
+    },
+    {
+      "frame": 3977,
+      "id": 930,
+      "line": 191,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4007,
+      "id": 940,
+      "line": 194,
+      "speaker": "诗音",
+      "voice": "sio-A001-0039"
+    },
+    {
+      "frame": 4007,
+      "id": 950,
+      "line": 195,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4037,
+      "id": 960,
+      "line": 198,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4067,
+      "id": 970,
+      "line": 201,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4097,
+      "id": 980,
+      "line": 204,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4127,
+      "id": 990,
+      "line": 207,
+      "speaker": "诗音",
+      "voice": "sio-A001-0041"
+    },
+    {
+      "frame": 4127,
+      "id": 1000,
+      "line": 208,
+      "speaker": "亮",
+      "voice": "ryo-A001-0019"
+    },
+    {
+      "frame": 4157,
+      "id": 1010,
+      "line": 211,
+      "speaker": "诗音",
+      "voice": "sio-A001-0043"
+    },
+    {
+      "frame": 4187,
+      "id": 1020,
+      "line": 214,
+      "speaker": "诗音",
+      "voice": "sio-A001-0045"
+    },
+    {
+      "frame": 4217,
+      "id": 1060,
+      "line": 225,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4217,
+      "id": 1070,
+      "line": 226,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4217,
+      "id": 1080,
+      "line": 227,
+      "speaker": "诗音",
+      "voice": "sio-A001-0047"
+    },
+    {
+      "frame": 4217,
+      "id": 1090,
+      "line": 228,
+      "speaker": "诗音",
+      "voice": "sio-A001-0049"
+    },
+    {
+      "frame": 4217,
+      "id": 1100,
+      "line": 229,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4247,
+      "id": 1110,
+      "line": 232,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4247,
+      "id": 1120,
+      "line": 233,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4247,
+      "id": 1130,
+      "line": 234,
+      "speaker": "诗音",
+      "voice": "sio-A001-0051[50]"
+    },
+    {
+      "frame": 4247,
+      "id": 1140,
+      "line": 235,
+      "speaker": "亮",
+      "voice": "ryo-A001-0021"
+    },
+    {
+      "frame": 4247,
+      "id": 1150,
+      "line": 236,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4247,
+      "id": 1160,
+      "line": 237,
+      "speaker": "亮",
+      "voice": "ryo-A001-0023"
+    },
+    {
+      "frame": 4277,
+      "id": 1170,
+      "line": 240,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1180,
+      "line": 241,
+      "speaker": "诗音",
+      "voice": "sio-A001-0053"
+    },
+    {
+      "frame": 4277,
+      "id": 1190,
+      "line": 242,
+      "speaker": "亮",
+      "voice": "ryo-A001-0025"
+    },
+    {
+      "frame": 4277,
+      "id": 1200,
+      "line": 243,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1210,
+      "line": 244,
+      "speaker": "诗音",
+      "voice": "sio-A001-0055"
+    },
+    {
+      "frame": 4277,
+      "id": 1220,
+      "line": 245,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1230,
+      "line": 246,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1240,
+      "line": 247,
+      "speaker": "亮",
+      "voice": "ryo-A001-0027"
+    },
+    {
+      "frame": 4277,
+      "id": 1250,
+      "line": 248,
+      "speaker": "诗音",
+      "voice": "sio-A001-0057"
+    },
+    {
+      "frame": 4277,
+      "id": 1260,
+      "line": 249,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1270,
+      "line": 250,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1280,
+      "line": 251,
+      "speaker": "亮",
+      "voice": "ryo-A001-0029"
+    },
+    {
+      "frame": 4277,
+      "id": 1290,
+      "line": 252,
+      "speaker": "诗音",
+      "voice": "sio-A001-0059"
+    },
+    {
+      "frame": 4277,
+      "id": 1300,
+      "line": 253,
+      "speaker": "亮",
+      "voice": "ryo-A001-0031"
+    },
+    {
+      "frame": 4277,
+      "id": 1310,
+      "line": 254,
+      "speaker": "诗音",
+      "voice": "sio-A001-0061"
+    },
+    {
+      "frame": 4277,
+      "id": 1320,
+      "line": 255,
+      "speaker": "亮",
+      "voice": "ryo-A001-0033"
+    },
+    {
+      "frame": 4277,
+      "id": 1330,
+      "line": 256,
+      "speaker": "诗音",
+      "voice": "sio-A001-0063"
+    },
+    {
+      "frame": 4277,
+      "id": 1340,
+      "line": 257,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1350,
+      "line": 258,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1360,
+      "line": 259,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4277,
+      "id": 1370,
+      "line": 260,
+      "speaker": "诗音",
+      "voice": "sio-A001-0065"
+    },
+    {
+      "frame": 4277,
+      "id": 1380,
+      "line": 261,
+      "speaker": "亮",
+      "voice": "ryo-A001-0035"
+    },
+    {
+      "frame": 4277,
+      "id": 1390,
+      "line": 262,
+      "speaker": "诗音",
+      "voice": "sio-A001-0067"
+    },
+    {
+      "frame": 4277,
+      "id": 1400,
+      "line": 263,
+      "speaker": "亮",
+      "voice": "ryo-A001-0037"
+    },
+    {
+      "frame": 4307,
+      "id": 1410,
+      "line": 266,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4307,
+      "id": 1420,
+      "line": 267,
+      "speaker": "诗音",
+      "voice": "sio-A001-0069"
+    },
+    {
+      "frame": 4307,
+      "id": 1430,
+      "line": 268,
+      "speaker": "亮",
+      "voice": "ryo-A001-0039"
+    },
+    {
+      "frame": 4307,
+      "id": 1440,
+      "line": 269,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4307,
+      "id": 1450,
+      "line": 270,
+      "speaker": "亮",
+      "voice": "ryo-A001-0041"
+    },
+    {
+      "frame": 4307,
+      "id": 1460,
+      "line": 271,
+      "speaker": "诗音",
+      "voice": "sio-A001-0071"
+    },
+    {
+      "frame": 4307,
+      "id": 1470,
+      "line": 272,
+      "speaker": "亮",
+      "voice": "ryo-A001-0043"
+    },
+    {
+      "frame": 4307,
+      "id": 1480,
+      "line": 273,
+      "speaker": "诗音",
+      "voice": "sio-A001-0073"
+    },
+    {
+      "frame": 4307,
+      "id": 1490,
+      "line": 274,
+      "speaker": "诗音",
+      "voice": "sio-A001-0075"
+    },
+    {
+      "frame": 4307,
+      "id": 1500,
+      "line": 275,
+      "speaker": "亮",
+      "voice": "ryo-A001-0045"
+    },
+    {
+      "frame": 4307,
+      "id": 1510,
+      "line": 276,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4307,
+      "id": 1520,
+      "line": 277,
+      "speaker": "诗音",
+      "voice": "sio-A001-0077"
+    },
+    {
+      "frame": 4307,
+      "id": 1530,
+      "line": 278,
+      "speaker": "亮",
+      "voice": "ryo-A001-0047"
+    },
+    {
+      "frame": 4307,
+      "id": 1540,
+      "line": 279,
+      "speaker": "诗音",
+      "voice": "sio-A001-0079"
+    },
+    {
+      "frame": 4307,
+      "id": 1550,
+      "line": 280,
+      "speaker": "诗音",
+      "voice": "sio-A001-0081"
+    },
+    {
+      "frame": 4307,
+      "id": 1560,
+      "line": 281,
+      "speaker": "亮",
+      "voice": "ryo-A001-0049"
+    },
+    {
+      "frame": 4307,
+      "id": 1570,
+      "line": 282,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4307,
+      "id": 1580,
+      "line": 283,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4307,
+      "id": 1590,
+      "line": 284,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4307,
+      "id": 1600,
+      "line": 285,
+      "speaker": "诗音",
+      "voice": "sio-A001-0083"
+    },
+    {
+      "frame": 4307,
+      "id": 1610,
+      "line": 286,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4307,
+      "id": 1620,
+      "line": 287,
+      "speaker": "亮",
+      "voice": "ryo-A001-0051"
+    },
+    {
+      "frame": 4307,
+      "id": 1630,
+      "line": 288,
+      "speaker": "诗音",
+      "voice": "sio-A001-0085"
+    },
+    {
+      "frame": 4307,
+      "id": 1640,
+      "line": 289,
+      "speaker": "诗音",
+      "voice": "sio-A001-0087"
+    },
+    {
+      "frame": 4307,
+      "id": 1650,
+      "line": 290,
+      "speaker": "亮",
+      "voice": "ryo-A001-0053"
+    },
+    {
+      "frame": 4307,
+      "id": 1660,
+      "line": 291,
+      "speaker": "诗音",
+      "voice": "sio-A001-0089"
+    },
+    {
+      "frame": 4352,
+      "id": 1700,
+      "line": 302,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4352,
+      "id": 1710,
+      "line": 303,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4372,
+      "id": 1720,
+      "line": 306,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4372,
+      "id": 1730,
+      "line": 307,
+      "speaker": "亮",
+      "voice": "ryo-A001-0055"
+    },
+    {
+      "frame": 4372,
+      "id": 1740,
+      "line": 308,
+      "speaker": "诗音",
+      "voice": "sio-A001-0091"
+    },
+    {
+      "frame": 4402,
+      "id": 1750,
+      "line": 311,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4402,
+      "id": 1760,
+      "line": 312,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4402,
+      "id": 1770,
+      "line": 313,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4402,
+      "id": 1780,
+      "line": 314,
+      "speaker": "亮",
+      "voice": "ryo-A001-0057"
+    },
+    {
+      "frame": 4402,
+      "id": 1790,
+      "line": 315,
+      "speaker": "诗音",
+      "voice": "sio-A001-0093"
+    },
+    {
+      "frame": 4402,
+      "id": 1800,
+      "line": 316,
+      "speaker": "亮",
+      "voice": "ryo-A001-0059"
+    },
+    {
+      "frame": 4402,
+      "id": 1810,
+      "line": 317,
+      "speaker": "诗音",
+      "voice": "sio-A001-0095"
+    },
+    {
+      "frame": 4402,
+      "id": 1820,
+      "line": 318,
+      "speaker": "亮",
+      "voice": "ryo-A001-0061"
+    },
+    {
+      "frame": 4432,
+      "id": 1830,
+      "line": 321,
+      "speaker": "诗音",
+      "voice": "sio-A001-0097"
+    },
+    {
+      "frame": 4432,
+      "id": 1840,
+      "line": 322,
+      "speaker": "诗音",
+      "voice": "sio-A001-0099"
+    },
+    {
+      "frame": 4462,
+      "id": 1850,
+      "line": 325,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4462,
+      "id": 1860,
+      "line": 326,
+      "speaker": "亮",
+      "voice": "ryo-A001-0063"
+    },
+    {
+      "frame": 4492,
+      "id": 1870,
+      "line": 329,
+      "speaker": "诗音",
+      "voice": "sio-A001-0101"
+    },
+    {
+      "frame": 4492,
+      "id": 1880,
+      "line": 330,
+      "speaker": "亮",
+      "voice": "ryo-A001-0065"
+    },
+    {
+      "frame": 4522,
+      "id": 1890,
+      "line": 333,
+      "speaker": "诗音",
+      "voice": "sio-A001-0103"
+    },
+    {
+      "frame": 4522,
+      "id": 1900,
+      "line": 334,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4522,
+      "id": 1910,
+      "line": 335,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4552,
+      "id": 1920,
+      "line": 338,
+      "speaker": "诗音",
+      "voice": "sio-A001-0105"
+    },
+    {
+      "frame": 4552,
+      "id": 1930,
+      "line": 339,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4582,
+      "id": 1940,
+      "line": 342,
+      "speaker": "诗音",
+      "voice": "sio-A001-0107"
+    },
+    {
+      "frame": 4582,
+      "id": 1950,
+      "line": 343,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4582,
+      "id": 1960,
+      "line": 344,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4582,
+      "id": 1970,
+      "line": 345,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4582,
+      "id": 1980,
+      "line": 346,
+      "speaker": "亮",
+      "voice": "ryo-A001-0067"
+    },
+    {
+      "frame": 4612,
+      "id": 1990,
+      "line": 349,
+      "speaker": "诗音",
+      "voice": "sio-A001-0109"
+    },
+    {
+      "frame": 4612,
+      "id": 2000,
+      "line": 350,
+      "speaker": "亮",
+      "voice": "ryo-A001-0069"
+    },
+    {
+      "frame": 4612,
+      "id": 2010,
+      "line": 351,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4612,
+      "id": 2020,
+      "line": 352,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4612,
+      "id": 2030,
+      "line": 353,
+      "speaker": "亮",
+      "voice": "ryo-A001-0071"
+    },
+    {
+      "frame": 4642,
+      "id": 2040,
+      "line": 356,
+      "speaker": "诗音",
+      "voice": "sio-A001-0111"
+    },
+    {
+      "frame": 4642,
+      "id": 2050,
+      "line": 357,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4692,
+      "id": 2090,
+      "line": 368,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4692,
+      "id": 2100,
+      "line": 369,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4722,
+      "id": 2110,
+      "line": 372,
+      "speaker": "诗音",
+      "voice": "sio-A001-0113"
+    },
+    {
+      "frame": 4722,
+      "id": 2120,
+      "line": 373,
+      "speaker": "亮",
+      "voice": "ryo-A001-0073"
+    },
+    {
+      "frame": 4752,
+      "id": 2130,
+      "line": 376,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4752,
+      "id": 2140,
+      "line": 377,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4782,
+      "id": 2150,
+      "line": 380,
+      "speaker": "诗音",
+      "voice": "sio-A001-0115"
+    },
+    {
+      "frame": 4782,
+      "id": 2160,
+      "line": 381,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4782,
+      "id": 2170,
+      "line": 382,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4782,
+      "id": 2180,
+      "line": 383,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4812,
+      "id": 2190,
+      "line": 386,
+      "speaker": "诗音",
+      "voice": "sio-A001-0117"
+    },
+    {
+      "frame": 4812,
+      "id": 2200,
+      "line": 387,
+      "speaker": "亮",
+      "voice": "ryo-A001-0075"
+    },
+    {
+      "frame": 4812,
+      "id": 2210,
+      "line": 388,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4842,
+      "id": 2220,
+      "line": 391,
+      "speaker": "诗音",
+      "voice": "sio-A001-0119"
+    },
+    {
+      "frame": 4842,
+      "id": 2230,
+      "line": 392,
+      "speaker": "亮",
+      "voice": "ryo-A001-0077"
+    },
+    {
+      "frame": 4872,
+      "id": 2240,
+      "line": 395,
+      "speaker": "诗音",
+      "voice": "sio-A001-0121"
+    },
+    {
+      "frame": 4872,
+      "id": 2250,
+      "line": 396,
+      "speaker": "亮",
+      "voice": "ryo-A001-0079"
+    },
+    {
+      "frame": 4872,
+      "id": 2260,
+      "line": 397,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4872,
+      "id": 2270,
+      "line": 398,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4872,
+      "id": 2280,
+      "line": 399,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4902,
+      "id": 2290,
+      "line": 402,
+      "speaker": "诗音",
+      "voice": "sio-A001-0123"
+    },
+    {
+      "frame": 4902,
+      "id": 2300,
+      "line": 403,
+      "speaker": "亮",
+      "voice": "ryo-A001-0081"
+    },
+    {
+      "frame": 4932,
+      "id": 2310,
+      "line": 406,
+      "speaker": "诗音",
+      "voice": "sio-A001-0125"
+    },
+    {
+      "frame": 4962,
+      "id": 2320,
+      "line": 409,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 4992,
+      "id": 2330,
+      "line": 412,
+      "speaker": "诗音",
+      "voice": "sio-A001-0127"
+    },
+    {
+      "frame": 4992,
+      "id": 2340,
+      "line": 413,
+      "speaker": "亮",
+      "voice": "ryo-A001-0083"
+    },
+    {
+      "frame": 5022,
+      "id": 2350,
+      "line": 416,
+      "speaker": "诗音",
+      "voice": "sio-A001-0129"
+    },
+    {
+      "frame": 5022,
+      "id": 2360,
+      "line": 417,
+      "speaker": "亮",
+      "voice": "ryo-A001-0085"
+    },
+    {
+      "frame": 5022,
+      "id": 2370,
+      "line": 418,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5022,
+      "id": 2380,
+      "line": 419,
+      "speaker": "亮",
+      "voice": "ryo-A001-0087"
+    },
+    {
+      "frame": 5052,
+      "id": 2390,
+      "line": 422,
+      "speaker": "诗音",
+      "voice": "sio-A001-0131"
+    },
+    {
+      "frame": 5052,
+      "id": 2400,
+      "line": 423,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5052,
+      "id": 2410,
+      "line": 424,
+      "speaker": "亮",
+      "voice": "ryo-A001-0089"
+    },
+    {
+      "frame": 5082,
+      "id": 2420,
+      "line": 427,
+      "speaker": "诗音",
+      "voice": "sio-A001-0133"
+    },
+    {
+      "frame": 5082,
+      "id": 2430,
+      "line": 428,
+      "speaker": "亮",
+      "voice": "ryo-A001-0091"
+    },
+    {
+      "frame": 5112,
+      "id": 2440,
+      "line": 431,
+      "speaker": "诗音",
+      "voice": "sio-A001-0135"
+    },
+    {
+      "frame": 5142,
+      "id": 2450,
+      "line": 435,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5142,
+      "id": 2460,
+      "line": 436,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5142,
+      "id": 2470,
+      "line": 437,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5172,
+      "id": 2480,
+      "line": 440,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5172,
+      "id": 2490,
+      "line": 441,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5172,
+      "id": 2500,
+      "line": 442,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5172,
+      "id": 2510,
+      "line": 443,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5217,
+      "id": 2550,
+      "line": 453,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5247,
+      "id": 2560,
+      "line": 457,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5277,
+      "id": 2570,
+      "line": 461,
+      "speaker": "亮",
+      "voice": "ryo-A001-0093"
+    },
+    {
+      "frame": 5307,
+      "id": 2580,
+      "line": 464,
+      "speaker": null,
+      "voice": "sio-A001-0136"
+    },
+    {
+      "frame": 5307,
+      "id": 2590,
+      "line": 465,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5307,
+      "id": 2600,
+      "line": 466,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5307,
+      "id": 2610,
+      "line": 467,
+      "speaker": "亮",
+      "voice": "ryo-A001-0095"
+    },
+    {
+      "frame": 5307,
+      "id": 2620,
+      "line": 468,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5337,
+      "id": 2630,
+      "line": 471,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5337,
+      "id": 2640,
+      "line": 472,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5367,
+      "id": 2650,
+      "line": 475,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5367,
+      "id": 2660,
+      "line": 476,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5397,
+      "id": 2670,
+      "line": 479,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5397,
+      "id": 2680,
+      "line": 480,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5397,
+      "id": 2690,
+      "line": 481,
+      "speaker": "亮",
+      "voice": "ryo-A001-0097"
+    },
+    {
+      "frame": 5427,
+      "id": 2700,
+      "line": 484,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5457,
+      "id": 2710,
+      "line": 487,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5457,
+      "id": 2720,
+      "line": 488,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5487,
+      "id": 2730,
+      "line": 491,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5487,
+      "id": 2740,
+      "line": 492,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5517,
+      "id": 2750,
+      "line": 495,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5517,
+      "id": 2760,
+      "line": 496,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5517,
+      "id": 2770,
+      "line": 497,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5517,
+      "id": 2780,
+      "line": 498,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5547,
+      "id": 2790,
+      "line": 501,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5577,
+      "id": 2800,
+      "line": 504,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5577,
+      "id": 2810,
+      "line": 505,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5607,
+      "id": 2820,
+      "line": 508,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5772,
+      "id": 2830,
+      "line": 518,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5772,
+      "id": 2840,
+      "line": 519,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5772,
+      "id": 2850,
+      "line": 520,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2860,
+      "line": 523,
+      "speaker": "亮",
+      "voice": "ryo-A001-0099"
+    },
+    {
+      "frame": 5802,
+      "id": 2870,
+      "line": 524,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2880,
+      "line": 525,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2890,
+      "line": 526,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2900,
+      "line": 527,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2910,
+      "line": 528,
+      "speaker": "亮",
+      "voice": "ryo-A001-0101"
+    },
+    {
+      "frame": 5802,
+      "id": 2920,
+      "line": 529,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2930,
+      "line": 530,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2940,
+      "line": 531,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2950,
+      "line": 532,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2960,
+      "line": 533,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2970,
+      "line": 534,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2980,
+      "line": 535,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 2990,
+      "line": 536,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 3000,
+      "line": 537,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 3010,
+      "line": 538,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5802,
+      "id": 3020,
+      "line": 539,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 5992,
+      "id": 3030,
+      "line": 549,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 6595,
+      "id": 111,
+      "line": 7,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7045,
+      "id": 113,
+      "line": 14,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7400,
+      "id": 180,
+      "line": 20,
+      "speaker": "拉维",
+      "voice": "rav-B001-0003"
+    },
+    {
+      "frame": 7524,
+      "id": 190,
+      "line": 31,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7524,
+      "id": 200,
+      "line": 32,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7524,
+      "id": 210,
+      "line": 33,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7524,
+      "id": 220,
+      "line": 34,
+      "speaker": "拉维",
+      "voice": "rav-B001-0005"
+    },
+    {
+      "frame": 7524,
+      "id": 230,
+      "line": 35,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7554,
+      "id": 240,
+      "line": 38,
+      "speaker": "拉维",
+      "voice": "rav-B001-0007"
+    },
+    {
+      "frame": 7584,
+      "id": 250,
+      "line": 41,
+      "speaker": "拉维",
+      "voice": "rav-B001-0009"
+    },
+    {
+      "frame": 7584,
+      "id": 260,
+      "line": 42,
+      "speaker": "亮",
+      "voice": "ryo-B001-0003"
+    },
+    {
+      "frame": 7614,
+      "id": 270,
+      "line": 45,
+      "speaker": "拉维",
+      "voice": "rav-B001-0011"
+    },
+    {
+      "frame": 7614,
+      "id": 280,
+      "line": 46,
+      "speaker": "拉维",
+      "voice": "rav-B001-0013"
+    },
+    {
+      "frame": 7614,
+      "id": 290,
+      "line": 47,
+      "speaker": "亮",
+      "voice": "ryo-B001-0005"
+    },
+    {
+      "frame": 7644,
+      "id": 300,
+      "line": 50,
+      "speaker": "拉维",
+      "voice": "rav-B001-0015"
+    },
+    {
+      "frame": 7674,
+      "id": 310,
+      "line": 53,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7704,
+      "id": 320,
+      "line": 56,
+      "speaker": "拉维",
+      "voice": "rav-B001-0017"
+    },
+    {
+      "frame": 7704,
+      "id": 330,
+      "line": 57,
+      "speaker": "拉维",
+      "voice": "rav-B001-0019"
+    },
+    {
+      "frame": 7704,
+      "id": 340,
+      "line": 58,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7704,
+      "id": 350,
+      "line": 59,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7734,
+      "id": 360,
+      "line": 62,
+      "speaker": "拉维",
+      "voice": "rav-B001-0021"
+    },
+    {
+      "frame": 7734,
+      "id": 370,
+      "line": 63,
+      "speaker": "亮",
+      "voice": "ryo-B001-0007"
+    },
+    {
+      "frame": 7734,
+      "id": 380,
+      "line": 64,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7734,
+      "id": 390,
+      "line": 65,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7734,
+      "id": 400,
+      "line": 66,
+      "speaker": "亮",
+      "voice": "ryo-B001-0009"
+    },
+    {
+      "frame": 7764,
+      "id": 410,
+      "line": 69,
+      "speaker": "拉维",
+      "voice": "rav-B001-0023"
+    },
+    {
+      "frame": 7764,
+      "id": 420,
+      "line": 70,
+      "speaker": "亮",
+      "voice": "ryo-B001-0011"
+    },
+    {
+      "frame": 7764,
+      "id": 430,
+      "line": 71,
+      "speaker": "亮",
+      "voice": "ryo-B001-0013"
+    },
+    {
+      "frame": 7794,
+      "id": 440,
+      "line": 74,
+      "speaker": "拉维",
+      "voice": "rav-B001-0025"
+    },
+    {
+      "frame": 7794,
+      "id": 450,
+      "line": 75,
+      "speaker": "亮",
+      "voice": "ryo-B001-0015"
+    },
+    {
+      "frame": 7794,
+      "id": 460,
+      "line": 76,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7794,
+      "id": 470,
+      "line": 77,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7794,
+      "id": 480,
+      "line": 78,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7794,
+      "id": 490,
+      "line": 79,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7824,
+      "id": 500,
+      "line": 83,
+      "speaker": "拉维",
+      "voice": "rav-B001-0027"
+    },
+    {
+      "frame": 7824,
+      "id": 510,
+      "line": 84,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7854,
+      "id": 520,
+      "line": 87,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7884,
+      "id": 530,
+      "line": 90,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7914,
+      "id": 540,
+      "line": 93,
+      "speaker": null,
+      "voice": null
+    },
+    {
+      "frame": 7914,
+      "id": 550,
+      "line": 94,
+      "speaker": "亮",
+      "voice": "ryo-B001-0017"
+    },
+    {
+      "frame": 7944,
+      "id": 560,
+      "line": 100,
+      "speaker": "拉维",
+      "voice": "rav-B001-0029"
     }
   ],
   "ok": true,
@@ -698,11 +2393,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 13,
+      "pc": 14,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "BLACK.png",
+        "image": "ev001.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -727,11 +2422,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 15,
+      "pc": 16,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev001.png",
+        "image": "BLACK.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -828,11 +2523,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 19,
+      "pc": 20,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "BLACK.png",
+        "image": "ev001.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -857,11 +2552,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 21,
+      "pc": 22,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev001.png",
+        "image": "BLACK.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1102,11 +2797,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 29,
+      "pc": 30,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "BLACK.png",
+        "image": "ev001.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1131,11 +2826,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 31,
+      "pc": 32,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev001.png",
+        "image": "BLACK.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1208,11 +2903,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 34,
+      "pc": 35,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "BLACK.png",
+        "image": "ev001.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1237,11 +2932,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 36,
+      "pc": 37,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev001.png",
+        "image": "BLACK.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1362,11 +3057,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 42,
+      "pc": 43,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "BLACK.png",
+        "image": "ev001.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1391,11 +3086,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 44,
+      "pc": 45,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev001.png",
+        "image": "BLACK.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1708,11 +3403,11 @@
         "mask": null,
         "mode": 0
       },
-      "pc": 54,
+      "pc": 55,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "BLACK.png",
+        "image": "mozi_A001_020.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1833,11 +3528,11 @@
         "mask": null,
         "mode": 0
       },
-      "pc": 62,
+      "pc": 63,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "WHITE.png",
+        "image": "ev005b01_mugai_a.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1862,11 +3557,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 72,
+      "pc": 73,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev005b01.png",
+        "image": "ev005c01.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1891,11 +3586,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 87,
+      "pc": 88,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev003.png",
+        "image": "ev004.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1920,11 +3615,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 94,
+      "pc": 95,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev005a01.png",
+        "image": "ev005a01_mugai_a.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1949,11 +3644,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 100,
+      "pc": 101,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev004_mugai_b.png",
+        "image": "ev004_mugai_c.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -1978,11 +3673,11 @@
         "mask": null,
         "mode": 1
       },
-      "pc": 106,
+      "pc": 107,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev004_mugai_d.png",
+        "image": "ev005a02_mugai_a.png",
         "mask": null,
         "x": 0,
         "y": 0
@@ -2049,10 +3744,10 @@
         "speed_x": 0,
         "speed_y": -10,
         "start_x": 0,
-        "start_y": 1280,
+        "start_y": 970,
         "target_x": 0,
         "target_y": 0,
-        "total_frames": 128
+        "total_frames": 97
       },
       "stage": {
         "image": "ev006.png",
@@ -2064,7 +3759,7 @@
       "transition": null,
       "view": {
         "x": 0,
-        "y": 1090
+        "y": 780
       }
     },
     {
@@ -2083,10 +3778,10 @@
         "speed_x": 0,
         "speed_y": -10,
         "start_x": 0,
-        "start_y": 1280,
+        "start_y": 970,
         "target_x": 0,
         "target_y": 0,
-        "total_frames": 128
+        "total_frames": 97
       },
       "stage": {
         "image": "ev006.png",
@@ -2098,7 +3793,7 @@
       "transition": null,
       "view": {
         "x": 0,
-        "y": 490
+        "y": 180
       }
     },
     {
@@ -2109,39 +3804,10 @@
         "mask": null,
         "mode": 0
       },
-      "pc": 132,
-      "script": "A001.sc",
-      "scroll": null,
-      "stage": {
-        "image": "ev006.png",
-        "mask": null,
-        "x": 0,
-        "y": 1280
-      },
-      "state": "WaitTransition",
-      "transition": {
-        "elapsed": 11,
-        "kind": 0,
-        "layer": null,
-        "total_frames": 30
-      },
-      "view": {
-        "x": 0,
-        "y": 0
-      }
-    },
-    {
-      "frame": 3660,
-      "message_id": 580,
-      "panel": {
-        "image": null,
-        "mask": null,
-        "mode": 0
-      },
       "pc": 134,
       "script": "A001.sc",
       "scroll": {
-        "elapsed": 41,
+        "elapsed": 12,
         "kind": "VScroll",
         "speed_x": 0,
         "speed_y": 10,
@@ -2161,29 +3827,63 @@
       "transition": null,
       "view": {
         "x": 0,
-        "y": 410
+        "y": 120
       }
     },
     {
-      "frame": 3720,
-      "message_id": 590,
+      "frame": 3660,
+      "message_id": 580,
       "panel": {
         "image": null,
         "mask": null,
-        "mode": 1
+        "mode": 0
       },
-      "pc": 138,
+      "pc": 134,
       "script": "A001.sc",
-      "scroll": null,
+      "scroll": {
+        "elapsed": 72,
+        "kind": "VScroll",
+        "speed_x": 0,
+        "speed_y": 10,
+        "start_x": 0,
+        "start_y": 0,
+        "target_x": 0,
+        "target_y": 884,
+        "total_frames": 89
+      },
       "stage": {
         "image": "ev007a01.png",
         "mask": null,
         "x": 0,
         "y": 0
       },
+      "state": "WaitScroll",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 720
+      }
+    },
+    {
+      "frame": 3720,
+      "message_id": 620,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 144,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev007b02.png",
+        "mask": null,
+        "x": 0,
+        "y": 884
+      },
       "state": "WaitTransition",
       "transition": {
-        "elapsed": 12,
+        "elapsed": 13,
         "kind": 0,
         "layer": null,
         "total_frames": 30
@@ -2195,42 +3895,13 @@
     },
     {
       "frame": 3780,
-      "message_id": 640,
+      "message_id": 660,
       "panel": {
         "image": null,
         "mask": null,
         "mode": 1
       },
-      "pc": 147,
-      "script": "A001.sc",
-      "scroll": null,
-      "stage": {
-        "image": "ev007b02.png",
-        "mask": null,
-        "x": 0,
-        "y": 884
-      },
-      "state": "WaitTransition",
-      "transition": {
-        "elapsed": 12,
-        "kind": 0,
-        "layer": null,
-        "total_frames": 30
-      },
-      "view": {
-        "x": 0,
-        "y": 884
-      }
-    },
-    {
-      "frame": 3840,
-      "message_id": 710,
-      "panel": {
-        "image": null,
-        "mask": null,
-        "mode": 1
-      },
-      "pc": 158,
+      "pc": 152,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
@@ -2241,7 +3912,7 @@
       },
       "state": "WaitTransition",
       "transition": {
-        "elapsed": 12,
+        "elapsed": 13,
         "kind": 0,
         "layer": null,
         "total_frames": 30
@@ -2252,14 +3923,14 @@
       }
     },
     {
-      "frame": 3900,
-      "message_id": 780,
+      "frame": 3840,
+      "message_id": 760,
       "panel": {
         "image": null,
         "mask": null,
         "mode": 1
       },
-      "pc": 169,
+      "pc": 166,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
@@ -2270,7 +3941,36 @@
       },
       "state": "WaitTransition",
       "transition": {
-        "elapsed": 12,
+        "elapsed": 13,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 884
+      }
+    },
+    {
+      "frame": 3900,
+      "message_id": 820,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 176,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev007a04.png",
+        "mask": null,
+        "x": 0,
+        "y": 884
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 13,
         "kind": 0,
         "layer": null,
         "total_frames": 30
@@ -2282,24 +3982,24 @@
     },
     {
       "frame": 3960,
-      "message_id": 880,
+      "message_id": 900,
       "panel": {
         "image": null,
         "mask": null,
         "mode": 1
       },
-      "pc": 183,
+      "pc": 188,
       "script": "A001.sc",
       "scroll": null,
       "stage": {
-        "image": "ev007a04.png",
+        "image": "ev007b01.png",
         "mask": null,
         "x": 0,
         "y": 884
       },
       "state": "WaitTransition",
       "transition": {
-        "elapsed": 12,
+        "elapsed": 13,
         "kind": 0,
         "layer": null,
         "total_frames": 30
@@ -2308,11 +4008,1814 @@
         "x": 0,
         "y": 884
       }
+    },
+    {
+      "frame": 4020,
+      "message_id": 950,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 197,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev007a05_mugai_b.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 13,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4080,
+      "message_id": 970,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 203,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev007a05_mugai_d.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 13,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4140,
+      "message_id": 1000,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 210,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev007a01_mugai_a.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 13,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4200,
+      "message_id": 1020,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 220,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "WHITE.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 10
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4260,
+      "message_id": 1160,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 239,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev_cut04b.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 13,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4320,
+      "message_id": 1660,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 297,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "WHITE.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 15
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4380,
+      "message_id": 1740,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 310,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "A001_0004_0003.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 8,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4440,
+      "message_id": 1840,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 324,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "A001_0004_0005.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 8,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4500,
+      "message_id": 1880,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 332,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "A001_0004_0007.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 8,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4560,
+      "message_id": 1930,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 341,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "A001_0004_0009.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 8,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4620,
+      "message_id": 2030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 355,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "A001_0004_0011.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 8,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4680,
+      "message_id": 2050,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 366,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev010a01.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 8,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 20
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4740,
+      "message_id": 2120,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 375,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev011d06.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4800,
+      "message_id": 2180,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 385,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev011c03.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4860,
+      "message_id": 2230,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 394,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev011c02.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4920,
+      "message_id": 2300,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 405,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev011c04_close.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 4980,
+      "message_id": 2320,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 411,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev011d01.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5040,
+      "message_id": 2380,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 421,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev011d03.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5100,
+      "message_id": 2430,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 430,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev011d05.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5160,
+      "message_id": 2470,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 439,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev090a01.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 18,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5220,
+      "message_id": 2550,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 456,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev012b01.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5280,
+      "message_id": 2570,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 463,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev013a03.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5340,
+      "message_id": 2640,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 474,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev013b01_mugai_b.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5400,
+      "message_id": 2690,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 483,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev013b01_mugai_d.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5460,
+      "message_id": 2720,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 490,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev013b02_mugai_e.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5520,
+      "message_id": 2780,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 500,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev013a04.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5580,
+      "message_id": 2810,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 507,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "maisou_bg021a01_03.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 3,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5640,
+      "message_id": 2820,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 514,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5700,
+      "message_id": 2820,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 514,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5760,
+      "message_id": 2820,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 516,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev001.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 8,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 20
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5820,
+      "message_id": 3020,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 546,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "WHITE.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5880,
+      "message_id": 3020,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 546,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "WHITE.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 5940,
+      "message_id": 3020,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 546,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "WHITE.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6000,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 550,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_017.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6060,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 550,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_017.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6120,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 550,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_017.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6180,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 550,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_017.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6240,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 557,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "WHITE.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6300,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 562,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6360,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 562,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6420,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 562,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6480,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 562,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6540,
+      "message_id": 3030,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 562,
+      "script": "A001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6600,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 8,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_018.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6660,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 8,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_018.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6720,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 8,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_018.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6780,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 8,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_018.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6840,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 8,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_018.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6900,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 11,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 6960,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 11,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7020,
+      "message_id": 111,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 11,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7080,
+      "message_id": 113,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 15,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_019.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7140,
+      "message_id": 113,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 15,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_019.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7200,
+      "message_id": 113,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 15,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "mozi_A001_019.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7260,
+      "message_id": 113,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 18,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7320,
+      "message_id": 113,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 18,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7380,
+      "message_id": 113,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 18,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "BLACK.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7440,
+      "message_id": 180,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 27,
+      "script": "B001.sc",
+      "scroll": {
+        "elapsed": 10,
+        "kind": "VScroll",
+        "speed_x": 0,
+        "speed_y": -15,
+        "start_x": 0,
+        "start_y": 1408,
+        "target_x": 0,
+        "target_y": 0,
+        "total_frames": 94
+      },
+      "stage": {
+        "image": "ev015a01.png",
+        "mask": null,
+        "x": 0,
+        "y": 1408
+      },
+      "state": "WaitScroll",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 1258
+      }
+    },
+    {
+      "frame": 7500,
+      "message_id": 180,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 0
+      },
+      "pc": 27,
+      "script": "B001.sc",
+      "scroll": {
+        "elapsed": 70,
+        "kind": "VScroll",
+        "speed_x": 0,
+        "speed_y": -15,
+        "start_x": 0,
+        "start_y": 1408,
+        "target_x": 0,
+        "target_y": 0,
+        "total_frames": 94
+      },
+      "stage": {
+        "image": "ev015a01.png",
+        "mask": null,
+        "x": 0,
+        "y": 1408
+      },
+      "state": "WaitScroll",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 358
+      }
+    },
+    {
+      "frame": 7560,
+      "message_id": 240,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 40,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev015a03.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 6,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7620,
+      "message_id": 290,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 49,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev015a01.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 6,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7680,
+      "message_id": 310,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 55,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev015a05.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 6,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7740,
+      "message_id": 400,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 68,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev015a07.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 6,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7800,
+      "message_id": 490,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 82,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev015a01_mugai_b.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 6,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7860,
+      "message_id": 520,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 89,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev016a01.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 6,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7920,
+      "message_id": 550,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 99,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev015a07_mugai_a.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitTransition",
+      "transition": {
+        "elapsed": 6,
+        "kind": 0,
+        "layer": null,
+        "total_frames": 30
+      },
+      "view": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "frame": 7980,
+      "message_id": 560,
+      "panel": {
+        "image": null,
+        "mask": null,
+        "mode": 1
+      },
+      "pc": 101,
+      "script": "B001.sc",
+      "scroll": null,
+      "stage": {
+        "image": "ev015a07_mugai_a.png",
+        "mask": null,
+        "x": 0,
+        "y": 0
+      },
+      "state": "WaitFrames",
+      "transition": null,
+      "view": {
+        "x": 0,
+        "y": 0
+      }
     }
   ],
   "stage_timeline": [
     {
-      "frame": 6,
+      "frame": 1,
       "image": "BLACK.png",
       "line": 7,
       "view_x": 0,
@@ -2321,7 +5824,7 @@
       "y": 0
     },
     {
-      "frame": 376,
+      "frame": 316,
       "image": "ev001.png",
       "line": 14,
       "view_x": 0,
@@ -2330,7 +5833,7 @@
       "y": 0
     },
     {
-      "frame": 436,
+      "frame": 376,
       "image": "BLACK.png",
       "line": 16,
       "view_x": 0,
@@ -2339,7 +5842,7 @@
       "y": 0
     },
     {
-      "frame": 696,
+      "frame": 646,
       "image": "ev001.png",
       "line": 20,
       "view_x": 0,
@@ -2348,7 +5851,7 @@
       "y": 0
     },
     {
-      "frame": 746,
+      "frame": 696,
       "image": "BLACK.png",
       "line": 22,
       "view_x": 0,
@@ -2357,7 +5860,7 @@
       "y": 0
     },
     {
-      "frame": 1376,
+      "frame": 1316,
       "image": "ev001.png",
       "line": 30,
       "view_x": 0,
@@ -2366,7 +5869,7 @@
       "y": 0
     },
     {
-      "frame": 1436,
+      "frame": 1376,
       "image": "BLACK.png",
       "line": 32,
       "view_x": 0,
@@ -2375,7 +5878,7 @@
       "y": 0
     },
     {
-      "frame": 1591,
+      "frame": 1556,
       "image": "ev001.png",
       "line": 35,
       "view_x": 0,
@@ -2384,7 +5887,7 @@
       "y": 0
     },
     {
-      "frame": 1626,
+      "frame": 1591,
       "image": "BLACK.png",
       "line": 37,
       "view_x": 0,
@@ -2393,7 +5896,7 @@
       "y": 0
     },
     {
-      "frame": 1951,
+      "frame": 1906,
       "image": "ev001.png",
       "line": 43,
       "view_x": 0,
@@ -2402,7 +5905,7 @@
       "y": 0
     },
     {
-      "frame": 1996,
+      "frame": 1951,
       "image": "BLACK.png",
       "line": 45,
       "view_x": 0,
@@ -2411,7 +5914,7 @@
       "y": 0
     },
     {
-      "frame": 2776,
+      "frame": 2756,
       "image": "mozi_A001_020.png",
       "line": 55,
       "view_x": 0,
@@ -2420,7 +5923,7 @@
       "y": 0
     },
     {
-      "frame": 2936,
+      "frame": 2926,
       "image": "WHITE.png",
       "line": 59,
       "view_x": 0,
@@ -2429,7 +5932,7 @@
       "y": 0
     },
     {
-      "frame": 3066,
+      "frame": 3036,
       "image": "ev005b01_mugai_a.png",
       "line": 63,
       "view_x": 0,
@@ -2438,7 +5941,7 @@
       "y": 0
     },
     {
-      "frame": 3096,
+      "frame": 3066,
       "image": "ev005b01.png",
       "line": 68,
       "view_x": 0,
@@ -2447,7 +5950,7 @@
       "y": 0
     },
     {
-      "frame": 3126,
+      "frame": 3096,
       "image": "ev005c01.png",
       "line": 73,
       "view_x": 0,
@@ -2456,7 +5959,7 @@
       "y": 0
     },
     {
-      "frame": 3156,
+      "frame": 3126,
       "image": "ev003.png",
       "line": 82,
       "view_x": 0,
@@ -2465,7 +5968,7 @@
       "y": 0
     },
     {
-      "frame": 3186,
+      "frame": 3156,
       "image": "ev004.png",
       "line": 88,
       "view_x": 0,
@@ -2474,7 +5977,7 @@
       "y": 0
     },
     {
-      "frame": 3216,
+      "frame": 3186,
       "image": "ev005a01.png",
       "line": 91,
       "view_x": 0,
@@ -2483,7 +5986,7 @@
       "y": 0
     },
     {
-      "frame": 3246,
+      "frame": 3216,
       "image": "ev005a01_mugai_a.png",
       "line": 95,
       "view_x": 0,
@@ -2492,7 +5995,7 @@
       "y": 0
     },
     {
-      "frame": 3276,
+      "frame": 3246,
       "image": "ev004_mugai_b.png",
       "line": 98,
       "view_x": 0,
@@ -2501,7 +6004,7 @@
       "y": 0
     },
     {
-      "frame": 3306,
+      "frame": 3276,
       "image": "ev004_mugai_c.png",
       "line": 101,
       "view_x": 0,
@@ -2510,7 +6013,7 @@
       "y": 0
     },
     {
-      "frame": 3336,
+      "frame": 3306,
       "image": "ev004_mugai_d.png",
       "line": 104,
       "view_x": 0,
@@ -2519,7 +6022,7 @@
       "y": 0
     },
     {
-      "frame": 3366,
+      "frame": 3336,
       "image": "ev005a02_mugai_a.png",
       "line": 107,
       "view_x": 0,
@@ -2528,7 +6031,7 @@
       "y": 0
     },
     {
-      "frame": 3396,
+      "frame": 3366,
       "image": "ev005b01_mugai_b.png",
       "line": 110,
       "view_x": 0,
@@ -2537,7 +6040,7 @@
       "y": 0
     },
     {
-      "frame": 3416,
+      "frame": 3396,
       "image": "ev006.png",
       "line": 114,
       "view_x": 0,
@@ -2546,7 +6049,7 @@
       "y": 1280
     },
     {
-      "frame": 3619,
+      "frame": 3558,
       "image": "ev007a01.png",
       "line": 133,
       "view_x": 0,
@@ -2555,7 +6058,7 @@
       "y": 0
     },
     {
-      "frame": 3738,
+      "frame": 3677,
       "image": "ev007a03.png",
       "line": 139,
       "view_x": 0,
@@ -2564,7 +6067,7 @@
       "y": 884
     },
     {
-      "frame": 3768,
+      "frame": 3707,
       "image": "ev007b02.png",
       "line": 144,
       "view_x": 0,
@@ -2573,7 +6076,7 @@
       "y": 884
     },
     {
-      "frame": 3798,
+      "frame": 3737,
       "image": "ev007b01.png",
       "line": 148,
       "view_x": 0,
@@ -2582,7 +6085,7 @@
       "y": 884
     },
     {
-      "frame": 3828,
+      "frame": 3767,
       "image": "ev006_mugai_c.png",
       "line": 152,
       "view_x": 0,
@@ -2591,7 +6094,7 @@
       "y": 0
     },
     {
-      "frame": 3858,
+      "frame": 3797,
       "image": "ev007a01.png",
       "line": 159,
       "view_x": 0,
@@ -2600,7 +6103,7 @@
       "y": 884
     },
     {
-      "frame": 3888,
+      "frame": 3827,
       "image": "ev007a02.png",
       "line": 166,
       "view_x": 0,
@@ -2609,7 +6112,7 @@
       "y": 884
     },
     {
-      "frame": 3918,
+      "frame": 3857,
       "image": "ev007a01.png",
       "line": 170,
       "view_x": 0,
@@ -2618,7 +6121,7 @@
       "y": 0
     },
     {
-      "frame": 3948,
+      "frame": 3887,
       "image": "ev007a04.png",
       "line": 176,
       "view_x": 0,
@@ -2627,13 +6130,769 @@
       "y": 884
     },
     {
-      "frame": 3978,
+      "frame": 3917,
       "image": "ev007a03.png",
       "line": 184,
       "view_x": 0,
       "view_y": 884,
       "x": 0,
       "y": 884
+    },
+    {
+      "frame": 3947,
+      "image": "ev007b01.png",
+      "line": 188,
+      "view_x": 0,
+      "view_y": 884,
+      "x": 0,
+      "y": 884
+    },
+    {
+      "frame": 3977,
+      "image": "ev007b02.png",
+      "line": 193,
+      "view_x": 0,
+      "view_y": 884,
+      "x": 0,
+      "y": 884
+    },
+    {
+      "frame": 4007,
+      "image": "ev007a05_mugai_b.png",
+      "line": 197,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4037,
+      "image": "ev007a05_mugai_c.png",
+      "line": 200,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4067,
+      "image": "ev007a05_mugai_d.png",
+      "line": 203,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4097,
+      "image": "ev007a05.png",
+      "line": 206,
+      "view_x": 0,
+      "view_y": 884,
+      "x": 0,
+      "y": 884
+    },
+    {
+      "frame": 4127,
+      "image": "ev007a01_mugai_a.png",
+      "line": 210,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4157,
+      "image": "ev007a04_mugai_a.png",
+      "line": 213,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4187,
+      "image": "WHITE.png",
+      "line": 218,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4207,
+      "image": "ev009.png",
+      "line": 223,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4217,
+      "image": "ev008.png",
+      "line": 231,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4247,
+      "image": "ev_cut04b.png",
+      "line": 239,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4277,
+      "image": "ev009.png",
+      "line": 265,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4307,
+      "image": "WHITE.png",
+      "line": 295,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4332,
+      "image": "maisou_bg010a01_02.png",
+      "line": 300,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4352,
+      "image": "maisou_bg001a01_02.png",
+      "line": 305,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4372,
+      "image": "A001_0004_0003.png",
+      "line": 310,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4402,
+      "image": "A001_0004_0004.png",
+      "line": 320,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4432,
+      "image": "A001_0004_0005.png",
+      "line": 324,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4462,
+      "image": "A001_0004_0006.png",
+      "line": 328,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4492,
+      "image": "A001_0004_0007.png",
+      "line": 332,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4522,
+      "image": "A001_0004_0008.png",
+      "line": 337,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4552,
+      "image": "A001_0004_0009.png",
+      "line": 341,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4582,
+      "image": "A001_0004_0010.png",
+      "line": 348,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4612,
+      "image": "A001_0004_0011.png",
+      "line": 355,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4642,
+      "image": "WHITE.png",
+      "line": 361,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4672,
+      "image": "ev010a01.png",
+      "line": 366,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4692,
+      "image": "ev011a01.png",
+      "line": 371,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4722,
+      "image": "ev011d06.png",
+      "line": 375,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4752,
+      "image": "ev011b01.png",
+      "line": 379,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4782,
+      "image": "ev011c03.png",
+      "line": 385,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4812,
+      "image": "ev011c01.png",
+      "line": 390,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4842,
+      "image": "ev011c02.png",
+      "line": 394,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4872,
+      "image": "ev011c04.png",
+      "line": 401,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4902,
+      "image": "ev011c04_close.png",
+      "line": 405,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4932,
+      "image": "ev011d06_close.png",
+      "line": 408,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4962,
+      "image": "ev011d01.png",
+      "line": 411,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 4992,
+      "image": "ev011d02.png",
+      "line": 415,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5022,
+      "image": "ev011d03.png",
+      "line": 421,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5052,
+      "image": "ev011d04.png",
+      "line": 426,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5082,
+      "image": "ev011d05.png",
+      "line": 430,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5112,
+      "image": "ev231a01.png",
+      "line": 434,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5142,
+      "image": "ev090a01.png",
+      "line": 439,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5172,
+      "image": "WHITE.png",
+      "line": 447,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5197,
+      "image": "ev012a01.png",
+      "line": 451,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5217,
+      "image": "ev012b01.png",
+      "line": 456,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5247,
+      "image": "ev012a02.png",
+      "line": 460,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5277,
+      "image": "ev013a03.png",
+      "line": 463,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5307,
+      "image": "ev013b01.png",
+      "line": 470,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5337,
+      "image": "ev013b01_mugai_b.png",
+      "line": 474,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5367,
+      "image": "ev013b01_mugai_a2.png",
+      "line": 478,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5397,
+      "image": "ev013b01_mugai_d.png",
+      "line": 483,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5427,
+      "image": "ev013b01_mugai_e.png",
+      "line": 486,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5457,
+      "image": "ev013b02_mugai_e.png",
+      "line": 490,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5487,
+      "image": "ev013b02.png",
+      "line": 494,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5517,
+      "image": "ev013a04.png",
+      "line": 500,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5547,
+      "image": "ev227a04.png",
+      "line": 503,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5577,
+      "image": "maisou_bg021a01_03.png",
+      "line": 507,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5607,
+      "image": "BLACK.png",
+      "line": 511,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5752,
+      "image": "ev001.png",
+      "line": 516,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5772,
+      "image": "ev014.png",
+      "line": 522,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5802,
+      "image": "WHITE.png",
+      "line": 545,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 5980,
+      "image": "mozi_A001_017.png",
+      "line": 548,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 6192,
+      "image": "WHITE.png",
+      "line": 553,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 6262,
+      "image": "BLACK.png",
+      "line": 559,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 6580,
+      "image": "mozi_A001_018.png",
+      "line": 6,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 6875,
+      "image": "BLACK.png",
+      "line": 10,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7030,
+      "image": "mozi_A001_019.png",
+      "line": 13,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7245,
+      "image": "BLACK.png",
+      "line": 17,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7415,
+      "image": "ev015a01.png",
+      "line": 26,
+      "view_x": 0,
+      "view_y": 1408,
+      "x": 0,
+      "y": 1408
+    },
+    {
+      "frame": 7524,
+      "image": "ev015a02.png",
+      "line": 37,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7554,
+      "image": "ev015a03.png",
+      "line": 40,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7584,
+      "image": "ev015a02.png",
+      "line": 44,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7614,
+      "image": "ev015a01.png",
+      "line": 49,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7644,
+      "image": "ev015a04.png",
+      "line": 52,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7674,
+      "image": "ev015a05.png",
+      "line": 55,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7704,
+      "image": "ev015a06.png",
+      "line": 61,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7734,
+      "image": "ev015a07.png",
+      "line": 68,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7764,
+      "image": "ev015a08.png",
+      "line": 73,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7794,
+      "image": "ev015a01_mugai_b.png",
+      "line": 82,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7824,
+      "image": "ev015a01_mugai_c.png",
+      "line": 86,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7854,
+      "image": "ev016a01.png",
+      "line": 89,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7884,
+      "image": "ev016a01_mugai.png",
+      "line": 92,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "frame": 7914,
+      "image": "ev015a07_mugai_a.png",
+      "line": 99,
+      "view_x": 0,
+      "view_y": 0,
+      "x": 0,
+      "y": 0
     }
   ]
 }

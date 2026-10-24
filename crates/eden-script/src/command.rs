@@ -85,6 +85,13 @@ pub struct WaitCommand {
     pub line: usize,
 }
 
+/// `.waitBGM [frames]` — wait for the active BGM fade, or a fixed frame count.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WaitBgmCommand {
+    pub frames: Option<u32>,
+    pub line: usize,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PragmaCommand {
     pub disable_control: bool,
@@ -253,6 +260,7 @@ pub enum ScriptCommand {
     PlaySe2(PlaySeCommand),
     PlayVoice(PlayVoiceCommand),
     Wait(WaitCommand),
+    WaitBgm(WaitBgmCommand),
     Pragma(PragmaCommand),
     Label(LabelCommand),
     If(IfCommand),
@@ -283,6 +291,7 @@ impl ScriptCommand {
             ScriptCommand::PlaySe2(_) => ".playSE2",
             ScriptCommand::PlayVoice(_) => ".playVoice",
             ScriptCommand::Wait(_) => ".wait",
+            ScriptCommand::WaitBgm(_) => ".waitBGM",
             ScriptCommand::Pragma(_) => ".pragma",
             ScriptCommand::Label(_) => ".label",
             ScriptCommand::If(_) => ".if",
@@ -312,6 +321,7 @@ impl ScriptCommand {
             ScriptCommand::PlaySe(c) | ScriptCommand::PlaySe2(c) => c.line,
             ScriptCommand::PlayVoice(c) => c.line,
             ScriptCommand::Wait(c) => c.line,
+            ScriptCommand::WaitBgm(c) => c.line,
             ScriptCommand::Pragma(c) => c.line,
             ScriptCommand::Label(c) => c.line,
             ScriptCommand::If(c) => c.line,
@@ -356,7 +366,6 @@ pub const COMPAT_COMMANDS: &[&str] = &[
     ".setTimer",
     ".waitTimer",
     ".waitAnimation",
-    ".waitBGM",
     ".deleteVar",
     ".scrollFG",
     ".scrollAcc",

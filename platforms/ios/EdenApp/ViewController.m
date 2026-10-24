@@ -3,8 +3,10 @@
 //  Eden
 //
 //  Hosts the pure-Rust Musica runtime (libeden_ffi.a) on iOS 12–14.4.
-//  The VM is ticked from a CADisplayLink at 60 Hz; the selected backend only
-//  receives the finished 1024x640 RGBA8 framebuffer.
+//  A CADisplayLink runs at the panel's native rate (60/120 Hz) and calls
+//  eden_engine_tick_display(); the runtime advances the VM at exactly 60 Hz
+//  and interpolates scroll/transition state for ProMotion. The selected
+//  backend only receives the finished 1024x640 RGBA8 framebuffer.
 //
 
 #import "ViewController.h"
@@ -49,6 +51,12 @@
 @property (nonatomic, assign) BOOL engineReady;
 @property (nonatomic, assign) BOOL backgrounded;
 @property (nonatomic, assign) BOOL reportedRuntimeError;
+@property (nonatomic, assign) CGPoint touchStart;
+@property (nonatomic, assign) CGPoint lastPan;
+@property (nonatomic, assign) CFTimeInterval touchStartTime;
+@property (nonatomic, assign) NSInteger maxTouchCount;
+@property (nonatomic, assign) CGFloat panAccum;
+@property (nonatomic, assign) BOOL gestureHandled;
 
 @end
 
@@ -142,12 +150,9 @@
         : [[NSUserDefaults standardUserDefaults] boolForKey:@"EdenAutoAdvance"];
     eden_engine_set_auto_advance(self.engine, autoAdvance ? 1 : 0);
 
-    if (eden_engine_start_script(self.engine, "A001.sc") != 0) {
-        [self showMessage:[NSString stringWithFormat:@"无法启动 A001.sc：\n%s",
-                           eden_engine_last_error(self.engine)]];
-        [self destroyEngine];
-        return;
-    }
+    // Boot into the retail title screen; its menu starts A001.sc (main) or
+    // the PLUS+MOSAIC edition through the same UI state machine as desktop.
+    eden_engine_ui_open(self.engine, 0);
 
     NSError *audioError = nil;
     if (![self.audio startWithEngine:self.engine error:&audioError]) {
@@ -223,18 +228,33 @@
 
     CADisplayLink *link = [CADisplayLink displayLinkWithTarget:proxy
                                                       selector:@selector(tick:)];
-    link.preferredFramesPerSecond = 60;
+    NSInteger fps = 60;
+    if (@available(iOS 10.0, *)) {
+        fps = (NSInteger)[UIScreen mainScreen].maximumFramesPerSecond;
+    }
+    if (fps < 60) {
+        fps = 60;
+    }
+    link.preferredFramesPerSecond = fps;
+    NSLog(@"Eden: display link = %ld Hz", (long)fps);
     [link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     self.displayLink = link;
 }
 
 - (void)step:(CADisplayLink *)link
 {
-    (void)link;
     if (!self.engineReady || self.backgrounded) {
         return;
     }
-    if (eden_engine_tick(self.engine) != 0) {
+    double dt = 1.0 / 60.0;
+    if (@available(iOS 10.0, *)) {
+        dt = link.targetTimestamp - link.timestamp;
+    }
+    if (!(dt > 0.0) || dt > 0.25) {
+        dt = 1.0 / 60.0;
+    }
+    int ticks = eden_engine_tick_display(self.engine, dt);
+    if (ticks < 0) {
         if (!self.reportedRuntimeError) {
             self.reportedRuntimeError = YES;
             NSLog(@"Eden: tick failed: %s", eden_engine_last_error(self.engine));
@@ -250,13 +270,91 @@
 
 #pragma mark - Input
 
+- (CGPoint)stagePoint:(CGPoint)point
+{
+    CGSize bounds = self.view.bounds.size;
+    if (bounds.width <= 0.0 || bounds.height <= 0.0) {
+        return point;
+    }
+    CGFloat scale = MIN(bounds.width / 1024.0, bounds.height / 640.0);
+    CGFloat ox = (bounds.width - 1024.0 * scale) * 0.5;
+    CGFloat oy = (bounds.height - 640.0 * scale) * 0.5;
+    return CGPointMake((point.x - ox) / scale, (point.y - oy) / scale);
+}
+
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    UITouch *touch = touches.anyObject;
+    if (touch == nil) {
+        return;
+    }
+    self.touchStart = [touch locationInView:self.view];
+    self.lastPan = self.touchStart;
+    self.touchStartTime = CACurrentMediaTime();
+    self.maxTouchCount = (NSInteger)event.allTouches.count;
+    self.panAccum = 0.0;
+    self.gestureHandled = NO;
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    self.maxTouchCount = MAX(self.maxTouchCount, (NSInteger)event.allTouches.count);
+    if (!self.engineReady || event.allTouches.count != 1) {
+        return;
+    }
+    UITouch *touch = touches.anyObject;
+    if (touch == nil) {
+        return;
+    }
+    CGPoint point = [touch locationInView:self.view];
+    self.panAccum += point.y - self.lastPan.y;
+    self.lastPan = point;
+    const CGFloat step = 26.0;
+    if (fabs(self.panAccum) >= step) {
+        int steps = (int)(-self.panAccum / step);
+        self.panAccum -= steps * step;
+        eden_engine_ui_scroll(self.engine, steps);
+    }
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    if (!self.engineReady || self.gestureHandled) {
+        return;
+    }
+    UITouch *touch = touches.anyObject;
+    if (touch == nil) {
+        return;
+    }
+    CGPoint end = [touch locationInView:self.view];
+    CGFloat dx = end.x - self.touchStart.x;
+    CGFloat dy = end.y - self.touchStart.y;
+    CFTimeInterval elapsed = CACurrentMediaTime() - self.touchStartTime;
+
+    if (self.maxTouchCount >= 2) {
+        if (elapsed < 0.45 && hypot(dx, dy) < 28.0) {
+            self.gestureHandled = YES;
+            eden_engine_ui_two_finger_tap(self.engine);
+        }
+        return;
+    }
+    if (dy < -70.0 && fabs(dx) < 80.0) {
+        self.gestureHandled = YES;
+        eden_engine_ui_swipe_up(self.engine);
+        return;
+    }
+    if (hypot(dx, dy) < 14.0 && elapsed < 0.9) {
+        CGPoint stage = [self stagePoint:end];
+        self.gestureHandled = YES;
+        eden_engine_ui_tap(self.engine, (int)lround(stage.x), (int)lround(stage.y));
+    }
+}
+
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
     (void)touches;
     (void)event;
-    if (self.engineReady) {
-        eden_engine_click(self.engine);
-    }
+    self.gestureHandled = YES;
 }
 
 #pragma mark - Lifecycle / persistence
@@ -287,6 +385,7 @@
             }
         }
     }
+    eden_engine_reset_display_clock(self.engine);
     [self.audio setPaused:NO];
     [self.displayLink setPaused:NO];
 }

@@ -1,0 +1,107 @@
+name: ios-ipa
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ipa:
+    runs-on: macos-14
+    env:
+      IPHONEOS_DEPLOYMENT_TARGET: "12.0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ios-arm64
+
+      - name: Cache FFmpeg iOS build
+        uses: actions/cache@v4
+        with:
+          path: platforms/ios/ffmpeg-ios
+          key: ffmpeg-6.1.1-${{ hashFiles('platforms/ios/build_ffmpeg_ios.sh') }}
+
+      - name: Build Rust staticlib
+        run: |
+          cargo build -p eden-ffi --release --target aarch64-apple-ios
+          mkdir -p platforms/ios/EdenApp/lib platforms/ios/EdenApp/include
+          cp target/aarch64-apple-ios/release/libeden_ffi.a platforms/ios/EdenApp/lib/
+          cp crates/eden-ffi/include/eden_ffi.h platforms/ios/EdenApp/include/
+          ls -lh platforms/ios/EdenApp/lib/libeden_ffi.a
+
+      - name: Build FFmpeg for iOS (libavcodec WMV3/MPEG-4)
+        run: |
+          chmod +x platforms/ios/build_ffmpeg_ios.sh
+          platforms/ios/build_ffmpeg_ios.sh
+
+      - name: Build Eden.app (Metal 2.0 + OpenGL ES 3.0 host)
+        run: |
+          set -euo pipefail
+          cd platforms/ios
+          FFMPEG="$(pwd)/ffmpeg-ios"
+          xcodebuild \
+            -project Eden.xcodeproj \
+            -scheme Eden \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}" \
+            HEADER_SEARCH_PATHS="$(pwd)/EdenApp/include ${FFMPEG}/include" \
+            LIBRARY_SEARCH_PATHS="$(pwd)/EdenApp/lib ${FFMPEG}/lib" \
+            OTHER_LDFLAGS="-lavformat -lavcodec -lswscale -lavutil" \
+            build
+          APP="build/Build/Products/Release-iphoneos/Eden.app"
+          test -x "${APP}/Eden"
+          file "${APP}/Eden"
+          otool -L "${APP}/Eden" | head -20
+
+      - name: Pseudo-sign with ldid (TrollStore / jailbroken iOS 12–14.4)
+        run: |
+          set -euo pipefail
+          if ! command -v ldid >/dev/null 2>&1; then
+            brew install ldid
+          fi
+          APP="platforms/ios/build/Build/Products/Release-iphoneos/Eden.app"
+          ldid -Splatforms/ios/Entitlements.plist "${APP}/Eden"
+          echo "==> entitlements"
+          ldid -e "${APP}/Eden" || true
+
+      - name: Package Payload/Eden.app -> Eden-iOS-arm64.ipa
+        run: |
+          set -euo pipefail
+          rm -rf Payload artifacts
+          mkdir -p Payload artifacts
+          cp -R platforms/ios/build/Build/Products/Release-iphoneos/Eden.app Payload/
+          zip -qry artifacts/Eden-iOS-arm64.ipa Payload
+          ls -lh artifacts/Eden-iOS-arm64.ipa
+          unzip -l artifacts/Eden-iOS-arm64.ipa | head -20
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eden-iOS-arm64
+          path: artifacts/Eden-iOS-arm64.ipa
+          if-no-files-found: error
+
+      - name: Attach IPA to tag release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/Eden-iOS-arm64.ipa
+          generate_release_notes: true

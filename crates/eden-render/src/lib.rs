@@ -15,6 +15,7 @@ pub mod renderer;
 pub mod scene;
 pub mod text;
 pub mod texture;
+pub mod ui;
 
 pub use framebuffer::Framebuffer;
 pub use gpu::GlowRenderer;

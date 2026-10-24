@@ -129,6 +129,8 @@ pub enum VmState {
     WaitTransition { remaining: u32, total: u32 },
     WaitMovie { id: i64 },
     Ended,
+    /// Waits for the active BGM fade (or a fixed frame count).
+    WaitBgm { remaining: Option<u32> },
 }
 
 /// Events emitted for the presentation/audio layers.
@@ -342,6 +344,7 @@ pub struct ScriptVm {
     pragma_control: bool,
     auto_advance_clicks: bool,
     click_advance: bool,
+    bgm_wait_done: bool,
     events: Vec<VmEvent>,
     provider: Arc<dyn ScriptProvider>,
     max_commands_per_tick: usize,
@@ -378,6 +381,7 @@ impl ScriptVm {
             pragma_control: true,
             auto_advance_clicks: false,
             click_advance: false,
+            bgm_wait_done: false,
             events: Vec::new(),
             provider,
             max_commands_per_tick: 4096,
@@ -479,6 +483,11 @@ impl ScriptVm {
         }
     }
 
+    /// Called by the runtime once the active BGM fade has completed.
+    pub fn finish_bgm_wait(&mut self) {
+        self.bgm_wait_done = true;
+    }
+
     pub fn last_error(&self) -> Option<&ScriptError> {
         self.last_error.as_ref()
     }
@@ -552,10 +561,29 @@ impl ScriptVm {
                     self.events.push(VmEvent::TransitionEnd);
                 }
             }
+            VmState::WaitBgm { remaining } => {
+                let done = match remaining {
+                    Some(left) => {
+                        if *left > 0 {
+                            *left -= 1;
+                        }
+                        *left == 0
+                    }
+                    None => self.bgm_wait_done,
+                };
+                if done {
+                    self.bgm_wait_done = false;
+                    self.state = VmState::Running;
+                }
+            }
             VmState::WaitMovie { id } => {
                 let id = *id;
                 let done = self.movie.as_ref().map(|m| m.done).unwrap_or(true);
-                if done || self.auto_advance_clicks {
+                // Auto-advance is for dialogue only. A `.movie ... t` wait must
+                // run to the decoder's end unless the player explicitly taps to
+                // skip, otherwise enabling auto mode would skip every movie.
+                if done || self.click_advance {
+                    self.click_advance = false;
                     self.movie = None;
                     self.state = VmState::Running;
                     self.events.push(VmEvent::MovieEnd { id });
@@ -607,7 +635,10 @@ impl ScriptVm {
                     text: m.text.clone(),
                     line: m.line,
                 });
-                if m.text.has_wait_click() && !self.auto_advance_clicks {
+                // Every retail `.message` is a text box the player advances;
+                // `\a` marks lines that auto mode may skip after their voice,
+                // not lines that wait while unmarked narration does not.
+                if !self.auto_advance_clicks {
                     self.state = VmState::WaitClick;
                 }
             }
@@ -618,9 +649,9 @@ impl ScriptVm {
                     x: s.x,
                     y: s.y,
                 };
-                // The viewport starts at the stage image's top-left corner.
-                // `.vscroll 970 -7` after `.stage * ev006.png 0 1280` must
-                // start at y=1280, not at the previous viewport position.
+                // The stage's x/y are the initial viewport offset into the
+                // artwork (`.stage * ev006.png 0 1280` starts at the bottom of
+                // a tall image). `.vscroll 970 -7` continues from there.
                 self.view = ViewState { x: s.x, y: s.y };
                 self.events.push(VmEvent::Stage {
                     mask: s.mask,
@@ -629,6 +660,15 @@ impl ScriptVm {
                     y: s.y,
                     line: s.line,
                 });
+                // A pending `.transition` starts its timer on the stage change.
+                if let Some(t) = &self.transition {
+                    if t.total_frames > 0 {
+                        self.state = VmState::WaitTransition {
+                            remaining: t.total_frames,
+                            total: t.total_frames,
+                        };
+                    }
+                }
             }
             ScriptCommand::Transition(t) => {
                 self.transition = Some(TransitionState {
@@ -643,12 +683,10 @@ impl ScriptVm {
                     frames: t.frames,
                     line: t.line,
                 });
-                if t.frames > 0 {
-                    self.state = VmState::WaitTransition {
-                        remaining: t.frames,
-                        total: t.frames,
-                    };
-                }
+                // `.transition` only arms the wipe: the following `.stage`
+                // supplies the incoming artwork and starts the timer. The
+                // runtime captures the outgoing frame when it sees this event,
+                // before the stage is applied.
             }
             ScriptCommand::Panel(p) => {
                 self.panel = PanelState {
@@ -712,6 +750,18 @@ impl ScriptVm {
                     self.state = VmState::WaitFrames {
                         remaining: w.frames,
                     };
+                }
+            }
+            ScriptCommand::WaitBgm(w) => {
+                self.bgm_wait_done = false;
+                match w.frames {
+                    Some(0) => {}
+                    Some(frames) => {
+                        self.state = VmState::WaitBgm {
+                            remaining: Some(frames),
+                        }
+                    }
+                    None => self.state = VmState::WaitBgm { remaining: None },
                 }
             }
             ScriptCommand::Pragma(p) => {
@@ -898,14 +948,12 @@ impl ScriptVm {
         frames: u32,
         line: usize,
     ) {
-        let start_x = match kind {
-            ScrollKind::HScroll | ScrollKind::Scroll => self.stage.x,
-            ScrollKind::VScroll => self.view.x,
-        };
-        let start_y = match kind {
-            ScrollKind::VScroll | ScrollKind::Scroll => self.stage.y,
-            ScrollKind::HScroll => self.view.y,
-        };
+        // Scrolls continue from wherever the viewport currently is. The first
+        // scroll after `.stage` therefore starts at the stage's x/y (`.stage`
+        // resets the view there), while a second `.vscroll` picks up from the
+        // position the previous one reached instead of jumping back.
+        let start_x = self.view.x;
+        let start_y = self.view.y;
         self.view = ViewState {
             x: start_x,
             y: start_y,
@@ -1046,6 +1094,7 @@ impl ScriptVm {
             pragma_control: state.pragma_control,
             auto_advance_clicks: false,
             click_advance: false,
+            bgm_wait_done: false,
             events: Vec::new(),
             provider,
             max_commands_per_tick: 4096,
@@ -1208,10 +1257,30 @@ mod tests {
     }
 
     #[test]
+    fn consecutive_vscrolls_continue_from_the_current_view() {
+        let p = provider(&[(
+            "t.sc",
+            ".stage * bg.png 0 1280\n.vscroll 970 -7\n.endScroll f\n.vscroll 0 -10\n.endScroll f\n",
+        )]);
+        let mut vm = ScriptVm::new("t.sc", p).unwrap();
+        vm.tick(); // stage + first vscroll
+        assert_eq!(vm.view().y, 1280);
+        for _ in 0..45 {
+            vm.tick();
+        }
+        assert_eq!(vm.view().y, 970);
+        assert_eq!(vm.scroll().unwrap().start_y, 970);
+        assert_eq!(vm.scroll().unwrap().total_frames, 97);
+        vm.tick();
+        assert_eq!(vm.view().y, 960);
+    }
+
+    #[test]
     fn transition_runs_for_exact_frames() {
-        let p = provider(&[("t.sc", ".transition 0 * 30\n.end\n")]);
+        let p = provider(&[("t.sc", ".transition 0 * 30\n.stage * bg.png 0 0\n.end\n")]);
         let mut vm = ScriptVm::new("t.sc", p).unwrap();
         vm.tick();
+        // `.transition` arms the wipe; `.stage` starts the timer.
         assert_eq!(
             vm.state(),
             &VmState::WaitTransition {
@@ -1219,6 +1288,9 @@ mod tests {
                 total: 30
             }
         );
+        let events = vm.events();
+        assert!(matches!(events.first(), Some(VmEvent::Transition { .. })));
+        assert!(matches!(events.get(1), Some(VmEvent::Stage { .. })));
         for _ in 0..29 {
             vm.tick();
         }
@@ -1226,6 +1298,16 @@ mod tests {
         vm.tick();
         assert!(vm.transition().is_none());
         assert!(matches!(vm.state(), VmState::Ended));
+    }
+
+    #[test]
+    fn transition_without_a_stage_does_not_block() {
+        let p = provider(&[("t.sc", ".transition 0 * 30\n.message 1 #hi\n.end\n")]);
+        let mut vm = ScriptVm::new("t.sc", p).unwrap();
+        vm.tick();
+        // The message waits for the player, not for the unused transition.
+        assert!(matches!(vm.state(), VmState::WaitClick));
+        assert!(vm.transition().is_some());
     }
 
     #[test]
@@ -1268,6 +1350,49 @@ mod tests {
         vm.finish_movie();
         vm.tick();
         assert!(vm.movie().is_none());
+        assert!(matches!(vm.state(), VmState::Ended));
+    }
+
+    #[test]
+    fn movie_wait_ignores_auto_advance_but_accepts_skip_click() {
+        let p = provider(&[("t.sc", ".movie 1 op.avi 1024 640 t\n.end\n")]);
+        let mut vm = ScriptVm::new("t.sc", p).unwrap();
+        vm.set_auto_advance_clicks(true);
+        vm.tick();
+        assert_eq!(vm.state(), &VmState::WaitMovie { id: 1 });
+        for _ in 0..10 {
+            vm.tick();
+        }
+        assert_eq!(vm.state(), &VmState::WaitMovie { id: 1 });
+        vm.click();
+        vm.tick();
+        assert!(matches!(vm.state(), VmState::Ended));
+        assert!(vm.movie().is_none());
+    }
+
+    #[test]
+    fn wait_bgm_waits_for_runtime_signal_or_frames() {
+        let p = provider(&[("t.sc", ".playBGM x.ogg\n.waitBGM\n.end\n")]);
+        let mut vm = ScriptVm::new("t.sc", p).unwrap();
+        vm.tick();
+        assert_eq!(vm.state(), &VmState::WaitBgm { remaining: None });
+        for _ in 0..5 {
+            vm.tick();
+        }
+        assert_eq!(vm.state(), &VmState::WaitBgm { remaining: None });
+        vm.finish_bgm_wait();
+        vm.tick();
+        assert!(matches!(vm.state(), VmState::Ended));
+
+        let p = provider(&[("t.sc", ".waitBGM 3\n.end\n")]);
+        let mut vm = ScriptVm::new("t.sc", p).unwrap();
+        vm.tick();
+        assert_eq!(vm.state(), &VmState::WaitBgm { remaining: Some(3) });
+        for _ in 0..2 {
+            vm.tick();
+        }
+        assert_eq!(vm.state(), &VmState::WaitBgm { remaining: Some(1) });
+        vm.tick();
         assert!(matches!(vm.state(), VmState::Ended));
     }
 

@@ -176,6 +176,42 @@ pub unsafe extern "C" fn eden_engine_tick(engine: *mut EdenEngine) -> i32 {
     }
 }
 
+/// Advances by wall-clock seconds (for example 1/120 on a ProMotion display)
+/// and interpolates scrolling/transitions between 60 Hz logical frames.
+/// Returns the number of logical frames consumed, or -1 on error.
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_tick_display(
+    engine: *mut EdenEngine,
+    dt_seconds: f64,
+) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let result = match inner.runtime.as_mut() {
+        Some(runtime) => runtime.tick_display(dt_seconds),
+        None => return no_runtime(&mut inner),
+    };
+    match result {
+        Ok(ticks) => ticks as i32,
+        Err(e) => {
+            set_error(&mut inner, e.to_string());
+            -1
+        }
+    }
+}
+
+/// Drops the wall-clock remainder accumulated by `eden_engine_tick_display`.
+/// Call after returning from the background so the first frame does not
+/// fast-forward through a long pause.
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_reset_display_clock(engine: *mut EdenEngine) {
+    if let Some(mut inner) = lock(engine) {
+        if let Some(runtime) = inner.runtime.as_mut() {
+            runtime.reset_display_clock();
+        }
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn eden_engine_click(engine: *mut EdenEngine) {
     if let Some(mut inner) = lock(engine) {
@@ -492,7 +528,7 @@ pub unsafe extern "C" fn eden_engine_last_error(engine: *mut EdenEngine) -> *con
 /// ABI version, bumped when function signatures change.
 #[no_mangle]
 pub extern "C" fn eden_ffi_version() -> u32 {
-    1
+    3
 }
 
 #[cfg(test)]
@@ -550,4 +586,280 @@ mod tests {
             eden_engine_destroy(engine);
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// Full UI, save-slot and video controls (ABI 2)
+// ---------------------------------------------------------------------------
+
+fn ui_screen_from_int(value: i32) -> Option<eden_render::ui::UiScreen> {
+    use eden_render::ui::UiScreen;
+    Some(match value {
+        0 => UiScreen::Title,
+        1 => UiScreen::Save,
+        2 => UiScreen::Load,
+        3 => UiScreen::Backlog,
+        4 => UiScreen::Gallery,
+        5 => UiScreen::Music,
+        6 => UiScreen::Config,
+        7 => UiScreen::Extra,
+        8 => UiScreen::Game,
+        _ => return None,
+    })
+}
+
+fn ui_screen_to_int(screen: eden_render::ui::UiScreen) -> i32 {
+    use eden_render::ui::UiScreen;
+    match screen {
+        UiScreen::Title => 0,
+        UiScreen::Save => 1,
+        UiScreen::Load => 2,
+        UiScreen::Backlog => 3,
+        UiScreen::Gallery => 4,
+        UiScreen::GalleryView => 9,
+        UiScreen::Music => 5,
+        UiScreen::Config => 6,
+        UiScreen::Extra => 7,
+        UiScreen::Game => 8,
+    }
+}
+
+/// Opens one of the full-screen UI modes (0=title, 1=save, 2=load,
+/// 3=backlog, 4=gallery, 5=music, 6=config, 7=extra, 8=game).
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_open(engine: *mut EdenEngine, screen: i32) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let Some(screen) = ui_screen_from_int(screen) else {
+        set_error(&mut inner, format!("unknown UI screen {screen}"));
+        return -1;
+    };
+    let Some(runtime) = inner.runtime.as_mut() else {
+        return no_runtime(&mut inner);
+    };
+    runtime.open_ui(screen);
+    clear_error(&mut inner);
+    0
+}
+
+/// Current UI screen (see `eden_engine_ui_open`).
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_screen(engine: *mut EdenEngine) -> i32 {
+    lock(engine)
+        .and_then(|inner| inner.runtime.as_ref().map(|r| ui_screen_to_int(r.ui().screen)))
+        .unwrap_or(-1)
+}
+
+/// Forwards a primary tap in 1024×640 stage coordinates.
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_tap(engine: *mut EdenEngine, x: i32, y: i32) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let Some(runtime) = inner.runtime.as_mut() else {
+        return no_runtime(&mut inner);
+    };
+    if runtime.ui_tap(x, y) {
+        0
+    } else {
+        1
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_move(engine: *mut EdenEngine, x: i32, y: i32) {
+    if let Some(mut inner) = lock(engine) {
+        if let Some(runtime) = inner.runtime.as_mut() {
+            runtime.ui_move(x, y);
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_scroll(engine: *mut EdenEngine, delta: i32) {
+    if let Some(mut inner) = lock(engine) {
+        if let Some(runtime) = inner.runtime.as_mut() {
+            runtime.ui_scroll(delta);
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_swipe_up(engine: *mut EdenEngine) {
+    if let Some(mut inner) = lock(engine) {
+        if let Some(runtime) = inner.runtime.as_mut() {
+            runtime.ui_swipe_up();
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_two_finger_tap(engine: *mut EdenEngine) {
+    if let Some(mut inner) = lock(engine) {
+        if let Some(runtime) = inner.runtime.as_mut() {
+            runtime.ui_two_finger_tap();
+        }
+    }
+}
+
+/// Serialises the ten save slots (without thumbnails) as JSON.
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_slots_json(engine: *mut EdenEngine) -> *const c_char {
+    let Some(mut inner) = lock(engine) else {
+        return ptr::null();
+    };
+    let Some(runtime) = inner.runtime.as_ref() else {
+        no_runtime(&mut inner);
+        return ptr::null();
+    };
+    let slots: Vec<serde_json::Value> = runtime
+        .ui()
+        .slots
+        .iter()
+        .map(|slot| {
+            serde_json::json!({
+                "index": slot.index,
+                "empty": slot.empty,
+                "timestamp": slot.timestamp,
+                "summary": slot.summary,
+                "script": slot.script,
+            })
+        })
+        .collect();
+    inner.state_json = cstring(serde_json::to_string(&slots).unwrap_or_else(|_| "[]".into()));
+    inner.state_json.as_ptr()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_save_slot(engine: *mut EdenEngine, index: u32) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let result = match inner.runtime.as_mut() {
+        Some(runtime) => runtime.save_slot(index as usize),
+        None => return no_runtime(&mut inner),
+    };
+    match result {
+        Ok(()) => {
+            clear_error(&mut inner);
+            0
+        }
+        Err(e) => {
+            set_error(&mut inner, e.to_string());
+            -1
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_ui_load_slot(engine: *mut EdenEngine, index: u32) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let result = match inner.runtime.as_mut() {
+        Some(runtime) => runtime.load_slot(index as usize),
+        None => return no_runtime(&mut inner),
+    };
+    match result {
+        Ok(()) => {
+            clear_error(&mut inner);
+            0
+        }
+        Err(e) => {
+            set_error(&mut inner, e.to_string());
+            -1
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_set_save_dir(
+    engine: *mut EdenEngine,
+    path: *const c_char,
+) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let Some(path) = cstr(path) else {
+        set_error(&mut inner, "save directory is NULL or not UTF-8");
+        return -1;
+    };
+    let result = match inner.runtime.as_mut() {
+        Some(runtime) => runtime.set_save_dir(path),
+        None => return no_runtime(&mut inner),
+    };
+    match result {
+        Ok(()) => {
+            clear_error(&mut inner);
+            0
+        }
+        Err(e) => {
+            set_error(&mut inner, e.to_string());
+            -1
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_set_video_enabled(engine: *mut EdenEngine, enabled: i32) {
+    if let Some(mut inner) = lock(engine) {
+        if let Some(runtime) = inner.runtime.as_mut() {
+            runtime.set_video_enabled(enabled != 0);
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_movie_active(engine: *mut EdenEngine) -> i32 {
+    lock(engine)
+        .and_then(|inner| inner.runtime.as_ref().map(|r| r.movie_active() as i32))
+        .unwrap_or(0)
+}
+
+/// Switches the active edition: 0 = main, 1 = PLUS+MOSAIC.
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_open_edition(engine: *mut EdenEngine, edition: i32) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let edition = match edition {
+        0 => eden_paz::Edition::Main,
+        1 => eden_paz::Edition::PlusMosaic,
+        other => {
+            set_error(&mut inner, format!("unknown edition {other}"));
+            return -1;
+        }
+    };
+    let result = match inner.runtime.as_mut() {
+        Some(runtime) => runtime.open_edition(edition),
+        None => return no_runtime(&mut inner),
+    };
+    match result {
+        Ok(()) => {
+            clear_error(&mut inner);
+            0
+        }
+        Err(e) => {
+            set_error(&mut inner, e.to_string());
+            -1
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_save_unlocks(engine: *mut EdenEngine) {
+    if let Some(inner) = lock(engine) {
+        if let Some(runtime) = inner.runtime.as_ref() {
+            runtime.save_unlocks();
+        }
+    }
+}
+
+/// 1 when the user asked to quit from the title menu.
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_quit_requested(engine: *mut EdenEngine) -> i32 {
+    lock(engine)
+        .and_then(|inner| inner.runtime.as_ref().map(|r| r.quit_requested() as i32))
+        .unwrap_or(0)
 }

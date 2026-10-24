@@ -516,7 +516,10 @@ fn parse_index(
         let aligned_size = u32::from_le_bytes(buf[p + 16..p + 20].try_into().unwrap());
         let is_packed = u32::from_le_bytes(buf[p + 20..p + 24].try_into().unwrap()) != 0;
         p += 24;
-        if aligned_size % 8 != 0 {
+        // Video payloads are XORed with a repeating 64 KiB block and are not
+        // Blowfish-encrypted, so the PLUS+MOSAIC `mov.paz` index stores the
+        // exact byte length instead of an 8-byte aligned one.
+        if !is_video && aligned_size % 8 != 0 {
             return Err(PazError::InvalidIndex(format!(
                 "{name}: aligned size {aligned_size} is not a multiple of 8"
             )));

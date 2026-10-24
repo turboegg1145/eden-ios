@@ -1,0 +1,118 @@
+{
+  "ffmpeg": true,
+  "game_dir": "/mnt/f/gal/【PC硬盘】【官中】eden",
+  "generated_unix": 1792872427,
+  "ok": true,
+  "time_seconds": 2.0,
+  "videos": [
+    {
+      "audio_channels": 2,
+      "audio_codec": "pcm_s16le",
+      "audio_duration": 132.66666666666666,
+      "audio_peak": 1.0,
+      "audio_rate": 48000,
+      "codec": "wmv3",
+      "duration": 132.66586666666666,
+      "edition": "main",
+      "fps": 59.94005994005994,
+      "frame": {
+        "file": "reports/screenshots/09_movie_op.png",
+        "height": 640,
+        "png_bytes": 418634,
+        "sha256_png": "41ae582f99d13289919f26b699200c0abe0604e83592cb93509eaaeb1c48132c",
+        "sha256_rgba": "6b1137a34e46cebe86c9a49da7bbe3f2338f4e7f091056f8b10cc912f5ec5f32",
+        "width": 1024
+      },
+      "frames": 7952,
+      "height": 478,
+      "lit_pixels": 655360,
+      "name": "op.avi",
+      "width": 768
+    },
+    {
+      "audio_channels": 2,
+      "audio_codec": "mp3",
+      "audio_duration": 345.0514285714286,
+      "audio_peak": 1.0,
+      "audio_rate": 44100,
+      "codec": "mpeg4",
+      "duration": 345.0561380698738,
+      "edition": "main",
+      "fps": 23.998993457473578,
+      "frame": {
+        "file": "reports/screenshots/10_movie_ed.png",
+        "height": 640,
+        "png_bytes": 8625,
+        "sha256_png": "1a8c57e3ee9262c5507253bd0508a3eb2d657a3d8c491a79a9a6955d96e6fb84",
+        "sha256_rgba": "71a66c12dc705675c4f13982afd5d29e4973e2d617e9750314268687bd4d34e4",
+        "width": 1024
+      },
+      "frames": 8281,
+      "height": 478,
+      "lit_pixels": 1303,
+      "name": "ed.avi",
+      "width": 768
+    },
+    {
+      "audio_channels": 2,
+      "audio_codec": "pcm_s16le",
+      "audio_duration": 135.0,
+      "audio_peak": 0.966064453125,
+      "audio_rate": 48000,
+      "codec": "wmv3",
+      "duration": 135.0,
+      "edition": "pm",
+      "fps": 24.0,
+      "frame": {
+        "file": "reports/screenshots/11_movie_pm_op.png",
+        "height": 640,
+        "png_bytes": 261917,
+        "sha256_png": "18a05638a74e871619c2151b997b9bb7a17c60d9ea974103f88549d21b5f0f38",
+        "sha256_rgba": "07cdfd8c28e5835350082e64d72952cad43228224c7dce45b2d8bcc4d285961a",
+        "width": 1024
+      },
+      "frames": 3240,
+      "height": 640,
+      "lit_pixels": 589824,
+      "name": "op.avi",
+      "width": 1024
+    },
+    {
+      "audio_channels": 2,
+      "audio_codec": "pcm_s16le",
+      "audio_duration": 345.0,
+      "audio_peak": 1.0,
+      "audio_rate": 48000,
+      "codec": "wmv3",
+      "duration": 345.0,
+      "edition": "pm",
+      "fps": 24.0,
+      "frame": {
+        "file": "reports/screenshots/12_movie_pm_ed.png",
+        "height": 640,
+        "png_bytes": 7021,
+        "sha256_png": "c6a1c7443355a89dccb7977d15e6b3494824897e0ebb7b0decba88aad24c50c0",
+        "sha256_rgba": "ec0759b4b5ad952e82ea6cee10cce5d2792ba65a44a1a0f6e721db4fa2ca6fc6",
+        "width": 1024
+      },
+      "frames": 8280,
+      "height": 640,
+      "lit_pixels": 695,
+      "name": "ed.avi",
+      "width": 1024
+    }
+  ],
+  "vm_movie": {
+    "audio_frames_mixed": 184320,
+    "frame": {
+      "file": "reports/screenshots/13_movie_vm_op.png",
+      "height": 640,
+      "png_bytes": 350887,
+      "sha256_png": "0582c116ea8f51f67cbbcd43dc2abd9fb6a5b3728b1041dcc4f7d94c5dddd978",
+      "sha256_rgba": "aea67af764e5970db532ef605e236ab4838083bfd073f602cc1cd65b735c120b",
+      "width": 1024
+    },
+    "lit_pixels": 655360,
+    "script": "memOp.sc"
+  }
+}

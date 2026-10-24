@@ -12,17 +12,17 @@
     {
       "file": "reports/screenshots/02_a001_vscroll_text_panel.png",
       "height": 640,
-      "png_bytes": 930896,
-      "sha256_png": "5730536dac572c94ecad464908a9bf0c7c6f524ca93ede6d8d3ddc03ad6d6e47",
-      "sha256_rgba": "e17bfe9710f6113781c139992fac21fc192d7923ad41d4d8a287cc913a6b748c",
+      "png_bytes": 938998,
+      "sha256_png": "fc4afd30cc14bf1361ce9da7ee7bac06ee1f36e1acd3b43f804be41165578757",
+      "sha256_rgba": "096bceea6702a864f59f41c3220531af603ecea938569b425c8221ef10892f30",
       "width": 1024
     },
     {
       "file": "reports/screenshots/03_b006_mask_transition.png",
       "height": 640,
-      "png_bytes": 243744,
-      "sha256_png": "81caa3d1dece396e715b132adbeb654d822a6df49594fa615091dfacce5129d7",
-      "sha256_rgba": "70d3f01387bb7e9a46624f38e118a4de27c14332d2ddb2e0e07756c5adc6cd66",
+      "png_bytes": 558732,
+      "sha256_png": "a621be6fd9f072b9f77ccee55d11efe14b5575cad09d129502610849fca057cd",
+      "sha256_rgba": "e69dfe246f2b43356c38002ad4eb2fc6dff0475e1c90daa19717630e62e95c79",
       "width": 1024
     },
     {
@@ -44,17 +44,17 @@
     {
       "file": "reports/screenshots/06_full_chain_from.png",
       "height": 640,
-      "png_bytes": 272245,
-      "sha256_png": "67ff1da442a2d069ed8c8251cff79b1791a1458d2f0f7e9444d4d2aec15da2ed",
-      "sha256_rgba": "2bbdcb38f438128bc25750cf7da469ead61fa3aa30ad6080dbd4a06804e11a1a",
+      "png_bytes": 750535,
+      "sha256_png": "5d874d1759c360c4692290d9aa82ae03ef3ce21954866b8368101bd6f05c7f82",
+      "sha256_rgba": "638910a209fa346a14a041382ed5582d0b2e1cedaf40fe42ed6567a947f386a5",
       "width": 1024
     },
     {
       "file": "reports/screenshots/07_full_chain_mask_text.png",
       "height": 640,
-      "png_bytes": 749373,
-      "sha256_png": "b66139abefc9589a2d8a019be860f46bfcf7584867f37e4fff6481f344a22a51",
-      "sha256_rgba": "12af7dcb5f66e272ff27f1c726c3508c491e0f965cf057084c0b0b8d2c3fc28b",
+      "png_bytes": 903777,
+      "sha256_png": "a038fc4a86bad89ae42b50020f003770b4d5f059220e6620917c3813fefc7ccd",
+      "sha256_rgba": "f4a4ab6b8890e9fc0e7109b7fe4709a7f0bd0ff236843ccecfc28b3a973bcc0f",
       "width": 1024
     },
     {
@@ -67,11 +67,11 @@
     }
   ],
   "game_dir": "/mnt/f/gal/【PC硬盘】【官中】eden",
-  "generated_unix": 1792859856,
+  "generated_unix": 1792872397,
   "notes": [
-    "A001 frame 3639: stage=ev007a01.png view_y=200 .ani=4 frames",
-    "A001 frame 3732: stage=ev007a01.png view_y=884 message=590 panel=1 transition=0.80",
-    "B006 frame 1734: transition kind=1 layer=Some(\"fadeSwirl.png\") 13/30 stage=ev214a01_mugai_c.png view_y=0",
+    "A001 frame 3649: stage=ev007a01.png view_y=200 .ani=4 frames",
+    "A001 frame 3718: stage=ev007a01.png view_y=884 message=590 panel=1 transition=1.00",
+    "B006 frame 1891: transition kind=1 layer=Some(\"fadeSwirl.png\") 13/30 stage=ev229a00_mugai_a.png view_y=0",
     "ev_add02_up06a.ani frame 0 changed 143 pixels (2 frames)",
     "full-chain composite: ev006 long stage + view 970 -> ev007a01 view 884 + .ani frame 1 + msgPanel_Omni + fadeSide mask @ 15/30"
   ],

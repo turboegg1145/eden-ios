@@ -149,15 +149,22 @@ pub struct Transition {
     pub mask: Option<Arc<RgbaImage>>,
     pub total_frames: u32,
     pub elapsed: u32,
-    pub from: Option<RgbaImage>,
+    pub from: Option<Arc<RgbaImage>>,
 }
 
 impl Transition {
     pub fn progress(&self) -> f32 {
+        self.progress_with_sub(0.0)
+    }
+
+    /// Progress including a sub-frame fraction in `0..1`, used by the
+    /// 120 Hz display link to interpolate between two 60 Hz VM ticks.
+    pub fn progress_with_sub(&self, sub: f32) -> f32 {
         if self.total_frames == 0 {
             1.0
         } else {
-            (self.elapsed as f32 / self.total_frames as f32).clamp(0.0, 1.0)
+            ((self.elapsed as f32 + sub.clamp(0.0, 1.0)) / self.total_frames as f32)
+                .clamp(0.0, 1.0)
         }
     }
 }
@@ -167,6 +174,13 @@ pub struct Scene {
     pub height: u32,
     pub view_x: i32,
     pub view_y: i32,
+    /// Sub-pixel viewport offset (0..1) used at 120 Hz. The stage artwork is
+    /// sampled with bilinear filtering so ProMotion scrolls stay smooth
+    /// between two 60 Hz logical frames.
+    pub view_sub_x: f32,
+    pub view_sub_y: f32,
+    /// Sub-frame transition progress (0..1) for the same reason.
+    pub transition_sub: f32,
     pub stage_spec: StageSpec,
     pub layers: Vec<Layer>,
     pub panel: PanelOverlay,
@@ -188,6 +202,9 @@ impl Scene {
             height,
             view_x: 0,
             view_y: 0,
+            view_sub_x: 0.0,
+            view_sub_y: 0.0,
+            transition_sub: 0.0,
             stage_spec: StageSpec::default(),
             layers: Vec::new(),
             panel: PanelOverlay::default(),
@@ -200,6 +217,25 @@ impl Scene {
     pub fn set_view(&mut self, x: i32, y: i32) {
         self.view_x = x;
         self.view_y = y;
+    }
+
+    /// Sub-pixel viewport offset applied on top of [`Self::set_view`].
+    /// Values are clamped to one frame of the fastest retail scroll speed: a
+    /// scroll moving towards a lower offset runs slightly ahead of the last
+    /// logical frame, then the next 60 Hz tick catches up exactly.
+    pub fn set_view_subpixel(&mut self, x: f32, y: f32) {
+        self.view_sub_x = x.clamp(-64.0, 64.0);
+        self.view_sub_y = y.clamp(-64.0, 64.0);
+    }
+
+    pub fn set_transition_subpixel(&mut self, sub: f32) {
+        self.transition_sub = sub.clamp(0.0, 1.0);
+    }
+
+    pub fn clear_subpixel(&mut self) {
+        self.view_sub_x = 0.0;
+        self.view_sub_y = 0.0;
+        self.transition_sub = 0.0;
     }
 
     pub fn set_stage_spec(
@@ -227,11 +263,15 @@ impl Scene {
         self.stage_spec.x = x;
         self.stage_spec.y = y;
         self.layers.retain(|l| l.name != "stage");
+        // `.stage` x/y are the initial *viewport offset* into the artwork
+        // (the engine uses them for oversized CGs and for the starting point
+        // of `.vscroll`). The layer itself always starts at the origin and
+        // the scene's view is subtracted from it while blitting.
         self.layers.push(Layer {
             name: "stage".into(),
             image,
-            x,
-            y,
+            x: 0,
+            y: 0,
             opacity: 255,
             blend: BlendMode::Normal,
             z: 0,
@@ -320,7 +360,7 @@ impl Scene {
             mask,
             total_frames: frames,
             elapsed: 0,
-            from: Some(from),
+            from: Some(Arc::new(from)),
         });
     }
 
@@ -358,9 +398,30 @@ impl Scene {
         let mut order: Vec<&Layer> = self.layers.iter().collect();
         order.sort_by_key(|l| l.z);
         for layer in order {
-            let sx = layer.x - self.view_x;
-            let sy = layer.y - self.view_y;
-            if let Some(mask) = &layer.mask {
+            let is_stage = layer.name == "stage";
+            let sx_f = if is_stage {
+                -(self.view_x as f32 + self.view_sub_x)
+            } else {
+                (layer.x - self.view_x) as f32
+            };
+            let sy_f = if is_stage {
+                -(self.view_y as f32 + self.view_sub_y)
+            } else {
+                (layer.y - self.view_y) as f32
+            };
+            let sx = sx_f.floor() as i32;
+            let sy = sy_f.floor() as i32;
+            let subpixel = sx_f.fract() != 0.0 || sy_f.fract() != 0.0;
+            if subpixel {
+                blit_stage_bilinear(
+                    out,
+                    &layer.image,
+                    sx_f,
+                    sy_f,
+                    layer.mask.as_deref(),
+                    layer.opacity,
+                );
+            } else if let Some(mask) = &layer.mask {
                 blit_masked(out, &layer.image, sx, sy, mask, layer.opacity);
             } else {
                 blit_blend(out, &layer.image, sx, sy, layer.opacity, layer.blend);
@@ -461,6 +522,72 @@ fn blit_masked(
     }
 }
 
+/// Bilinear stage blit used for sub-pixel scroll offsets at 120 Hz.
+///
+/// `x`/`y` are the (possibly fractional) screen position of the artwork's
+/// top-left corner. Pixels outside the source are transparent.
+fn blit_stage_bilinear(
+    dst: &mut RgbaImage,
+    src: &RgbaImage,
+    x: f32,
+    y: f32,
+    mask: Option<&RgbaImage>,
+    opacity: u8,
+) {
+    let sw = src.width as i32;
+    let sh = src.height as i32;
+    for sy in 0..dst.height as i32 {
+        let v = sy as f32 - y;
+        for sx in 0..dst.width as i32 {
+            let u = sx as f32 - x;
+            let sp = sample_bilinear(src, u, v);
+            if sp[3] == 0 {
+                continue;
+            }
+            let mut a = u16::from(sp[3]);
+            if let Some(mask) = mask {
+                let mu = ((u + 0.5) / sw as f32).clamp(0.0, 1.0);
+                let mv = ((v + 0.5) / sh as f32).clamp(0.0, 1.0);
+                a = a * u16::from(mask.luma_bilinear(mu, mv)) / 255;
+            }
+            let a = (a * u16::from(opacity) / 255) as u8;
+            if a == 0 {
+                continue;
+            }
+            dst.blend_pixel(sx as u32, sy as u32, [sp[0], sp[1], sp[2], a], 255);
+        }
+    }
+}
+
+fn sample_bilinear(src: &RgbaImage, x: f32, y: f32) -> [u8; 4] {
+    let xf = x.floor();
+    let yf = y.floor();
+    let fx = x - xf;
+    let fy = y - yf;
+    let xi = xf as i32;
+    let yi = yf as i32;
+    let texel = |dx: i32, dy: i32| -> [u8; 4] {
+        let sx = xi + dx;
+        let sy = yi + dy;
+        if sx < 0 || sy < 0 || sx >= src.width as i32 || sy >= src.height as i32 {
+            [0, 0, 0, 0]
+        } else {
+            src.pixel(sx as u32, sy as u32)
+        }
+    };
+    let p00 = texel(0, 0);
+    let p10 = texel(1, 0);
+    let p01 = texel(0, 1);
+    let p11 = texel(1, 1);
+    let mut out = [0u8; 4];
+    for c in 0..4 {
+        let top = p00[c] as f32 * (1.0 - fx) + p10[c] as f32 * fx;
+        let bottom = p01[c] as f32 * (1.0 - fx) + p11[c] as f32 * fx;
+        out[c] = (top * (1.0 - fy) + bottom * fy).round().clamp(0.0, 255.0) as u8;
+    }
+    out
+}
+
 fn blit_bgra_masked(
     dst: &mut RgbaImage,
     bgra: &[u8],
@@ -512,21 +639,61 @@ mod tests {
         let img = gradient(1024, 2007);
         let mut scene = Scene::new(1024, 640);
         scene.set_stage(img.clone(), 0, 1280, None);
-        // Camera exactly at the stage: its top row is the first visible row.
+        // The stage's y is the initial scroll offset into the artwork.
         scene.set_view(0, 1280);
         let mut out = RgbaImage::new(1024, 640);
         scene.render_into(&mut out);
-        assert_eq!(out.pixel(0, 0), img.pixel(0, 0));
-        // Camera 310 px above the stage: the image slides down by 310 px and
-        // the area above it stays background.
+        assert_eq!(out.pixel(0, 0), img.pixel(0, 1280));
+        // Scrolling up reveals earlier rows, without any empty band: the
+        // viewport is a window into the image, not a world-space camera.
         scene.set_view(0, 970);
         scene.render_into(&mut out);
-        assert_eq!(out.pixel(0, 0), [0, 0, 0, 255]);
-        assert_eq!(out.pixel(0, 310), img.pixel(0, 0));
-        // Camera 310 px below the stage: the top of the image is clipped.
+        assert_eq!(out.pixel(0, 0), img.pixel(0, 970));
+        assert_eq!(out.pixel(0, 639), img.pixel(0, 1609));
+        // Scrolling down clips the top of the image.
         scene.set_view(0, 1590);
         scene.render_into(&mut out);
-        assert_eq!(out.pixel(0, 0), img.pixel(0, 310));
+        assert_eq!(out.pixel(0, 0), img.pixel(0, 1590));
+        // Past the bottom edge the framebuffer stays black.
+        scene.set_view(0, 2007);
+        scene.render_into(&mut out);
+        assert_eq!(out.pixel(0, 0), [0, 0, 0, 255]);
+    }
+
+    #[test]
+    fn subpixel_view_interpolates_rows() {
+        let img = gradient(1024, 2007);
+        let mut scene = Scene::new(1024, 640);
+        scene.set_stage(img.clone(), 0, 0, None);
+        scene.set_view(0, 100);
+        let mut out = RgbaImage::new(1024, 640);
+        scene.render_into(&mut out);
+        let integer = out.pixel(10, 0);
+        scene.set_view_subpixel(0.0, 0.5);
+        scene.render_into(&mut out);
+        let half = out.pixel(10, 0);
+        let a = img.pixel(10, 100)[1] as i32;
+        let b = img.pixel(10, 101)[1] as i32;
+        assert!((half[1] as i32 - (a + b) / 2).abs() <= 1, "{half:?}");
+        assert_ne!(half, integer);
+        scene.clear_subpixel();
+        scene.render_into(&mut out);
+        assert_eq!(out.pixel(10, 0), integer);
+    }
+
+    #[test]
+    fn transition_subpixel_adds_a_fraction_of_a_frame() {
+        let mut t = Transition {
+            kind: 0,
+            mask: None,
+            total_frames: 30,
+            elapsed: 15,
+            from: None,
+        };
+        assert!((t.progress() - 0.5).abs() < 1e-6);
+        assert!((t.progress_with_sub(0.5) - 15.5 / 30.0).abs() < 1e-6);
+        t.elapsed = 30;
+        assert!((t.progress_with_sub(0.5) - 1.0).abs() < 1e-6);
     }
 
     #[test]

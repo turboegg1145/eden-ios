@@ -12,7 +12,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use eden_ffi::Runtime;
 use eden_paz::{encode_png, Edition, PazArchive, RgbaImage};
+use eden_render::ui::UiScreen;
 use eden_render::{MessageOverlay, Scene, SoftwareRenderer};
+use eden_video::avi::AviFile;
+use eden_video::ffmpeg;
 use eden_script::{parse_script_bytes, ScriptCommand, ScriptEncoding, VmEvent, VmState};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -42,6 +45,10 @@ fn run(args: &[String]) -> Result<(), String> {
         "shot" | "screenshot" => cmd_shot(rest),
         "list" => cmd_list(rest),
         "audio" => cmd_audio(rest),
+        "movie" => cmd_movie(rest),
+        "ui" => cmd_ui(rest),
+        "display" => cmd_display(rest),
+        "walkthrough" => cmd_walkthrough(rest),
         "help" | "-h" | "--help" => {
             print_help();
             Ok(())
@@ -60,6 +67,10 @@ USAGE:
   eden shot   [--game DIR] [--out DIR] [--max-frames N]
   eden list   <archive.paz> [--filter TEXT]
   eden audio  [--game DIR] [--voice NAME] [--json PATH]
+  eden movie  [--game DIR] [--out DIR] [--time SECONDS] [--all]
+  eden ui     [--game DIR] [--out DIR] [--frames N]
+  eden display [--game DIR] [--out DIR]
+  eden walkthrough [--game DIR] [--json PATH] [--max-frames N] [--edition main|pm]
 
 DEFAULTS:
   game dir   $EDEN_GAME_DIR or {DEFAULT_GAME_DIR}
@@ -814,6 +825,7 @@ fn state_name(state: &VmState) -> &'static str {
         VmState::WaitScroll { .. } => "WaitScroll",
         VmState::WaitTransition { .. } => "WaitTransition",
         VmState::WaitMovie { .. } => "WaitMovie",
+        VmState::WaitBgm { .. } => "WaitBgm",
         VmState::Ended => "Ended",
     }
 }
@@ -1052,6 +1064,13 @@ fn save_frame(dir: &Path, name: &str, frame: &RgbaImage) -> Result<Value, String
     }))
 }
 
+/// Render the current UI without the debug cursor and save the frame.
+fn snap_ui(runtime: &mut Runtime, dir: &Path, name: &str) -> Result<Value, String> {
+    runtime.ui_mut().cursor_visible = false;
+    runtime.render_now();
+    save_frame(dir, name, runtime.frame())
+}
+
 fn message_text(archive: &PazArchive, script: &str, id: i64) -> Result<String, String> {
     let bytes = archive
         .read_entry(script)
@@ -1084,7 +1103,8 @@ fn cmd_shot(args: &[String]) -> Result<(), String> {
     let out_dir = PathBuf::from(opts.value("out").unwrap_or("reports/screenshots"));
     let max_frames = opts.number("max-frames", 12000)?;
     let mut runtime = Runtime::open(&game, None).map_err(|e| format!("{}: {e}", game.display()))?;
-    runtime.set_auto_advance(true);
+    // Advance messages one click at a time so each text box is observable.
+    runtime.set_auto_advance(false);
     let mut frames = Vec::new();
     let mut notes = Vec::new();
 
@@ -1157,6 +1177,9 @@ fn cmd_shot(args: &[String]) -> Result<(), String> {
             text_saved = true;
             break;
         }
+        if matches!(runtime.vm_state(), Some(VmState::WaitClick)) {
+            runtime.click();
+        }
     }
     if !mid_saved || !text_saved {
         return Err(format!(
@@ -1192,6 +1215,9 @@ fn cmd_shot(args: &[String]) -> Result<(), String> {
                 transition_saved = true;
                 break;
             }
+        }
+        if matches!(runtime.vm_state(), Some(VmState::WaitClick)) {
+            runtime.click();
         }
     }
     if !transition_saved {
@@ -1300,6 +1326,680 @@ fn cmd_shot(args: &[String]) -> Result<(), String> {
         println!("  note: {note}");
     }
     println!("report: {}", out_dir.join("report.json").display());
+    Ok(())
+}
+
+
+// ---------------------------------------------------------------------------
+// movie / ui / walkthrough
+// ---------------------------------------------------------------------------
+
+fn extract_movie_entry(archive: &Path, name: &str) -> Result<PathBuf, String> {
+    let paz = PazArchive::open(archive).map_err(|e| format!("{}: {e}", archive.display()))?;
+    let entry = paz
+        .entry(name)
+        .ok_or_else(|| format!("{}: missing {name}", archive.display()))?
+        .clone();
+    let dir = std::env::temp_dir().join("eden-video-cache");
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let ident: String = paz
+        .ident()
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
+        .collect();
+    let path = dir.join(format!("{ident}-{name}"));
+    if let Ok(meta) = fs::metadata(&path) {
+        if meta.len() == u64::from(entry.unpacked_size) {
+            return Ok(path);
+        }
+    }
+    let mut reader = paz.open_entry(&entry).map_err(|e| e.to_string())?;
+    let mut file = fs::File::create(&path).map_err(|e| e.to_string())?;
+    std::io::copy(&mut reader, &mut file).map_err(|e| e.to_string())?;
+    Ok(path)
+}
+
+fn cmd_movie(args: &[String]) -> Result<(), String> {
+    let opts = Opts::parse(args);
+    let game = game_dir(&opts);
+    let out_dir = PathBuf::from(opts.value("out").unwrap_or("reports/screenshots"));
+    let time: f64 = opts
+        .value("time")
+        .unwrap_or("2.0")
+        .parse()
+        .map_err(|_| "--time expects seconds".to_string())?;
+    if !ffmpeg::is_available() {
+        return Err("ffmpeg is required for the desktop video decoder bridge".into());
+    }
+    let pm = pm_dir(&game);
+    let mut sources: Vec<(&str, PathBuf)> = vec![("main", game.join("mov.paz"))];
+    if pm != game && pm.join("mov.paz").exists() {
+        sources.push(("pm", pm.join("mov.paz")));
+    }
+    let mut entries = Vec::new();
+    let mut index = 9;
+    for (edition, archive) in &sources {
+        if !archive.exists() {
+            continue;
+        }
+        for name in ["op.avi", "ed.avi"] {
+            let path = match extract_movie_entry(archive, name) {
+                Ok(path) => path,
+                Err(e) => {
+                    eprintln!("skip {edition} {name}: {e}");
+                    continue;
+                }
+            };
+            let avi = AviFile::open(&path).map_err(|e| format!("{name}: {e}"))?;
+            let clip = avi.decode_audio().map_err(|e| format!("{name} audio: {e}"))?;
+            let frame = ffmpeg::decode_frame_at(&path, time, 1024, 640, avi.video.fps)
+                .map_err(|e| format!("{name} frame: {e}"))?;
+            let lit = frame
+                .data
+                .chunks_exact(4)
+                .filter(|p| p[0] > 8 || p[1] > 8 || p[2] > 8)
+                .count();
+            if lit < 500 {
+                return Err(format!("{edition} {name}: frame at {time}s is blank ({lit} px)"));
+            }
+            let file = if *edition == "main" {
+                format!("{index:02}_movie_{}.png", name.trim_end_matches(".avi"))
+            } else {
+                format!("{index:02}_movie_pm_{}.png", name.trim_end_matches(".avi"))
+            };
+            let saved = save_frame(&out_dir, &file, &frame)?;
+            let (audio_rate, audio_channels, audio_duration, audio_peak) = clip
+                .as_ref()
+                .map(|c| (c.sample_rate, c.channels, c.duration(), c.peak()))
+                .unwrap_or((0, 0, 0.0, 0.0));
+            if audio_peak <= 0.0 {
+                return Err(format!("{edition} {name}: audio track is silent"));
+            }
+            entries.push(json!({
+                "edition": edition,
+                "name": name,
+                "codec": avi.video.codec.name(),
+                "width": avi.video.width,
+                "height": avi.video.height,
+                "fps": avi.video.fps,
+                "frames": avi.video.frame_count,
+                "duration": avi.duration(),
+                "audio_codec": avi.audio.as_ref().map(|a| a.format.codec.name()),
+                "audio_rate": audio_rate,
+                "audio_channels": audio_channels,
+                "audio_duration": audio_duration,
+                "audio_peak": audio_peak,
+                "lit_pixels": lit,
+                "frame": saved,
+            }));
+            index += 1;
+        }
+    }
+    if entries.is_empty() {
+        return Err("mov.paz contains no decodable AVI entries".into());
+    }
+
+    // Prove the `.movie` VM instruction drives the real decoder and scene.
+    let mut runtime = Runtime::open(&game, None).map_err(|e| e.to_string())?;
+    runtime.set_auto_advance(true);
+    runtime.start_script("memOp.sc").map_err(|e| e.to_string())?;
+    let mut audio_written = 0;
+    let mut out = vec![[0.0f32; 2]; 2048];
+    for _ in 0..90 {
+        runtime.tick_vm().map_err(|e| e.to_string())?;
+        audio_written += runtime.mix_audio(&mut out);
+    }
+    if !runtime.movie_active() {
+        let detail = runtime.last_error().unwrap_or("no error reported");
+        let stats = runtime.stats();
+        return Err(format!(
+            "memOp.sc did not keep the movie active: {detail} (movies={}, errors={}, frame={})",
+            stats.movies,
+            stats.errors,
+            runtime.frame_count()
+        ));
+    }
+    runtime.render_now();
+    let vm_entry = save_frame(&out_dir, "13_movie_vm_op.png", runtime.frame())?;
+    let vm_lit = runtime
+        .frame()
+        .data
+        .chunks_exact(4)
+        .filter(|p| p[0] > 8 || p[1] > 8 || p[2] > 8)
+        .count();
+    if vm_lit < 500 {
+        return Err(format!("VM movie frame is blank ({vm_lit} px)"));
+    }
+    if audio_written == 0 {
+        return Err("VM movie audio was not mixed".into());
+    }
+
+    let report = json!({
+        "generated_unix": now_unix(),
+        "game_dir": game.display().to_string(),
+        "time_seconds": time,
+        "ffmpeg": true,
+        "videos": entries,
+        "vm_movie": {
+            "script": "memOp.sc",
+            "frame": vm_entry,
+            "lit_pixels": vm_lit,
+            "audio_frames_mixed": audio_written,
+        },
+        "ok": true,
+    });
+    write_json(&PathBuf::from("reports/movie_report.json"), &report)?;
+    println!("movie: {} real AVI decodes", entries.len());
+    for video in report["videos"].as_array().unwrap() {
+        println!(
+            "  {:<4} {:<7} {:<6} {}x{} @ {:.2}fps  lit={}  audio={} {}Hz {}ch",
+            video["edition"].as_str().unwrap_or("?"),
+            video["name"].as_str().unwrap_or("?"),
+            video["codec"].as_str().unwrap_or("?"),
+            video["width"],
+            video["height"],
+            video["fps"].as_f64().unwrap_or(0.0),
+            video["lit_pixels"],
+            video["audio_codec"].as_str().unwrap_or("?"),
+            video["audio_rate"],
+            video["audio_channels"],
+        );
+    }
+    println!("  VM .movie frame lit={vm_lit}, audio frames mixed={audio_written}");
+    println!("report: reports/movie_report.json");
+    Ok(())
+}
+
+fn cmd_ui(args: &[String]) -> Result<(), String> {
+    let opts = Opts::parse(args);
+    let game = game_dir(&opts);
+    let out_dir = PathBuf::from(opts.value("out").unwrap_or("reports/screenshots"));
+    let max_frames = opts.number("frames", 30_000)?;
+    let mut runtime = Runtime::open(&game, None).map_err(|e| e.to_string())?;
+    runtime
+        .set_save_dir(PathBuf::from("reports/saves"))
+        .map_err(|e| e.to_string())?;
+    runtime.use_system_font();
+    runtime.set_auto_advance(true);
+
+    runtime.open_ui(UiScreen::Title);
+    let title = snap_ui(&mut runtime, &out_dir, "15_ui_title.png")?;
+
+    runtime.start_script("A001.sc").map_err(|e| e.to_string())?;
+    let mut reached = 0;
+    for frame in 1..=max_frames {
+        runtime.tick_vm().map_err(|e| e.to_string())?;
+        if frame % 500 == 0 {
+            runtime.refresh_ui_lists();
+            let unlocked = runtime.ui().gallery.iter().filter(|g| g.unlocked).count();
+            if runtime.ui().backlog.len() >= 20 && unlocked >= 3 {
+                reached = frame;
+                break;
+            }
+        }
+    }
+    runtime.refresh_ui_lists();
+    if runtime.ui().backlog.len() < 5 {
+        return Err(format!(
+            "A001 produced only {} backlog entries",
+            runtime.ui().backlog.len()
+        ));
+    }
+    let unlocked_cgs = runtime.ui().gallery.iter().filter(|g| g.unlocked).count();
+    if unlocked_cgs == 0 {
+        return Err("A001 unlocked no CGs".into());
+    }
+
+    // Save the live stage into slot 0 and exercise the slot grid.
+    runtime.save_slot(0).map_err(|e| e.to_string())?;
+    runtime.open_ui(UiScreen::Save);
+    runtime.ui_mut().clear_toast();
+    let save_shot = snap_ui(&mut runtime, &out_dir, "16_ui_save.png")?;
+    if runtime.ui_tap(600, 60) {
+        // save slot 2 through the real hit region
+        runtime.ui_mut().clear_toast();
+        runtime.render_now();
+    }
+    runtime.open_ui(UiScreen::Load);
+    runtime.ui_mut().clear_toast();
+    let load_shot = snap_ui(&mut runtime, &out_dir, "17_ui_load.png")?;
+    runtime.ui_tap(200, 60);
+    if runtime.ui().screen != UiScreen::Game {
+        return Err("load-slot tap did not return to the game".into());
+    }
+    runtime.ui_mut().cursor_visible = false;
+    runtime.render_now();
+    let game_after_load = save_frame(&out_dir, "17b_game_after_load.png", runtime.frame())?;
+
+    runtime.open_ui(UiScreen::Backlog);
+    runtime.ui_mut().clear_toast();
+    let backlog_shot = snap_ui(&mut runtime, &out_dir, "18_ui_backlog.png")?;
+    if runtime.ui_tap(40, 600) {
+        // Back
+    }
+
+    runtime.open_ui(UiScreen::Gallery);
+    runtime.ui_mut().clear_toast();
+    let gallery_shot = snap_ui(&mut runtime, &out_dir, "19_ui_gallery.png")?;
+    let thumb_count = runtime
+        .ui()
+        .gallery
+        .iter()
+        .filter(|g| g.thumb.is_some())
+        .count();
+    if thumb_count == 0 {
+        return Err("gallery has no decoded cgthumb images".into());
+    }
+    let locked_cgs = runtime.ui().gallery.iter().filter(|g| !g.unlocked).count();
+    if locked_cgs == 0 {
+        return Err("gallery has no locked entries".into());
+    }
+    // Open the first unlocked CG fullscreen from the real hit region.
+    let first_unlocked = runtime
+        .ui()
+        .gallery
+        .iter()
+        .position(|g| g.unlocked)
+        .ok_or("gallery has no unlocked entries")?;
+    let cell = first_unlocked % 25;
+    let rect = (96 + (cell % 5) as i32 * 176, 30 + (cell / 5) as i32 * 113);
+    runtime.ui_tap(rect.0 + 40, rect.1 + 30);
+    runtime.ui_mut().clear_toast();
+    let gallery_view_shot = snap_ui(&mut runtime, &out_dir, "19b_ui_gallery_view.png")?;
+    if runtime.ui().screen != UiScreen::GalleryView {
+        return Err("gallery tap did not open the fullscreen CG".into());
+    }
+    let full_pixels = runtime
+        .ui()
+        .gallery
+        .get(first_unlocked)
+        .and_then(|g| g.full.as_ref())
+        .map(|f| f.data.chunks_exact(4).filter(|p| p[0] > 8 || p[1] > 8 || p[2] > 8).count())
+        .unwrap_or(0);
+    if full_pixels < 10_000 {
+        return Err(format!("fullscreen CG is blank ({full_pixels} px)"));
+    }
+    runtime.ui_tap(500, 300);
+
+    runtime.open_ui(UiScreen::Music);
+    runtime.ui_mut().clear_toast();
+    let music_shot = snap_ui(&mut runtime, &out_dir, "20_ui_music.png")?;
+    let music_tracks = runtime.ui().music.len();
+    if music_tracks == 0 {
+        return Err("music room has no bgm.paz tracks".into());
+    }
+    let unlocked_tracks = runtime.ui().music.iter().filter(|m| m.unlocked).count();
+    let locked_tracks = music_tracks - unlocked_tracks;
+    if unlocked_tracks == 0 || locked_tracks == 0 {
+        return Err(format!(
+            "music room unlock linkage failed (unlocked={unlocked_tracks}, locked={locked_tracks})"
+        ));
+    }
+
+    runtime.open_ui(UiScreen::Config);
+    runtime.ui_tap(760, 115); // BGM slider, left half -> -5
+    runtime.ui_mut().clear_toast();
+    let config_shot = snap_ui(&mut runtime, &out_dir, "21_ui_config.png")?;
+
+    runtime.open_ui(UiScreen::Extra);
+    runtime.ui_mut().clear_toast();
+    let extra_shot = snap_ui(&mut runtime, &out_dir, "22_ui_extra.png")?;
+
+    let report = json!({
+        "generated_unix": now_unix(),
+        "game_dir": game.display().to_string(),
+        "reached_frame": reached,
+        "backlog_entries": runtime.ui().backlog.len(),
+        "unlocked_cgs": unlocked_cgs,
+        "locked_cgs": locked_cgs,
+        "gallery_thumbnails": thumb_count,
+        "gallery_full_pixels": full_pixels,
+        "music_tracks": music_tracks,
+        "unlocked_tracks": unlocked_tracks,
+        "locked_tracks": locked_tracks,
+        "screens": {
+            "title": title,
+            "save": save_shot,
+            "load": load_shot,
+            "game_after_load": game_after_load,
+            "backlog": backlog_shot,
+            "gallery": gallery_shot,
+            "gallery_view": gallery_view_shot,
+            "music": music_shot,
+            "config": config_shot,
+            "extra": extra_shot,
+        },
+        "ok": true,
+    });
+    write_json(&PathBuf::from("reports/ui_report.json"), &report)?;
+    println!("ui: title/save/load/backlog/gallery/music/config/extra rendered");
+    println!(
+        "  A001 frame {reached}: backlog={} cgs={} thumbs={} tracks={}",
+        runtime.ui().backlog.len(),
+        unlocked_cgs,
+        thumb_count,
+        music_tracks
+    );
+    println!("report: reports/ui_report.json");
+    Ok(())
+}
+
+fn cmd_display(args: &[String]) -> Result<(), String> {
+    let opts = Opts::parse(args);
+    let game = game_dir(&opts);
+    let out_dir = PathBuf::from(opts.value("out").unwrap_or("reports/screenshots"));
+    let mut runtime = Runtime::open(&game, None).map_err(|e| e.to_string())?;
+    runtime.use_system_font();
+    runtime.set_auto_advance(true);
+
+    // 1) Scroll: stop at the ev006 vertical pan (stage y=1280, speed -7).
+    runtime
+        .start_script("A001.sc")
+        .map_err(|e| e.to_string())?;
+    let mut scroll_found = false;
+    for _ in 0..20_000 {
+        runtime.tick_vm().map_err(|e| e.to_string())?;
+        let is_ev006 = runtime
+            .vm()
+            .and_then(|vm| vm.scroll())
+            .map(|s| s.start_y == 1280 && s.speed_y == -7)
+            .unwrap_or(false);
+        if is_ev006 {
+            scroll_found = true;
+            break;
+        }
+    }
+    if !scroll_found {
+        return Err("A001 never reached the ev006 scroll".into());
+    }
+    runtime.reset_display_clock();
+    runtime.render_now();
+    let scroll_60_frame = runtime.frame().clone();
+    let scroll_60 = save_frame(&out_dir, "23_display_60hz_scroll.png", &scroll_60_frame)?;
+    let view_60 = runtime.scene().view_y;
+    let ticks = runtime.tick_display(1.0 / 120.0).map_err(|e| e.to_string())?;
+    if ticks != 0 {
+        return Err(format!("half a 120 Hz frame consumed {ticks} logical ticks"));
+    }
+    runtime.render_now();
+    let scroll_120 = save_frame(&out_dir, "24_display_120hz_scroll.png", runtime.frame())?;
+    let sub_y = runtime.scene().view_sub_y;
+    if (sub_y + 3.5).abs() > 1e-4 {
+        return Err(format!("expected -3.5 px sub-pixel offset, got {sub_y}"));
+    }
+    let scroll_diff = pixel_diff(runtime.frame(), &scroll_60_frame);
+    if scroll_diff < 10_000 {
+        return Err(format!(
+            "120 Hz scroll frame barely differs from 60 Hz ({scroll_diff} px)"
+        ));
+    }
+
+    // 2) Transition: find a 60-frame wipe whose outgoing frame is real art
+    // (A001 fades ev001 -> BLACK right after the first scene).
+    runtime
+        .start_script("A001.sc")
+        .map_err(|e| e.to_string())?;
+    let mut transition_found = false;
+    for _ in 0..5000 {
+        runtime.tick_vm().map_err(|e| e.to_string())?;
+        let is_art_wipe = runtime
+            .scene()
+            .transition
+            .as_ref()
+            .map(|t| {
+                t.total_frames == 60
+                    && t.from
+                        .as_ref()
+                        .map(|f| f.pixel(0, 0) != [0, 0, 0, 255])
+                        .unwrap_or(false)
+            })
+            .unwrap_or(false);
+        if is_art_wipe {
+            transition_found = true;
+            break;
+        }
+    }
+    if !transition_found {
+        return Err("A001 never started a 60-frame art wipe".into());
+    }
+    // Let the new stage land and advance one logical frame into the wipe,
+    // otherwise the "to" image is still identical to the captured "from".
+    runtime.reset_display_clock();
+    runtime.tick_display(1.0 / 60.0).map_err(|e| e.to_string())?;
+    runtime.render_now();
+    let trans_60_frame = runtime.frame().clone();
+    let trans_60 = save_frame(&out_dir, "25_display_60hz_transition.png", &trans_60_frame)?;
+    runtime.tick_display(1.0 / 120.0).map_err(|e| e.to_string())?;
+    runtime.render_now();
+    let trans_120 = save_frame(&out_dir, "26_display_120hz_transition.png", runtime.frame())?;
+    let transition_sub = runtime.scene().transition_sub;
+    if (transition_sub - 0.5).abs() > 1e-4 {
+        return Err(format!(
+            "expected 0.5 sub-frame transition progress, got {transition_sub}"
+        ));
+    }
+    let trans_diff = pixel_diff(runtime.frame(), &trans_60_frame);
+    if trans_diff < 10_000 {
+        return Err(format!(
+            "120 Hz transition frame barely differs from 60 Hz ({trans_diff} px)"
+        ));
+    }
+
+    let report = json!({
+        "ok": true,
+        "scroll": {
+            "view_y_60hz": view_60,
+            "view_sub_y_120hz": sub_y,
+            "changed_pixels": scroll_diff,
+            "frame_60hz": scroll_60,
+            "frame_120hz": scroll_120,
+        },
+        "transition": {
+            "sub_frame_120hz": transition_sub,
+            "changed_pixels": trans_diff,
+            "frame_60hz": trans_60,
+            "frame_120hz": trans_120,
+        },
+    });
+    write_json(&PathBuf::from("reports/display_report.json"), &report)?;
+    println!(
+        "display: 120 Hz interpolation ok (scroll sub {sub_y:.1} px, {scroll_diff} px changed; \
+         transition sub {transition_sub:.2}, {trans_diff} px changed)"
+    );
+    println!("report: reports/display_report.json");
+    Ok(())
+}
+
+fn pixel_diff(a: &RgbaImage, b: &RgbaImage) -> usize {
+    a.data
+        .chunks_exact(4)
+        .zip(b.data.chunks_exact(4))
+        .filter(|(x, y)| x != y)
+        .count()
+}
+
+fn cmd_walkthrough(args: &[String]) -> Result<(), String> {
+    let opts = Opts::parse(args);
+    let game = game_dir(&opts);
+    let out = PathBuf::from(
+        opts.value("json")
+            .unwrap_or("reports/full_walkthrough_report.json"),
+    );
+    let max_frames = opts.number("max-frames", 2_000_000)?;
+    let which = opts.value("edition").unwrap_or("all");
+    let mut editions: Vec<(&str, PathBuf, Option<PathBuf>)> = Vec::new();
+    if which == "all" || which == "main" {
+        editions.push(("main", game.clone(), None));
+    }
+    if which == "all" || which == "pm" {
+        let pm = pm_dir(&game);
+        if pm != game {
+            let exe = ["eden_pm_en.exe", "eden_pm.exe"]
+                .iter()
+                .map(|n| pm.join(n))
+                .find(|p| p.exists());
+            editions.push(("pm", pm, exe));
+        }
+    }
+    if editions.is_empty() {
+        return Err("no editions selected".into());
+    }
+
+    let mut reports = Vec::new();
+    let mut total_scripts = 0;
+    let mut total_ended = 0;
+    let mut total_errors = 0;
+    let started = std::time::Instant::now();
+    for (edition, dir, exe) in &editions {
+        let mut runtime = Runtime::open(dir, exe.as_deref())
+            .map_err(|e| format!("{}: {e}", dir.display()))?;
+        runtime.set_headless(true);
+        runtime.set_video_enabled(false);
+        runtime.set_auto_advance(true);
+        let names = runtime.script_names();
+        println!("walkthrough {edition}: {} scripts", names.len());
+        for name in names {
+            total_scripts += 1;
+            runtime.reset_stats();
+            let mut frames = 0u64;
+            let mut state = String::new();
+            let mut error = None;
+            let mut pc = 0;
+            let mut commands = 0;
+            match runtime.start_script(&name) {
+                Ok(()) => {
+                    commands = runtime.vm().map(|v| v.script().commands.len()).unwrap_or(0);
+                    loop {
+                        if frames >= max_frames as u64 {
+                            error = Some(format!("timed out after {max_frames} frames"));
+                            break;
+                        }
+                        if let Err(e) = runtime.tick_vm() {
+                            error = Some(e.to_string());
+                            break;
+                        }
+                        frames += 1;
+                        let vm = runtime.vm().unwrap();
+                        state = format!("{:?}", vm.state());
+                        pc = vm.pc();
+                        if matches!(vm.state(), VmState::Ended) {
+                            break;
+                        }
+                        if let Some(err) = runtime.last_error() {
+                            error = Some(err.to_string());
+                            break;
+                        }
+                    }
+                }
+                Err(e) => error = Some(e.to_string()),
+            }
+            let ended = state.starts_with("Ended");
+            if ended {
+                total_ended += 1;
+            }
+            if error.is_some() {
+                total_errors += 1;
+            }
+            let stats = runtime.stats().clone();
+            if error.is_none() && !ended {
+                error = Some(format!("did not end (state={state})"));
+                total_errors += 1;
+            }
+            let stage = runtime
+                .vm()
+                .map(|vm| vm.stage().image.clone())
+                .unwrap_or_default();
+            let backlog = runtime.ui().backlog.len();
+            reports.push(json!({
+                "edition": edition,
+                "script": name,
+                "commands": commands,
+                "frames": frames,
+                "ended": ended,
+                "state": state,
+                "pc": pc,
+                "stage": stage,
+                "backlog": backlog,
+                "stats": {
+                    "events": stats.events,
+                    "messages": stats.messages,
+                    "stages": stats.stages,
+                    "transitions": stats.transitions,
+                    "panels": stats.panels,
+                    "movies": stats.movies,
+                    "chains": stats.chains,
+                    "scrolls": stats.scrolls,
+                    "errors": stats.errors,
+                },
+                "error": error,
+            }));
+        }
+    }
+    let elapsed = started.elapsed().as_secs_f64();
+    let total_frames: u64 = reports
+        .iter()
+        .map(|r| r["frames"].as_u64().unwrap_or(0))
+        .sum();
+    let total_messages: u64 = reports
+        .iter()
+        .map(|r| r["stats"]["messages"].as_u64().unwrap_or(0))
+        .sum();
+    let total_stages: u64 = reports
+        .iter()
+        .map(|r| r["stats"]["stages"].as_u64().unwrap_or(0))
+        .sum();
+    let total_transitions: u64 = reports
+        .iter()
+        .map(|r| r["stats"]["transitions"].as_u64().unwrap_or(0))
+        .sum();
+    let total_scrolls: u64 = reports
+        .iter()
+        .map(|r| r["stats"]["scrolls"].as_u64().unwrap_or(0))
+        .sum();
+    let total_panels: u64 = reports
+        .iter()
+        .map(|r| r["stats"]["panels"].as_u64().unwrap_or(0))
+        .sum();
+    let total_movies: u64 = reports
+        .iter()
+        .map(|r| r["stats"]["movies"].as_u64().unwrap_or(0))
+        .sum();
+    let total_chains: u64 = reports
+        .iter()
+        .map(|r| r["stats"]["chains"].as_u64().unwrap_or(0))
+        .sum();
+    let report = json!({
+        "generated_unix": now_unix(),
+        "game_dir": game.display().to_string(),
+        "max_frames_per_script": max_frames,
+        "editions": editions.iter().map(|(e, d, _)| json!({"edition": e, "dir": d.display().to_string()})).collect::<Vec<_>>(),
+        "summary": {
+            "scripts": total_scripts,
+            "ended": total_ended,
+            "errors": total_errors,
+            "elapsed_seconds": elapsed,
+            "frames": total_frames,
+            "messages": total_messages,
+            "stages": total_stages,
+            "transitions": total_transitions,
+            "scrolls": total_scrolls,
+            "panels": total_panels,
+            "movies": total_movies,
+            "chains": total_chains,
+        },
+        "scripts": reports,
+        "ok": total_errors == 0 && total_scripts == 58 && total_ended == 58,
+    });
+    write_json(&out, &report)?;
+    println!(
+        "walkthrough: {total_scripts} scripts, {total_ended} ended, {total_errors} errors in {elapsed:.2}s"
+    );
+    println!("report: {}", out.display());
+    if total_errors != 0 || total_scripts != 58 || total_ended != 58 {
+        return Err(format!(
+            "walkthrough incomplete: {total_scripts} scripts, {total_ended} ended, {total_errors} errors"
+        ));
+    }
     Ok(())
 }
 

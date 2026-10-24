@@ -5,6 +5,7 @@ members = [
     "crates/eden-script",
     "crates/eden-render",
     "crates/eden-audio",
+    "crates/eden-video",
     "crates/eden-app",
     "crates/eden-ffi",
 ]

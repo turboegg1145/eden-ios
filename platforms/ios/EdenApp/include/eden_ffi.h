@@ -41,7 +41,7 @@ extern "C" {
 
 #define EDEN_STAGE_WIDTH 1024u
 #define EDEN_STAGE_HEIGHT 640u
-#define EDEN_FFI_ABI_VERSION 1u
+#define EDEN_FFI_ABI_VERSION 3u
 
 typedef struct EdenEngine EdenEngine;
 
@@ -79,6 +79,15 @@ EDEN_FFI_API int eden_engine_start_script(EdenEngine *engine,
 
 /* Advances exactly one 60 Hz logical frame. Returns 0 on success. */
 EDEN_FFI_API int eden_engine_tick(EdenEngine *engine);
+
+/*
+ * Advances by wall-clock seconds (e.g. 1.0/120.0 from a ProMotion display
+ * link) and interpolates scroll/transition state between 60 Hz logical
+ * frames. Returns the number of logical frames consumed, or -1 on error.
+ * Call eden_engine_render() afterwards to draw the interpolated frame.
+ */
+EDEN_FFI_API int eden_engine_tick_display(EdenEngine *engine, double dt_seconds);
+EDEN_FFI_API void eden_engine_reset_display_clock(EdenEngine *engine);
 
 /* Queues one click/touch advance for the next tick. */
 EDEN_FFI_API void eden_engine_click(EdenEngine *engine);
@@ -139,6 +148,28 @@ EDEN_FFI_API uint64_t eden_engine_frame_count(EdenEngine *engine);
 
 /* Last error message; empty string when the last call succeeded. */
 EDEN_FFI_API const char *eden_engine_last_error(EdenEngine *engine);
+
+/* ------------------------------------------------------------------ */
+/* Full UI, save slots and video (ABI 2)                              */
+/* ------------------------------------------------------------------ */
+
+/* 0=title 1=save 2=load 3=backlog 4=gallery 5=music 6=config 7=extra 8=game */
+EDEN_FFI_API int eden_engine_ui_open(EdenEngine *engine, int screen);
+EDEN_FFI_API int eden_engine_ui_screen(EdenEngine *engine);
+EDEN_FFI_API int eden_engine_ui_tap(EdenEngine *engine, int x, int y);
+EDEN_FFI_API void eden_engine_ui_move(EdenEngine *engine, int x, int y);
+EDEN_FFI_API void eden_engine_ui_scroll(EdenEngine *engine, int delta);
+EDEN_FFI_API void eden_engine_ui_swipe_up(EdenEngine *engine);
+EDEN_FFI_API void eden_engine_ui_two_finger_tap(EdenEngine *engine);
+EDEN_FFI_API const char *eden_engine_ui_slots_json(EdenEngine *engine);
+EDEN_FFI_API int eden_engine_ui_save_slot(EdenEngine *engine, uint32_t index);
+EDEN_FFI_API int eden_engine_ui_load_slot(EdenEngine *engine, uint32_t index);
+EDEN_FFI_API int eden_engine_set_save_dir(EdenEngine *engine, const char *path);
+EDEN_FFI_API void eden_engine_set_video_enabled(EdenEngine *engine, int enabled);
+EDEN_FFI_API int eden_engine_movie_active(EdenEngine *engine);
+EDEN_FFI_API int eden_engine_open_edition(EdenEngine *engine, int edition);
+EDEN_FFI_API void eden_engine_save_unlocks(EdenEngine *engine);
+EDEN_FFI_API int eden_engine_quit_requested(EdenEngine *engine);
 
 #ifdef __cplusplus
 } /* extern "C" */

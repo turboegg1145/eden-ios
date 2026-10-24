@@ -14,4 +14,5 @@ eden-paz = { path = "../eden-paz" }
 eden-script = { path = "../eden-script" }
 eden-render = { path = "../eden-render" }
 eden-audio = { path = "../eden-audio" }
+eden-video = { path = "../eden-video" }
 serde_json.workspace = true

@@ -30,7 +30,7 @@ impl SoftwareRenderer {
             width,
             height,
             font: None,
-            cache: TextureCache::new(256 * 1024 * 1024),
+            cache: TextureCache::new(96 * 1024 * 1024),
             panel_visible_default: true,
         }
     }
@@ -68,7 +68,14 @@ impl SoftwareRenderer {
         let mut out = self.render_base(scene);
         if let Some(t) = &scene.transition {
             if let Some(from) = &t.from {
-                out = blend_transition(from, &out, t, self.width, self.height);
+                out = blend_transition(
+                    from,
+                    &out,
+                    t,
+                    scene.transition_sub,
+                    self.width,
+                    self.height,
+                );
             }
         }
         if scene.panel.visible {
@@ -161,10 +168,11 @@ fn blend_transition(
     from: &RgbaImage,
     to: &RgbaImage,
     t: &crate::scene::Transition,
+    sub: f32,
     w: u32,
     h: u32,
 ) -> RgbaImage {
-    let p = t.progress();
+    let p = t.progress_with_sub(sub);
     let mut out = RgbaImage::new(w, h);
     if t.kind == 0 || t.mask.is_none() {
         // Cross-fade.
@@ -299,9 +307,9 @@ mod tests {
             mask: Some(Arc::new(mask)),
             total_frames: 2,
             elapsed: 1,
-            from: Some(from.clone()),
+            from: Some(Arc::new(from.clone())),
         };
-        let out = blend_transition(&from, &to, &t, 4, 4);
+        let out = blend_transition(&from, &to, &t, 0.0, 4, 4);
         assert_eq!(out.pixel(0, 0), [0, 0, 0, 255]);
         assert_eq!(out.pixel(3, 0), [255, 255, 255, 255]);
     }

@@ -1,0 +1,44 @@
+{
+  "ok": true,
+  "scroll": {
+    "changed_pixels": 646000,
+    "frame_120hz": {
+      "file": "reports/screenshots/24_display_120hz_scroll.png",
+      "height": 640,
+      "png_bytes": 1037582,
+      "sha256_png": "c208fa17c03e28ffd9f5913ca6d2319014a5f3083bd4d39c10463c6946fe3d9f",
+      "sha256_rgba": "5c9ef6a069262ab1e1f865538d9da9a0706e2ddd0df3c9b29f0c8e6ef4b5e281",
+      "width": 1024
+    },
+    "frame_60hz": {
+      "file": "reports/screenshots/23_display_60hz_scroll.png",
+      "height": 640,
+      "png_bytes": 1132179,
+      "sha256_png": "1d03f2a937a00816878afb7d7dcf34edbd43da636e3dee9fbc219be1d3aeea32",
+      "sha256_rgba": "2ca2bb0929856b54ac0828bc749c76d21bb6777936fb031c8f4e7fb9ae501153",
+      "width": 1024
+    },
+    "view_sub_y_120hz": -3.5,
+    "view_y_60hz": 1280
+  },
+  "transition": {
+    "changed_pixels": 574998,
+    "frame_120hz": {
+      "file": "reports/screenshots/26_display_120hz_transition.png",
+      "height": 640,
+      "png_bytes": 646912,
+      "sha256_png": "410f7d9b49d6f40f4a1574e4ba3ba86a0c907edd18c1d1a4fcd3c426af7b1bd5",
+      "sha256_rgba": "c45e72544c24a8f31930daaa525ea6802d70c143f257749ac86d0ce626b325b8",
+      "width": 1024
+    },
+    "frame_60hz": {
+      "file": "reports/screenshots/25_display_60hz_transition.png",
+      "height": 640,
+      "png_bytes": 648956,
+      "sha256_png": "5db2947646d41a349cca20fb831689f146064e692873d9b0d9f747c466e0aac7",
+      "sha256_rgba": "af9929dcf2d4122a26c4b05adbaf8d8a5731e3b6f11db71b36e8cddcb1ee3f7e",
+      "width": 1024
+    },
+    "sub_frame_120hz": 0.5
+  }
+}

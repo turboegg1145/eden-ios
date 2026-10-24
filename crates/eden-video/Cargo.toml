@@ -1,0 +1,12 @@
+[package]
+name = "eden-video"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Pure-Rust AVI RIFF demuxer, MP3/PCM audio and real video-frame decoding for eden*"
+
+[dependencies]
+eden-paz = { path = "../eden-paz" }
+eden-audio = { path = "../eden-audio" }
+symphonia = { version = "0.5.4", default-features = false, features = ["mp3"] }

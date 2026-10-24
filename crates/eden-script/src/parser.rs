@@ -177,6 +177,17 @@ fn parse_line(line: &str, line_no: usize) -> Result<ScriptCommand, String> {
                 line: line_no,
             }))
         }
+        ".waitBGM" => {
+            let frames = if args.is_empty() {
+                None
+            } else {
+                Some(uint(args[0], cmd_ref)?)
+            };
+            Ok(ScriptCommand::WaitBgm(WaitBgmCommand {
+                frames,
+                line: line_no,
+            }))
+        }
         ".pragma" => {
             expect_args(&args, 1, cmd_ref)?;
             let disable_control = match args[0] {

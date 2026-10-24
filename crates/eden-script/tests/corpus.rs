@@ -54,6 +54,10 @@ fn load_all() -> (Vec<eden_script::Script>, BTreeMap<String, usize>) {
 
 #[test]
 fn all_58_scripts_parse_with_zero_errors() {
+    if !script_dirs().iter().all(|(dir, _)| dir.exists()) {
+        eprintln!("skip: extracted corpus missing (private game data)");
+        return;
+    }
     let (scripts, counts) = load_all();
     assert_eq!(scripts.len(), 58, "expected 23 main + 35 PM scripts");
 

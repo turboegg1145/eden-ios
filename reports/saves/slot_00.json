@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "script": "A001.sc",
+  "pc": 127,
+  "call_stack": [],
+  "vars": {},
+  "globals": {
+    "EYE_SEQ_DEFAULT": 2
+  },
+  "state": {
+    "WaitScroll": {
+      "remaining": 58
+    }
+  },
+  "frame": 3500,
+  "view": {
+    "x": 0,
+    "y": 580
+  },
+  "stage": {
+    "mask": null,
+    "image": "ev006.png",
+    "x": 0,
+    "y": 1280
+  },
+  "panel": {
+    "mode": 0,
+    "mask": null,
+    "image": null
+  },
+  "bgm": {
+    "file": "edenBGM016.ogg",
+    "volume": 100,
+    "fade_frames": 0
+  },
+  "message": {
+    "id": 570,
+    "voice": null,
+    "speaker": null,
+    "text": {
+      "raw": "我轻轻地摇了摇头。",
+      "segments": [
+        {
+          "Text": "我轻轻地摇了摇头。"
+        }
+      ]
+    },
+    "shown_chars": 0
+  },
+  "scroll": {
+    "kind": "VScroll",
+    "start_x": 0,
+    "start_y": 970,
+    "target_x": 0,
+    "target_y": 0,
+    "speed_x": 0,
+    "speed_y": -10,
+    "total_frames": 97,
+    "elapsed": 39
+  },
+  "transition": null,
+  "movie": null,
+  "pragma_control": true
+}

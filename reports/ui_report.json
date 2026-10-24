@@ -1,0 +1,96 @@
+{
+  "backlog_entries": 40,
+  "gallery_full_pixels": 655328,
+  "gallery_thumbnails": 199,
+  "game_dir": "/mnt/f/gal/【PC硬盘】【官中】eden",
+  "generated_unix": 1792872447,
+  "locked_cgs": 194,
+  "locked_tracks": 37,
+  "music_tracks": 38,
+  "ok": true,
+  "reached_frame": 3500,
+  "screens": {
+    "backlog": {
+      "file": "reports/screenshots/18_ui_backlog.png",
+      "height": 640,
+      "png_bytes": 285234,
+      "sha256_png": "0803840a999a9f53ea7067ee83aeeb98d220b77748b84480f30b75b7f9fcde0e",
+      "sha256_rgba": "f2e62f09a95753b307c210a223d33fdd681a198dd5684b0d705312ca63789494",
+      "width": 1024
+    },
+    "config": {
+      "file": "reports/screenshots/21_ui_config.png",
+      "height": 640,
+      "png_bytes": 765356,
+      "sha256_png": "3066cd1a5ec3a86fc38270d0842eb108365799f713cff14440210ac85daee30a",
+      "sha256_rgba": "a730e541b2639932175e64c907126771805f50c7fdaf23ce5c1978e5b451448f",
+      "width": 1024
+    },
+    "extra": {
+      "file": "reports/screenshots/22_ui_extra.png",
+      "height": 640,
+      "png_bytes": 641355,
+      "sha256_png": "6f6f665906d6702a7f5ac6c97d13426d503717791d158e04a8c0fd68880f8a1c",
+      "sha256_rgba": "960e7e41a019a93f985213cbbafc28e48f028587c6fd7e57ddf575c541395a9e",
+      "width": 1024
+    },
+    "gallery": {
+      "file": "reports/screenshots/19_ui_gallery.png",
+      "height": 640,
+      "png_bytes": 639561,
+      "sha256_png": "0b438eb78ae74e9fd419ddb29964ce4242a92d406f8a5336dfb00008ded01400",
+      "sha256_rgba": "06eed66762669b488c8abb5e33724a88df1d815c1dbd3905fd487f2a678153ea",
+      "width": 1024
+    },
+    "gallery_view": {
+      "file": "reports/screenshots/19b_ui_gallery_view.png",
+      "height": 640,
+      "png_bytes": 699365,
+      "sha256_png": "ceaf75314efc9f4626fb4648dcbf7956541ba195d4b060327ef038f2c3388dae",
+      "sha256_rgba": "02e196b298b1b8dd45dc36fdef35b9827ce39ab0a17253abf83f14d0083487fb",
+      "width": 1024
+    },
+    "game_after_load": {
+      "file": "reports/screenshots/17b_game_after_load.png",
+      "height": 640,
+      "png_bytes": 539779,
+      "sha256_png": "5b54b0ee1e3ab8f4bb061c67cc32e4ebdfbf99171aaf3efafc4d8e1f3edda8d1",
+      "sha256_rgba": "19a098682e8a80298f81fdc9556aa2b48706afe0be79be18c604bc027c872e33",
+      "width": 1024
+    },
+    "load": {
+      "file": "reports/screenshots/17_ui_load.png",
+      "height": 640,
+      "png_bytes": 398060,
+      "sha256_png": "0607145d75f59cfbcbf657d2d01f2d8f478ee4141ad176090e6fdbf543c2c3f1",
+      "sha256_rgba": "e964db5d13d9ab900e4036a0de394fb17ce7c5570c38ed6bf52cba6518df898c",
+      "width": 1024
+    },
+    "music": {
+      "file": "reports/screenshots/20_ui_music.png",
+      "height": 640,
+      "png_bytes": 616266,
+      "sha256_png": "6e200fb8525f8447a22ac5fa98f6b1f80468b195c21e44aaa5944b6ed377a9cd",
+      "sha256_rgba": "7938f07ff2a7f1993fb755bd246b35ed2e00391d977b014144f3f9961056574b",
+      "width": 1024
+    },
+    "save": {
+      "file": "reports/screenshots/16_ui_save.png",
+      "height": 640,
+      "png_bytes": 401416,
+      "sha256_png": "d977c2319b4d99d26907ce23a9602d2eb7d0f157246ca3421b40397bb1e8222c",
+      "sha256_rgba": "8da9c1c35de585602bb1d62a8f52003e1011508b22e27a923482babaf7b0d593",
+      "width": 1024
+    },
+    "title": {
+      "file": "reports/screenshots/15_ui_title.png",
+      "height": 640,
+      "png_bytes": 997262,
+      "sha256_png": "6cc06a112aaf3a340c36ac1430e21319dfee440ad2ea0e8304822cff3c7b45b4",
+      "sha256_rgba": "06fa3a6ee72ec78ac7f89728900d3682fbaee4dc8c26e4ea4a691c26c609b64c",
+      "width": 1024
+    }
+  },
+  "unlocked_cgs": 5,
+  "unlocked_tracks": 1
+}

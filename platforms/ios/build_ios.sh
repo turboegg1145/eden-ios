@@ -76,19 +76,45 @@ if ! command -v xcodebuild >/dev/null 2>&1; then
 fi
 
 DERIVED="${SCRIPT_DIR}/build"
+EXTRA_SETTINGS=()
+if [[ -f "${SCRIPT_DIR}/ffmpeg-ios/lib/libavcodec.a" ]]; then
+    echo "==> linking FFmpeg iOS (libavcodec/libavformat/libswscale)"
+    EXTRA_SETTINGS=(
+        "HEADER_SEARCH_PATHS=${SCRIPT_DIR}/EdenApp/include ${SCRIPT_DIR}/ffmpeg-ios/include"
+        "LIBRARY_SEARCH_PATHS=${SCRIPT_DIR}/EdenApp/lib ${SCRIPT_DIR}/ffmpeg-ios/lib"
+        "OTHER_LDFLAGS=-lavformat -lavcodec -lswscale -lavutil"
+    )
+fi
+
 echo "==> xcodebuild (${CONFIGURATION})"
-xcodebuild \
-    -project "${SCRIPT_DIR}/Eden.xcodeproj" \
-    -scheme Eden \
-    -configuration "${CONFIGURATION}" \
-    -sdk iphoneos \
-    -destination 'generic/platform=iOS' \
-    -derivedDataPath "${DERIVED}" \
-    IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}" \
-    CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}" \
-    CODE_SIGNING_REQUIRED=NO \
-    CODE_SIGNING_ALLOWED=NO \
-    build
+if [[ ${#EXTRA_SETTINGS[@]} -gt 0 ]]; then
+    xcodebuild \
+        -project "${SCRIPT_DIR}/Eden.xcodeproj" \
+        -scheme Eden \
+        -configuration "${CONFIGURATION}" \
+        -sdk iphoneos \
+        -destination 'generic/platform=iOS' \
+        -derivedDataPath "${DERIVED}" \
+        IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}" \
+        CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO \
+        "${EXTRA_SETTINGS[@]}" \
+        build
+else
+    xcodebuild \
+        -project "${SCRIPT_DIR}/Eden.xcodeproj" \
+        -scheme Eden \
+        -configuration "${CONFIGURATION}" \
+        -sdk iphoneos \
+        -destination 'generic/platform=iOS' \
+        -derivedDataPath "${DERIVED}" \
+        IPHONEOS_DEPLOYMENT_TARGET="${IPHONEOS_DEPLOYMENT_TARGET}" \
+        CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO \
+        build
+fi
 
 APP="${DERIVED}/Build/Products/${CONFIGURATION}-iphoneos/Eden.app"
 echo "==> built ${APP}"

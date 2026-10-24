@@ -1,4 +1,5 @@
 build/
+ffmpeg-ios/
 DerivedData/
 EdenApp/lib/*.a
 xcuserdata/

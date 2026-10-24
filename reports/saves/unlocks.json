@@ -1,0 +1,24 @@
+{
+  "cgs": [
+    "BLACK.png",
+    "WHITE.png",
+    "ev001.png",
+    "ev003.png",
+    "ev004.png",
+    "ev004_mugai_b.png",
+    "ev004_mugai_c.png",
+    "ev004_mugai_d.png",
+    "ev005a01.png",
+    "ev005a01_mugai_a.png",
+    "ev005a02_mugai_a.png",
+    "ev005b01.png",
+    "ev005b01_mugai_a.png",
+    "ev005b01_mugai_b.png",
+    "ev005c01.png",
+    "ev006.png",
+    "mozi_A001_020.png"
+  ],
+  "music": [
+    "edenBGM016.ogg"
+  ]
+}

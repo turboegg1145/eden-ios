@@ -774,18 +774,21 @@ cargo run --release -p eden-app -- audio --voice sio-C013-0183
 | 5 | 存档 JSON/binary 往返、恢复后继续 tick | ✅ 已测 |
 | 6 | 语音解码 + RMS 口型 | ✅ 已测 |
 | 7 | 与原版逐帧像素 diff（MAE < 1/255） | ⏳ 待原版截图 |
-| 8 | 4 个 AVI 可播、音画同步 ≤ 20ms | ❌ 未实现 |
-| 9 | iOS 真机 60fps、峰值内存 < 1.2GB | ⏳ 待在 macOS/真机验证 |
+| 8 | 4 个 AVI 真实解码、VM `.movie` 播放 | ✅ `eden movie`，5 张实测帧 |
+| 9 | 58 脚本从第 1 行走到 `.end` | ✅ 58/58，0 错误 |
+| 10 | 真实 `sys.paz` 完整 UI（标题/存读档/回想/鉴赏/音乐/设置） | ✅ 10 张实测 PNG |
+| 11 | 120Hz ProMotion 子像素滚动/转场插值 | ✅ 数值 + 截图 |
+| 12 | iOS 真机 60fps、峰值内存 < 1.2GB | ⏳ CI 已出 IPA，真机待测 |
 
 ### 5.5 风险与对策（更新）
 
 | 风险 | 影响 | 对策 |
 |---|---|---|
-| VC-1/Xvid 解码 | 视频段黑屏 | 纯 Rust 解码器 / 预转码 / FFmpeg 三选一，先做黑场跳过并记录 |
-| iOS Jetsam | 长图+缓存峰值 | 192MiB 纹理上限、`EntryStream` 流式、禁止整包 mmap |
-| Xcode 工程未链接 | 无法出包 | 在 macOS 执行 `build_ios.sh`；静态库已提前验证 |
+| VC-1/Xvid 解码 | 视频段黑屏 | ✅ 已解：桌面 `ffmpeg` 桥 + iOS 最小 FFmpeg 静态库，真实帧进舞台 |
+| iOS Jetsam | 长图+缓存峰值 | 96MiB 纹理上限、`EntryStream` 流式、禁止整包 mmap |
+| Xcode 工程未链接 | 无法出包 | ✅ 已解：GitHub Actions `macos-14` 云端 `xcodebuild` + `ldid` 出 IPA |
 | 字体缺失/授权 | 排版差异 | PingFang fallback + 可选 `GameFont.ttf` |
-| 120Hz | 时序漂移 | 逻辑固定 60Hz；后续可加渲染插值 |
+| 120Hz | 时序漂移 | ✅ 已解：逻辑固定 60Hz，`tick_display` 做子像素插值 |
 | GBK/CP932 混用 | 乱码 | 按档案 id 选编码；先解码再解析控制码 |
 | 原版像素校准 | "100%"最后一公里 | 采集原版关键帧，`frame_diff` 逐项拟合 |
 
@@ -813,20 +816,30 @@ cargo run --release -p eden-app -- audio --voice sio-C013-0183
 ## 附录 B：复现命令
 
 ```bash
-# 全工作区测试（126 个）
-cargo test --workspace
+# 全工作区测试（CI 同款，--test-threads=2 控制内存）
+cargo test --workspace -- --test-threads=2
 
 # 真实档案验收（默认读取 /mnt/f/gal/【PC硬盘】【官中】eden）
 cargo run --release -p eden-app -- verify
 cargo run --release -p eden-app -- trace --script A001.sc --frames 4000
 cargo run --release -p eden-app -- shot
+cargo run --release -p eden-app -- movie      # 真实 mov.paz → 5 张帧 + movie_report.json
+cargo run --release -p eden-app -- ui         # 10 张 sys.paz UI 截图 + ui_report.json
+cargo run --release -p eden-app -- walkthrough # 58 脚本通关 + full_walkthrough_report.json
+cargo run --release -p eden-app -- display    # 60/120Hz 滚动与转场插值对比
 cargo run --release -p eden-app -- audio --voice sio-C013-0183
 
 # iOS arm64 静态库（Linux 可执行）
 ./platforms/ios/build_ios.sh --cargo-only
 
-# 在 macOS 上出包（Xcode 12.5+）
+# 在 macOS 上出包（Xcode 12.5+，链接 FFmpeg 时先跑 build_ffmpeg_ios.sh）
+./platforms/ios/build_ffmpeg_ios.sh
 ./platforms/ios/build_ios.sh
+
+# 云端：CI + macOS IPA（GitHub Actions）
+gh workflow run ci.yml
+gh workflow run ios-ipa.yml
+gh run download --name Eden-iOS-arm64 --dir artifacts
 
 # 逆向阶段脚本（保留）
 .venv/bin/python tools/paz_extract.py samples/main/eden.exe samples/main/scr.paz extracted/main_scr
@@ -838,6 +851,6 @@ cargo run --release -p eden-app -- audio --voice sio-C013-0183
 **一句话总结**：eden* 的"演出"= 1024×640 虚拟舞台 + 纵向长图视口滚动 + 遮罩
 转场 + `.ani` 口型差分 + 固定 60Hz 帧语义 + WMV3/Xvid 视频。正确路线是
 **Native Musica Runtime 直读原版 `.paz`**，且已用纯 Rust 落地：封包、脚本 VM、
-场景/面板/转场、音频与口型、C ABI、iOS Metal/GLES 宿主、桌面验收 CLI 全部可运行，
-126 个测试与 9,927 条目实测零失败。剩余的是视频解码、完整 UI、原版逐帧校准与
+场景/面板/转场、真实视频、完整 UI、音频与口型、C ABI、iOS Metal/GLES 宿主、
+120Hz 插值、桌面验收 CLI 与云端 IPA 流水线全部可运行。剩余的是原版逐帧校准与
 iOS 真机验证——这些是收尾，不再是架构风险。

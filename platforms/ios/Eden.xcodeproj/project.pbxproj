@@ -26,6 +26,7 @@
 		A00000000000000000000050 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0000000000000000000007B /* AudioToolbox.framework */; };
 		A00000000000000000000051 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000072 /* Assets.xcassets */; };
 		A00000000000000000000052 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000006E /* LaunchScreen.storyboard */; };
+		A00000000000000000000053 /* EdenVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000007C /* EdenVideo.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +58,8 @@
 		A00000000000000000000079 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		A0000000000000000000007A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A0000000000000000000007B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		A0000000000000000000007C /* EdenVideo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EdenVideo.m; sourceTree = "<group>"; };
+		A0000000000000000000007D /* EdenVideo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdenVideo.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +107,8 @@
 				A0000000000000000000006A /* EdenGLRenderer.m */,
 				A0000000000000000000006B /* EdenAudio.h */,
 				A0000000000000000000006C /* EdenAudio.m */,
+				A0000000000000000000007C /* EdenVideo.m */,
+				A0000000000000000000007D /* EdenVideo.h */,
 				A00000000000000000000084 /* Shaders */,
 				A00000000000000000000085 /* include */,
 				A00000000000000000000072 /* Assets.xcassets */,
@@ -229,6 +234,7 @@
 				A00000000000000000000044 /* EdenMetalRenderer.m in Sources */,
 				A00000000000000000000045 /* EdenGLRenderer.m in Sources */,
 				A00000000000000000000046 /* EdenAudio.m in Sources */,
+				A00000000000000000000053 /* EdenVideo.m in Sources */,
 				A00000000000000000000047 /* eden.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

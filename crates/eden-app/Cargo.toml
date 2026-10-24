@@ -16,5 +16,6 @@ eden-script = { path = "../eden-script" }
 eden-render = { path = "../eden-render" }
 eden-audio = { path = "../eden-audio" }
 eden-ffi = { path = "../eden-ffi" }
+eden-video = { path = "../eden-video" }
 serde_json.workspace = true
 sha2 = "0.10"

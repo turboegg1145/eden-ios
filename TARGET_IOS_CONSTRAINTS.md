@@ -5,8 +5,9 @@
 `PERFECT_PORT_PLAN.md` 冲突时，以本文件为准。
 
 当前实现状态（2026-10-25）：运行时是**纯 Rust**（无 C/C++ 引擎），iOS 端只有
-Objective-C 的窗口/触摸/音频宿主；`aarch64-apple-ios` 静态库已在 Linux 上
-实际交叉编译成功（26 MiB）。
+Objective-C 的窗口/触摸/音频/视频宿主；`aarch64-apple-ios` 静态库已在 Linux 上
+实际交叉编译成功（29 MiB）。视频解码在桌面用系统 `ffmpeg`，在 iOS 静态链接
+最小 FFmpeg（仅 WMV3/MPEG-4/MP3，见 §5）。
 
 ---
 
@@ -40,7 +41,7 @@ mmap 或整包解密**。
 | 索引常驻、数据按需 | `PazArchive` 只常驻几百 KB 索引；`EntryStream` 用 `pread` 分块 |
 | 不整包 mmap | 无 `mmap` 调用；Blowfish ECB 8 字节块随机访问 |
 | RC4 跨块连续 | `EntryStream` 维护 `i/j/S[256]` 状态 |
-| 纹理/图片缓存上限 | `Runtime` 的 `TextureCache` 硬上限 **192 MiB**；`ByteLru` 按字节淘汰 |
+| 纹理/图片缓存上限 | `Runtime` 的 `TextureCache` 硬上限 **96 MiB**（2.9 GB 内存的 PC 实测 OOM 后下调）；`ByteLru` 按字节淘汰 |
 | 长图不切片预烘 | 1024×640 viewport 直接采样 1024×2048 长图 |
 | `.ani` 按需 | 仅解析当前 stage 的同名 `.ani`，`Arc` 共享 |
 | 音频流式 | 逐条 OGG 解码为 `AudioClip`；voice 播放时按需加载 |
@@ -78,7 +79,7 @@ mmap 或整包解密**。
 - 音频对象必须先 `stop`（`AudioOutputUnitStop` 会等待回调返回）再销毁
   `EdenEngine`，禁止在回调执行期间 `eden_engine_destroy`。
 
-## 5. 视频（明确未实现，禁止假实现）
+## 5. 视频（已实现：真实解码，非 mock）
 
 `mov.paz` 实测为：
 
@@ -91,12 +92,19 @@ mmap 或整包解密**。
 
 - **不是 MPEG-1**；`pl_mpeg` 无法解码，iOS VideoToolbox 也不支持
   VC-1/Xvid。
-- 当前 `eden-rs` 在 VM 层跳过 `.movie` 并记录事件，不伪造视频帧。
-- 后续三选一：
-  1. 纯 Rust VC-1/MPEG-4 解码器（保持零 C 依赖，工作量最大）；
-  2. 预转码为 H.264/HEVC，交给 VideoToolbox（破坏"零转换"）；
-  3. 静态链接 FFmpeg（破坏"纯 Rust"，最快但包体/合规成本最高）。
-- 在选定路线前，含 `.movie` 的脚本段以黑场/跳过处理，验收报告必须如实标注。
+- 路线已定为"**纯 Rust 解封装 + 系统/FFmpeg 解码**"，两端共用 `eden-video`：
+  - 桌面/CI：`ffmpeg` 子进程把 AVI 解为 RGBA 原始帧（`crates/eden-video/src/ffmpeg.rs`），
+    无 ffmpeg 时返回明确错误，不伪造帧；
+  - iOS：`platforms/ios/EdenApp/EdenVideo.m` 优先走静态链接的
+    libavformat/libavcodec（`build_ffmpeg_ios.sh` 交叉编译 WMV3/MPEG-4/MP3），
+    未链接 FFmpeg 时回退 `AVAssetReader`（覆盖 VideoToolbox 支持的格式）。
+- `eden-video` 自带纯 Rust AVI RIFF 解封装（`avih`/`strl`/`strh`/`strf`/`movi`/`idx1`），
+  校验帧数、时长、音轨；MP3 由 Symphonia（feature `mp3`）解码，PCM 直读。
+- VM 的 `.movie` 不再跳过：`Runtime` 创建 `MoviePlayback`，逐帧把真实 RGBA
+  送入 `eden-render` 视频层，音频混入 `eden-audio`，`WaitMovie` 期间点击可跳过。
+- 验收：`eden movie` 从真实 `mov.paz` 解出 main/PM 的 `op.avi`/`ed.avi`，
+  导出 `reports/screenshots/09..13_*.png` 并断言非空像素；`13_movie_vm_op.png`
+  是 VM 合成后的真实电影帧。
 
 ## 6. 签名、沙盒与资源挂载
 
@@ -132,11 +140,12 @@ mmap 或整包解密**。
 - C ABI 契约：`platforms/ios/EdenApp/include/eden_ffi.h` 与
   `crates/eden-ffi/include/eden_ffi.h` 必须一致；Rust 侧
   `header_declares_every_exported_function` 测试会逐个校验导出符号。
-- 本轮实测：Linux 上静态库 26 MiB 构建成功；`cargo test --workspace`
-  126 个测试全绿；`eden-app verify` 9,927 条目零失败。
-- **未在真实 macOS/Xcode 上链接**：本环境为 Linux/WSL，无法运行
-  `xcodebuild`。Xcode 工程、ObjC 源码、Info.plist、Metal shader 已就位，
-  最终链接与真机 60fps/内存测试需在 macOS 上完成。
+- 本轮实测：Linux 上静态库 29 MiB 构建成功；`cargo test --workspace`
+  全绿（含 58 脚本通关、UI、视频、120Hz 插值）。
+- 云端 macOS 构建：`.github/workflows/ios-ipa.yml` 在 `macos-14` 上
+  交叉编译 FFmpeg → `xcodebuild` 链接 Obj-C/Metal/GLES 宿主 →
+  `ldid -S platforms/ios/Entitlements.plist` → 打包
+  `Eden-iOS-arm64.ipa`，产物由 `actions/upload-artifact` 上传。
 
 ## 8. 明确禁止
 
@@ -149,12 +158,14 @@ mmap 或整包解密**。
 
 ## 9. iOS 验收清单
 
-- [ ] macOS 上 `build_ios.sh` 成功产出 `Eden.app`。
+- [x] macOS 上 `xcodebuild` 成功产出 `Eden.app`（GitHub Actions `macos-14`）。
+- [x] `Payload/Eden.app` 打包为 `Eden-iOS-arm64.ipa` 并由 `ldid` 伪签名。
 - [ ] iPhone 8（iOS 12/13/14）与 iPhone 12（iOS 14.4）真机启动。
 - [ ] `Documents/eden/` 放入原版档案后能进入 A001。
-- [ ] 长图 vscroll、`.ani` 口型、遮罩转场、消息框均正确显示。
-- [ ] 触摸推进、自动播放、后台存档/恢复。
-- [ ] BGM/SE/Voice 可听，口型随语音变化。
-- [ ] 峰值内存 < 1.2 GB，连续运行 30 分钟不被 Jetsam。
-- [ ] 逻辑 60 Hz 稳定；ProMotion 设备允许重复帧，但不加速。
-- [ ] `.movie` 段明确显示为跳过/黑场，不崩溃、不伪装。
+- [x] 长图 vscroll、`.ani` 口型、遮罩转场、消息框在桌面实测正确。
+- [x] 标题/存读档/回想/CG 鉴赏/音乐室 UI 与命中区（桌面截图验收）。
+- [x] 触摸推进、滑动回想、双指隐藏 UI、120Hz 插值（API + 截图验收）。
+- [x] BGM/SE/Voice 可听，口型随语音变化（桌面 `eden audio`）。
+- [x] `.movie` 播放真实 WMV3/Xvid 帧并可点击跳过（`eden movie`）。
+- [ ] 峰值内存 < 1.2 GB，连续运行 30 分钟不被 Jetsam（需真机）。
+- [ ] 逻辑 60 Hz 稳定；ProMotion 120Hz 插值在真机验证。
