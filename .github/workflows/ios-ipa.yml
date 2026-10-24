@@ -124,10 +124,10 @@ jobs:
                   code_signature = struct.unpack_from("<II", data, off + 8)
               off += size
 
-          def symbols(pattern):
+          def symbols(*prefixes):
               out = subprocess.run(["nm", "-gU", binary], capture_output=True, text=True).stdout
               return sorted({line.split()[-1] for line in out.splitlines()
-                             if line.strip() and pattern in line})
+                             if line.strip() and line.split()[-1].startswith(prefixes)})
 
           report = {
               "generated_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -150,7 +150,7 @@ jobs:
               "entitlements": subprocess.run(
                   ["ldid", "-e", binary], capture_output=True, text=True).stdout.strip(),
               "engine_exports": symbols("_eden_engine_"),
-              "ffmpeg_symbols": symbols("_av"),
+              "ffmpeg_symbols": symbols("_av", "_ff_"),
           }
           with open("reports/ipa_report.json", "w") as fh:
               json.dump(report, fh, indent=2, sort_keys=True)
