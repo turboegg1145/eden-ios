@@ -5,10 +5,13 @@
 > 单步执行，并在真实 `.paz` 上逐档案验证；证据见 `reports/RE_FINDINGS.md`，
 > 逆向脚本见 `tools/`。
 >
-> **当前状态（2026-10-25）**：6 个 crate、126 个测试全绿；真实档案 9,927 条目
-> 零失败；58 个脚本/40,397 行全部解析；A001 4,000 帧无错误；8 张 1024×640
-> 实测截图；`aarch64-apple-ios` 静态库 26 MiB 已在 Linux 交叉编译成功。
-> 未完成项集中在视频解码、完整 UI、原版像素校准与 iOS 真机验证。
+> **当前状态（2026-10-25）**：7 个 crate、144 个测试全绿；真实档案 9,927 条目
+> 零失败；58 个脚本全部从第 1 行走到 `.end`（0 错误）；真实 `mov.paz` 视频
+> 解码并接入 VM；完整 `sys.paz` UI（标题/存读档/回想/鉴赏/音乐/设置）与
+> 120Hz 子像素插值已实现；27 张 1024×640 实测截图；`aarch64-apple-ios`
+> 静态库 29 MiB 已交叉编译；GitHub Actions 在 `macos-14` 上真实产出并
+> `ldid` 伪签名 `Eden-iOS-arm64.ipa`（`ci.yml` 与 `ios-ipa.yml` 均绿灯）。
+> 未完成项集中在原版像素校准与 iOS 真机验证。
 
 ---
 
@@ -526,7 +529,7 @@ repeat frame_count:
 | 工具链 | 现成 | CMake + clang + cctools | **cargo + rustup，Linux 可交叉编译 iOS 静态库** |
 | 内存安全 | 取决于实现 | 手动管理 | **所有权 + `Arc` + 字节上限 LRU** |
 | 依赖 | ONS 运行时 | SDL2/FFmpeg/FreeType | **png/flate2/lewton/fontdue/glow，全纯 Rust** |
-| 现状 | 未采用 | 未采用 | **6 个 crate、126 个测试全绿、8 张实测截图** |
+| 现状 | 未采用 | 未采用 | **7 个 crate、144 个测试全绿、26 张实测截图、云端 IPA 绿灯** |
 
 最终选型：**Native Musica Runtime，纯 Rust 实现，C ABI 暴露给 iOS**。
 
@@ -565,17 +568,21 @@ platforms/ios        Objective-C 宿主 + Xcode 工程
 │  CADisplayLink 60Hz · Metal 2.0 / GLES 3.0 · RemoteIO Audio  │
 │  UIFileSharingEnabled → Documents/eden/*.paz                 │
 ├──────────────────────────────────────────────────────────────┤
-│ C ABI（crates/eden-ffi/include/eden_ffi.h）                   │
-│  EdenEngine* · tick/render/click/save/load/mix_audio          │
+│ C ABI（crates/eden-ffi/include/eden_ffi.h，ABI 3）             │
+│  EdenEngine* · tick/tick_display/render/click/save/load/mix    │
 ├──────────────────────────────────────────────────────────────┤
 │ eden-ffi::Runtime（安全 Rust 编排）                           │
-│  Assets · TextureCache(192MiB) · Scene · ScriptVm · Players   │
+│  Assets · TextureCache(96MiB) · Scene · UiState · ScriptVm     │
+│  Players · MoviePlayback · BgmFade · 120Hz 插值                │
 ├───────────────┬───────────────┬───────────────┬──────────────┤
 │ eden-paz      │ eden-script   │ eden-render   │ eden-audio   │
 │ VFS/Blowfish  │ 24 cmds/60Hz  │ 1024×640      │ Vorbis/PCM   │
-│ RC4/PNG/ANI   │ Serde save    │ scene/panel   │ RMS lipsync  │
+│ RC4/PNG/ANI   │ Serde save    │ scene/ui/panel│ RMS lipsync  │
 ├───────────────┴───────────────┴───────────────┴──────────────┤
-│ eden-app：verify / trace / shot / list / audio               │
+│ eden-video：AVI RIFF · MP3/PCM · ffmpeg / libavcodec 解码      │
+├──────────────────────────────────────────────────────────────┤
+│ eden-app：verify / trace / shot / movie / ui / walkthrough    │
+│           display / audio                                    │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -597,7 +604,8 @@ archive.parse_ani(name)                // .ani 差分帧
 - 索引常驻内存，只有几百 KB；数据区 `pread` 按需读取，禁止整包 mmap。
 - Blowfish ECB 以 8 字节为块，天然支持随机访问；RC4 在 `EntryStream`
   内维护 `i/j/S[256]` 跨块状态；`mov.paz` 的 64 KiB XOR 单独实现。
-- `WeightedLru` / `ByteLru` 双层缓存；`Runtime` 的纹理缓存硬上限 192 MiB。
+- `WeightedLru` / `ByteLru` 双层缓存；`Runtime` 的纹理缓存硬上限 96 MiB
+  （2.9 GB 内存主机上 192 MiB 实测 OOM 后下调）。
 - 实测：12 个档案、9,927 条目、解包后 2,740.7 MiB、0 失败；
   8 字节对齐、offset+aligned ≤ EOF、PNG/OGG/WAV/AVI/PSD 魔数全部通过。
 
@@ -644,17 +652,25 @@ archive.parse_ani(name)                // .ani 差分帧
 - 实测：`sio-C013-0183` 44.1kHz、1.083s、peak 0.3221、RMS 0.0611，
   直方图 `[15,21,11,0]`；真实语音驱动 `.ani` 峰值帧 ≥ 2。
 
-### 4.8 视频：明确未实现
+### 4.8 视频：真实解码（桌面 ffmpeg / iOS libavcodec）
 
-`mov.paz` 实测为 **WMV3 (VC-1)** 与 **XviD (MPEG-4 ASP)**，不是 MPEG-1；
-`pl_mpeg` 无法解码，iOS VideoToolbox 也不支持这两种编码。当前 VM 会跳过
-`.movie`，不会假装播放。后续三条路线：
+`mov.paz` 实测为 **WMV3** 与 **XviD (MPEG-4 ASP)**，不是 MPEG-1；
+`pl_mpeg` 无法解码，iOS VideoToolbox 也不支持这两种编码。实现路线为
+**纯 Rust 解封装 + 系统/FFmpeg 解码**，两端共用 `crates/eden-video`：
 
-1. 纯 Rust VC-1/MPEG-4 解码器（保持零 C 依赖，工作量最大）；
-2. 预转码为 H.264/HEVC，交给 VideoToolbox（破坏"零转换"）；
-3. 静态链接 FFmpeg（破坏"纯 Rust"，但最快）。
-
-在视频落地前，`op.avi`/`ed.avi` 相关脚本段会以黑场/跳过处理，并在 trace 中记录。
+- `avi.rs`：纯 Rust RIFF 解封装（`avih`/`strl`/`strh`/`strf`/`movi`/`idx1`），
+  校验帧数、时长、音轨格式；`mov.paz` 的 XOR + 64 KiB RC4 分块解密后交给它。
+- `ffmpeg.rs`（桌面/CI）：`ffmpeg -ss … -f rawvideo -pix_fmt rgba pipe:1`
+  逐帧取 RGBA；没有 ffmpeg 时返回明确错误，绝不伪造帧。
+- `ios.rs` + `platforms/ios/EdenApp/EdenVideo.m`：静态链接最小 FFmpeg
+  （仅 WMV3/MPEG-4/MP3 + AVI/MP3 demuxer + swscale），失败时回退
+  `AVAssetReader`；`sws_scale` 直接输出 RGBA。
+- `mp3.rs`：Symphonia（feature `mp3`）解码 `ed.avi` 的 MP3 音轨；PCM 直读。
+- VM：`.movie` 创建 `MoviePlayback`，每帧把真实 RGBA 送入 `eden-render`
+  视频层、音频混入 `eden-audio`，`WaitMovie` 期间点击跳过。
+- 实测：main/PM 的 `op.avi`/`ed.avi` 全部解出（main op 7,952 帧、
+  PM op 3,240 帧），`09..13_*.png` 非空像素校验通过，其中
+  `13_movie_vm_op.png` 是 VM 合成后的真实电影帧。
 
 ### 4.9 文本与字体
 
@@ -683,29 +699,36 @@ uint32_t eden_engine_mix_audio(EdenEngine *, float *out, uint32_t frames);
   `lib.rs` 的每个 `pub unsafe extern "C" fn`，缺一个就失败。
 - 本轮已在 Linux 上实际执行
   `cargo build -p eden-ffi --release --target aarch64-apple-ios`，
-  产出 **26 MiB `libeden_ffi.a`**（arm64，iOS 12.0 部署目标）。
+  产出 **29 MiB `libeden_ffi.a`**（arm64，iOS 12.0 部署目标）。
 
 ### 4.11 iOS 宿主（platforms/ios）
 
 ```
 Eden.xcodeproj                 手写 pbxproj + shared scheme
 EdenApp/main.m / AppDelegate    UIApplication 生命周期
-EdenApp/ViewController          60Hz CADisplayLink、触摸、后台存档
+EdenApp/ViewController          60/120Hz CADisplayLink、手势、后台存档
 EdenApp/EdenMetalRenderer       Metal 2.0 + MTKView + eden.metal
 EdenApp/EdenGLRenderer          OpenGL ES 3.0 + CAEAGLLayer
 EdenApp/EdenAudio               AVAudioSession + RemoteIO AudioUnit
+EdenApp/EdenVideo               libavcodec / AVAssetReader 解码桥
 EdenApp/Info.plist              UIFileSharingEnabled / LSSupportsOpeningDocumentsInPlace
 EdenApp/include/eden_ffi.h      从 crate 同步的完整头文件
 build_ios.sh                    rustup target + cargo + xcodebuild + ldid
+build_ffmpeg_ios.sh             最小 arm64 FFmpeg（WMV3/MPEG-4/MP3）
+Entitlements.plist              TrollStore / 越狱伪签名
 ```
 
 - 后端默认 Metal；`EdenBackend=gles` 可强制 GLES 3.0；首选后端创建失败会自动
   切换另一个。
-- 画面按 1024:640 等比 letterbox；触摸任意位置推进；后台保存
-  `Documents/eden_save.json`，回前台恢复。
+- 启动进入真实 `sys.paz` 标题画面；游戏内提供 10 槽存读档、回想、CG/音乐
+  鉴赏、设置；点击推进、拖动滚动、上滑回想、双指隐藏 UI。
+- 画面按 1024:640 等比 letterbox；后台保存 `Documents/eden_save.json`，
+  回前台恢复并重置 display clock。
 - `IPHONEOS_DEPLOYMENT_TARGET=12.0`、`aarch64-apple-ios`、`SUPPORTED_PLATFORMS=iphoneos`。
-- 说明：本环境是 Linux/WSL，无法运行 `xcodebuild`；Rust 静态库已真实交叉编译，
-  Xcode 工程与 ObjC 源码已就位，需在 macOS 上做最终链接/真机验证。
+- 云端实测：`.github/workflows/ios-ipa.yml` 在 `macos-14` 上交叉编译 FFmpeg、
+  `xcodebuild` 链接 Obj-C/Metal/GLES 宿主、`ldid -S` 伪签名并打包
+  `Eden-iOS-arm64.ipa`；产物与 `ipa_report.json` 发布到 `ci-latest` Release。
+  真机 60/120fps 与内存仍需 iPhone 实测。
 
 ### 4.12 桌面验证 CLI
 
@@ -713,6 +736,10 @@ build_ios.sh                    rustup target + cargo + xcodebuild + ldid
 cargo run --release -p eden-app -- verify
 cargo run --release -p eden-app -- trace --script A001.sc --frames 4000
 cargo run --release -p eden-app -- shot
+cargo run --release -p eden-app -- movie
+cargo run --release -p eden-app -- ui
+cargo run --release -p eden-app -- walkthrough
+cargo run --release -p eden-app -- display
 cargo run --release -p eden-app -- list bg.paz --filter ev007
 cargo run --release -p eden-app -- audio --voice sio-C013-0183
 ```
@@ -728,13 +755,18 @@ cargo run --release -p eden-app -- audio --voice sio-C013-0183
 
 | 项目 | 结果 |
 |---|---|
-| `cargo test --workspace` | **126 passed / 0 failed**（6 个 crate，含多个真实档案集成测试） |
+| `cargo test --workspace -- --test-threads=2` | **144 passed / 0 failed**（7 个 crate，含真实档案集成测试） |
 | `eden-app verify` | 12 档案、9,927 条目、2,740.7 MiB、**0 失败** |
 | 脚本普查 | 58 个 `.sc`、40,397 行、25 种命令 |
+| `eden-app walkthrough` | **58/58** 脚本走到 `.end`，0 错误，6.06 s |
 | `eden-app trace` | A001 4,000 帧、36 stage、73 message、0 错误；存档 JSON/binary 往返通过 |
 | `eden-app shot` | 8 张 1024×640 PNG；`.ani` 叠加 143 像素；面板/遮罩/长图全链路 |
+| `eden-app movie` | 4 个 AVI 真实解码（main op 7,952 帧等）；5 张帧 PNG；VM 播放含音频 |
+| `eden-app ui` | 10 张 UI PNG；backlog 40 条、CG 5 张、曲目 38 首 |
+| `eden-app display` | 60/120Hz 对比：滚动子像素 −3.5px（646,000 px 变化）、转场 0.50 帧（574,998 px 变化） |
 | 音频 | OGG 44.1kHz 解码、RMS 口型直方图 `[15,21,11,0]` |
-| iOS 静态库 | `aarch64-apple-ios` release，26 MiB，Linux 交叉编译成功 |
+| iOS 静态库 | `aarch64-apple-ios` release，29 MiB，Linux 交叉编译成功 |
+| 云端 IPA | `macos-14` 构建 + `ldid`：1,795,345 B、arm64、min iOS 12.0、851 个 FFmpeg 符号 |
 
 ### 5.2 已实现清单
 
@@ -743,25 +775,36 @@ cargo run --release -p eden-app -- audio --voice sio-C013-0183
 - 24 条实际 `.sc` 命令、60Hz VM、变量/标签/chain、Serde 存档。
 - 1024×640 舞台、长图 viewport、`.vscroll/.hscroll/.scroll`、遮罩转场、
   `.panel` 文本框、shake/firefly。
-- Ogg/WAV 解码、BGM/SE/Voice 混音、RMS 口型。
-- C ABI、头文件一致性测试、iOS arm64 静态库。
-- iOS Metal/GLES 双后端宿主、RemoteIO 音频、文件共享、后台存档。
-- 桌面 CLI：verify/trace/shot/list/audio。
+- 真实视频：AVI RIFF 解封装、MP3/PCM、桌面 ffmpeg / iOS libavcodec、
+  `.movie` 帧+音频+点击跳过。
+- 完整 `sys.paz` UI：标题（main/PM/load/Extra/Config）、10 槽存读档
+  （实时缩略图+时间+文本摘要）、回想+语音重播、CG 鉴赏、音乐室、
+  自动/跳过/隐藏文本框、手势（点击/滑动/上滑/双指）。
+- 120Hz ProMotion：`tick_display(dt)` 子像素滚动与转场插值，逻辑仍锁 60Hz。
+- BGM 精确循环与淡入淡出、`.waitBGM` 对齐、语音/文字同步。
+- Ogg/WAV/MP3 解码、BGM/SE/Voice 混音、RMS 口型。
+- C ABI（ABI 3）、头文件一致性测试、iOS arm64 静态库。
+- iOS Metal/GLES 双后端宿主、RemoteIO 音频、EdenVideo 解码桥、文件共享、
+  后台存档、120Hz display link。
+- 桌面 CLI：verify/trace/shot/movie/ui/walkthrough/display/audio。
+- GitHub Actions：`ci.yml`（Linux 测试）与 `ios-ipa.yml`（macOS IPA）。
 
 ### 5.3 未完成 / 诚实清单
 
-1. **视频**：WMV3/Xvid 未解码，`.movie` 跳过（见 4.8）。
-2. **完整 UI**：主菜单、存读档界面、回想、CG/音乐鉴赏、设置尚未实现；
-   当前从 `A001.sc` 直接进入游戏。
-3. **像素级校准**：已生成真实截图，但尚未与原版逐帧 diff；转场 alpha 曲线、
-   shake 噪声、firefly 分布、字距/行高仍需 P7 校准。
-4. **120Hz 插值**：当前逻辑与呈现都锁 60Hz；ProMotion 上会重复帧。
-5. **iOS 真机**：Xcode 工程未在 macOS 上链接；真机 60fps/内存/Jetsam
-   尚未实测。
-6. **音频时序**：BGM 循环点、`.waitBGM`、语音与文字精确对齐未做引擎级比对。
-7. **桌面窗口**：`glow` GPU 路径存在，但没有 SDL/winit 窗口宿主；
+1. **像素级校准**：已生成真实截图，但尚未与原版逐帧 diff；转场 alpha 曲线、
+   shake 噪声、firefly 分布、字距/行高仍需原版关键帧拟合。
+2. **iOS 真机**：CI 已在 `macos-14` 上完成 `xcodebuild` 链接、`ldid` 伪签名
+   并产出可安装 IPA；真机 60/120fps、峰值内存与 Jetsam 仍需 iPhone 8 /
+   iPhone 12 实测。
+3. **音频时序**：BGM 循环点、`.waitBGM`、语音与文字已按帧对齐并有测试，
+   但尚未与原版录音逐样本比对。
+4. **桌面窗口**：`glow` GPU 路径存在，但没有 SDL/winit 窗口宿主；
    桌面以 headless CLI + PNG 输出为主。
-8. **字体授权**：iOS 依赖系统 PingFang；若要跨端一致需自带授权字体。
+5. **字体授权**：iOS 依赖系统 PingFang；若要跨端一致需自带授权字体。
+6. **VC-1**：最小 FFmpeg 只启用 WMV3/MPEG-4/MP3；零售影像不需要 `vc1`，
+   若未来档案出现 `WVC1` 需在 `build_ffmpeg_ios.sh` 增加 decoder。
+7. **Actions 配额**：账号级 artifact 存储配额已满，`upload-artifact` 步骤
+   以 `continue-on-error` 保留；IPA 与报告始终发布到 `ci-latest` Release。
 
 ### 5.4 验收标准与当前状态
 
