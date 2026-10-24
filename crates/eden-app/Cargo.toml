@@ -1,0 +1,20 @@
+[package]
+name = "eden-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Desktop CLI for validating and tracing the pure-Rust eden* runtime"
+
+[[bin]]
+name = "eden"
+path = "src/main.rs"
+
+[dependencies]
+eden-paz = { path = "../eden-paz" }
+eden-script = { path = "../eden-script" }
+eden-render = { path = "../eden-render" }
+eden-audio = { path = "../eden-audio" }
+eden-ffi = { path = "../eden-ffi" }
+serde_json.workspace = true
+sha2 = "0.10"

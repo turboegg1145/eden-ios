@@ -1,0 +1,11 @@
+[package]
+name = "eden-audio"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Ogg Vorbis / WAV decoding, playback parameters and RMS lip-sync for eden*"
+
+[dependencies]
+lewton.workspace = true
+eden-paz = { path = "../eden-paz" }

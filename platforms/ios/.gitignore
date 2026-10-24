@@ -1,0 +1,5 @@
+build/
+DerivedData/
+EdenApp/lib/*.a
+xcuserdata/
+*.xcuserstate

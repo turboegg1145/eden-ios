@@ -1,0 +1,16 @@
+[package]
+name = "eden-render"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "1024x640 Musica scene graph, framebuffer reference renderer and glow GPU backend"
+
+[dependencies]
+eden-paz = { path = "../eden-paz" }
+fontdue.workspace = true
+glow.workspace = true
+bytemuck.workspace = true
+
+[dev-dependencies]
+sha2 = "0.10"

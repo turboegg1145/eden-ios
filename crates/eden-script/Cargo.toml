@@ -1,0 +1,16 @@
+[package]
+name = "eden-script"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Musica .sc parser, 60 Hz script VM and Serde save states for eden*"
+
+[dependencies]
+encoding_rs.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+bincode.workspace = true
+
+[dev-dependencies]
+eden-paz = { path = "../eden-paz" }

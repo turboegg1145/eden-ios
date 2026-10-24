@@ -1,0 +1,15 @@
+[package]
+name = "eden-paz"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Musica .paz VFS, Blowfish/RC4 chain, PNG and .ani decoders for eden*"
+
+[dependencies]
+encoding_rs.workspace = true
+png.workspace = true
+flate2.workspace = true
+
+[dev-dependencies]
+sha2 = "0.10"

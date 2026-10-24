@@ -13,6 +13,7 @@ extracted/
 *.wav
 
 # Build artifacts & iOS packages
+target/
 build/
 dist/
 *.o

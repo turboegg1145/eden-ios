@@ -1,0 +1,437 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 51;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00000000000000000000040 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000060 /* main.m */; };
+		A00000000000000000000041 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000062 /* AppDelegate.m */; };
+		A00000000000000000000042 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000064 /* ViewController.m */; };
+		A00000000000000000000043 /* EdenRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000066 /* EdenRenderer.m */; };
+		A00000000000000000000044 /* EdenMetalRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000068 /* EdenMetalRenderer.m */; };
+		A00000000000000000000045 /* EdenGLRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000006A /* EdenGLRenderer.m */; };
+		A00000000000000000000046 /* EdenAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000006C /* EdenAudio.m */; };
+		A00000000000000000000047 /* eden.metal in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000006F /* eden.metal */; };
+		A00000000000000000000048 /* libeden_ffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000071 /* libeden_ffi.a */; };
+		A00000000000000000000049 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000074 /* UIKit.framework */; };
+		A0000000000000000000004A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000075 /* Foundation.framework */; };
+		A0000000000000000000004B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000076 /* Metal.framework */; };
+		A0000000000000000000004C /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000077 /* MetalKit.framework */; };
+		A0000000000000000000004D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000078 /* QuartzCore.framework */; };
+		A0000000000000000000004E /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000000000000000000079 /* OpenGLES.framework */; };
+		A0000000000000000000004F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0000000000000000000007A /* AVFoundation.framework */; };
+		A00000000000000000000050 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0000000000000000000007B /* AudioToolbox.framework */; };
+		A00000000000000000000051 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000072 /* Assets.xcassets */; };
+		A00000000000000000000052 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000006E /* LaunchScreen.storyboard */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A00000000000000000000060 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A00000000000000000000061 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		A00000000000000000000062 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		A00000000000000000000063 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		A00000000000000000000064 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		A00000000000000000000065 /* EdenRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdenRenderer.h; sourceTree = "<group>"; };
+		A00000000000000000000066 /* EdenRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EdenRenderer.m; sourceTree = "<group>"; };
+		A00000000000000000000067 /* EdenMetalRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdenMetalRenderer.h; sourceTree = "<group>"; };
+		A00000000000000000000068 /* EdenMetalRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EdenMetalRenderer.m; sourceTree = "<group>"; };
+		A00000000000000000000069 /* EdenGLRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdenGLRenderer.h; sourceTree = "<group>"; };
+		A0000000000000000000006A /* EdenGLRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EdenGLRenderer.m; sourceTree = "<group>"; };
+		A0000000000000000000006B /* EdenAudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdenAudio.h; sourceTree = "<group>"; };
+		A0000000000000000000006C /* EdenAudio.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EdenAudio.m; sourceTree = "<group>"; };
+		A0000000000000000000006D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A0000000000000000000006E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A0000000000000000000006F /* eden.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = eden.metal; sourceTree = "<group>"; };
+		A00000000000000000000070 /* eden_ffi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = eden_ffi.h; sourceTree = "<group>"; };
+		A00000000000000000000071 /* libeden_ffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = EdenApp/lib/libeden_ffi.a; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000072 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A00000000000000000000073 /* Eden.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eden.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000074 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		A00000000000000000000075 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		A00000000000000000000076 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		A00000000000000000000077 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		A00000000000000000000078 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		A00000000000000000000079 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		A0000000000000000000007A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A0000000000000000000007B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A00000000000000000000091 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000048 /* libeden_ffi.a in Frameworks */,
+				A0000000000000000000004B /* Metal.framework in Frameworks */,
+				A0000000000000000000004C /* MetalKit.framework in Frameworks */,
+				A0000000000000000000004E /* OpenGLES.framework in Frameworks */,
+				A0000000000000000000004D /* QuartzCore.framework in Frameworks */,
+				A0000000000000000000004F /* AVFoundation.framework in Frameworks */,
+				A00000000000000000000050 /* AudioToolbox.framework in Frameworks */,
+				A00000000000000000000049 /* UIKit.framework in Frameworks */,
+				A0000000000000000000004A /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A00000000000000000000080 = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000081 /* EdenApp */,
+				A00000000000000000000082 /* Frameworks */,
+				A00000000000000000000083 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A00000000000000000000081 /* EdenApp */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000060 /* main.m */,
+				A00000000000000000000061 /* AppDelegate.h */,
+				A00000000000000000000062 /* AppDelegate.m */,
+				A00000000000000000000063 /* ViewController.h */,
+				A00000000000000000000064 /* ViewController.m */,
+				A00000000000000000000065 /* EdenRenderer.h */,
+				A00000000000000000000066 /* EdenRenderer.m */,
+				A00000000000000000000067 /* EdenMetalRenderer.h */,
+				A00000000000000000000068 /* EdenMetalRenderer.m */,
+				A00000000000000000000069 /* EdenGLRenderer.h */,
+				A0000000000000000000006A /* EdenGLRenderer.m */,
+				A0000000000000000000006B /* EdenAudio.h */,
+				A0000000000000000000006C /* EdenAudio.m */,
+				A00000000000000000000084 /* Shaders */,
+				A00000000000000000000085 /* include */,
+				A00000000000000000000072 /* Assets.xcassets */,
+				A0000000000000000000006E /* LaunchScreen.storyboard */,
+				A0000000000000000000006D /* Info.plist */,
+			);
+			path = EdenApp;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000082 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000071 /* libeden_ffi.a */,
+				A00000000000000000000076 /* Metal.framework */,
+				A00000000000000000000077 /* MetalKit.framework */,
+				A00000000000000000000079 /* OpenGLES.framework */,
+				A00000000000000000000078 /* QuartzCore.framework */,
+				A0000000000000000000007A /* AVFoundation.framework */,
+				A0000000000000000000007B /* AudioToolbox.framework */,
+				A00000000000000000000074 /* UIKit.framework */,
+				A00000000000000000000075 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000083 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000073 /* Eden.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000084 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				A0000000000000000000006F /* eden.metal */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000085 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000070 /* eden_ffi.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A00000000000000000000093 /* Eden */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000094 /* Build configuration list for PBXNativeTarget "Eden" */;
+			buildPhases = (
+				A00000000000000000000090 /* Sources */,
+				A00000000000000000000091 /* Frameworks */,
+				A00000000000000000000092 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Eden;
+			productName = Eden;
+			productReference = A00000000000000000000073 /* Eden.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A00000000000000000000095 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1250;
+				TargetAttributes = {
+					A00000000000000000000093 = {
+						CreatedOnToolsVersion = 12.5;
+					};
+				};
+			};
+			buildConfigurationList = A00000000000000000000096 /* Build configuration list for PBXProject "Eden" */;
+			compatibilityVersion = "Xcode 12.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = A00000000000000000000080;
+			productRefGroup = A00000000000000000000083 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A00000000000000000000093 /* Eden */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A00000000000000000000092 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000051 /* Assets.xcassets in Resources */,
+				A00000000000000000000052 /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A00000000000000000000090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000040 /* main.m in Sources */,
+				A00000000000000000000041 /* AppDelegate.m in Sources */,
+				A00000000000000000000042 /* ViewController.m in Sources */,
+				A00000000000000000000043 /* EdenRenderer.m in Sources */,
+				A00000000000000000000044 /* EdenMetalRenderer.m in Sources */,
+				A00000000000000000000045 /* EdenGLRenderer.m in Sources */,
+				A00000000000000000000046 /* EdenAudio.m in Sources */,
+				A00000000000000000000047 /* eden.metal in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A00000000000000000000097 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		A00000000000000000000098 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A00000000000000000000099 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_BITCODE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"EDEN_IOS=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/EdenApp/include",
+				);
+				INFOPLIST_FILE = EdenApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/EdenApp/lib",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cool.codebuddy.eden;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A0000000000000000000009A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_BITCODE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"EDEN_IOS=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/EdenApp/include",
+				);
+				INFOPLIST_FILE = EdenApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/EdenApp/lib",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cool.codebuddy.eden;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A00000000000000000000094 /* Build configuration list for PBXNativeTarget "Eden" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000099 /* Debug */,
+				A0000000000000000000009A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000096 /* Build configuration list for PBXProject "Eden" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000097 /* Debug */,
+				A00000000000000000000098 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A00000000000000000000095 /* Project object */;
+}

@@ -1,0 +1,17 @@
+[package]
+name = "eden-ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Pure-Rust Musica runtime and C ABI for the iOS <= 14.4 host"
+
+[lib]
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+eden-paz = { path = "../eden-paz" }
+eden-script = { path = "../eden-script" }
+eden-render = { path = "../eden-render" }
+eden-audio = { path = "../eden-audio" }
+serde_json.workspace = true
