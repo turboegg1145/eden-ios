@@ -1,0 +1,42 @@
+{
+ "ZArchiveFileReader3": {
+  "class": "ZArchiveFileReader3",
+  "name_rva": 1664520,
+  "td_rva": 1664512,
+  "cols": [],
+  "vtables": [],
+  "funcs": []
+ },
+ "ZArchiveFileReader2": {
+  "class": "ZArchiveFileReader2",
+  "name_rva": 1664484,
+  "td_rva": 1664476,
+  "cols": [],
+  "vtables": [],
+  "funcs": []
+ },
+ "ZArchiveFileReader": {
+  "class": "ZArchiveFileReader",
+  "name_rva": 1664448,
+  "td_rva": 1664440,
+  "cols": [],
+  "vtables": [],
+  "funcs": []
+ },
+ "BlowfishEncryptionKey": {
+  "class": "BlowfishEncryptionKey",
+  "name_rva": 1678724,
+  "td_rva": 1678716,
+  "cols": [],
+  "vtables": [],
+  "funcs": []
+ },
+ "ScriptEngine": {
+  "class": "ScriptEngine",
+  "name_rva": 1678456,
+  "td_rva": 1678448,
+  "cols": [],
+  "vtables": [],
+  "funcs": []
+ }
+}

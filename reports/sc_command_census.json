@@ -1,0 +1,446 @@
+{
+ ".message": {
+  "total": 22048,
+  "argc": {
+   "argc=4": 1454,
+   "argc=2": 3880,
+   "argc=3": 4986,
+   "argc=5": 727,
+   "argc=6": 737,
+   "argc=10": 846,
+   "argc=24": 168,
+   "argc=11": 875,
+   "argc=13": 687,
+   "argc=20": 304,
+   "argc=7": 753,
+   "argc=14": 678,
+   "argc=19": 320,
+   "argc=33": 15,
+   "argc=9": 820,
+   "argc=22": 222,
+   "argc=21": 257,
+   "argc=16": 512,
+   "argc=27": 82,
+   "argc=8": 840,
+   "argc=17": 426,
+   "argc=26": 108,
+   "argc=12": 754,
+   "argc=18": 403,
+   "argc=15": 564,
+   "argc=25": 133,
+   "argc=29": 66,
+   "argc=23": 181,
+   "argc=28": 79,
+   "argc=32": 25,
+   "argc=31": 43,
+   "argc=34": 19,
+   "argc=38": 7,
+   "argc=40": 4,
+   "argc=35": 14,
+   "argc=30": 34,
+   "argc=37": 9,
+   "argc=36": 8,
+   "argc=47": 1,
+   "argc=39": 4,
+   "argc=44": 1,
+   "argc=42": 2
+  },
+  "shapes": {
+   "n str str str": 1454,
+   "n str": 3880,
+   "n str str": 4986,
+   "n str str str str": 726,
+   "n str str str str str": 10996,
+   "n str n str str": 1,
+   "n str str n str str": 1,
+   "n str n str str str": 1,
+   "n str str str str n": 1,
+   "n str str str - str": 2
+  },
+  "examples": [
+   ".message 100 ryo-A001-1003 #亮 “我不能停下双手”\\v\\a",
+   ".message 110 ryo-A001-1005 #亮 我不断对自己说道\\v\\a",
+   ".message 120 ryo-A001-1007 #亮 哪怕只是片刻的停歇，我的心便会不由自主地沉浸在往昔之中。\\v\\a",
+   ".message 130 ryo-A001-1009 #亮 那段回忆温馨、美丽，又包含爱意——也让人痛惜。\\v\\a"
+  ]
+ },
+ ".stage": {
+  "total": 7730,
+  "argc": {
+   "argc=4": 7730
+  },
+  "shapes": {
+   "* file n n": 7727,
+   "file file n n": 3
+  },
+  "examples": [
+   ".stage * BLACK.png 0 0",
+   ".stage * ev001.png 0 0",
+   ".stage * BLACK.png 0 0",
+   ".stage * ev001.png 0 0"
+  ]
+ },
+ ".transition": {
+  "total": 7729,
+  "argc": {
+   "argc=3": 7729
+  },
+  "shapes": {
+   "n * n": 7721,
+   "n file n": 8
+  },
+  "examples": [
+   ".transition 0 * 5",
+   ".transition 0 * 60",
+   ".transition 0 * 60",
+   ".transition 0 * 50"
+  ]
+ },
+ ".panel": {
+  "total": 948,
+  "argc": {
+   "argc=1": 903,
+   "argc=3": 45
+  },
+  "shapes": {
+   "n": 903,
+   "n * file": 39,
+   "n * -": 6
+  },
+  "examples": [
+   ".panel 1",
+   ".panel 0",
+   ".panel 1",
+   ".panel 0"
+  ]
+ },
+ ".playBGM": {
+  "total": 552,
+  "argc": {
+   "argc=1": 310,
+   "argc=3": 228,
+   "argc=4": 14
+  },
+  "shapes": {
+   "file": 230,
+   "* * n": 190,
+   "file n *": 38,
+   "*": 80,
+   "file * * n": 14
+  },
+  "examples": [
+   ".playBGM edenBGM016.ogg",
+   ".playBGM * * 4",
+   ".playBGM edenBGM021.ogg",
+   ".playBGM * * 3"
+  ]
+ },
+ ".playSE": {
+  "total": 430,
+  "argc": {
+   "argc=4": 394,
+   "argc=1": 24,
+   "argc=2": 12
+  },
+  "shapes": {
+   "str str n *": 35,
+   "*": 24,
+   "file str n *": 343,
+   "* str * n": 13,
+   "file str": 6,
+   "str str str *": 3,
+   "str str": 6
+  },
+  "examples": [
+   ".playSE tori_tyun.ogg[7] t 0 *",
+   ".playSE tori_koe.ogg[30] f 0 *",
+   ".playSE *",
+   ".playSE sion_door_close.ogg f 0 *"
+  ]
+ },
+ ".wait": {
+  "total": 351,
+  "argc": {
+   "argc=1": 351
+  },
+  "shapes": {
+   "n": 351
+  },
+  "examples": [
+   ".wait 180",
+   ".wait 130",
+   ".wait 210",
+   ".wait 220"
+  ]
+ },
+ ".pragma": {
+  "total": 142,
+  "argc": {
+   "argc=1": 142
+  },
+  "shapes": {
+   "str": 142
+  },
+  "examples": [
+   ".pragma disable_control",
+   ".pragma enable_control",
+   ".pragma disable_control",
+   ".pragma enable_control"
+  ]
+ },
+ ".label": {
+  "total": 78,
+  "argc": {
+   "argc=1": 78
+  },
+  "shapes": {
+   "str": 78
+  },
+  "examples": [
+   ".label A001_1",
+   ".label A001_2",
+   ".label A001_18",
+   ".label B001_1"
+  ]
+ },
+ ".if": {
+  "total": 74,
+  "argc": {
+   "argc=4": 74
+  },
+  "shapes": {
+   "str str n str": 74
+  },
+  "examples": [
+   ".if eden_D001 == 1 A001_1",
+   ".if eden_D001 == 1 A001_2",
+   ".if eden_D001 == 1 A001_18",
+   ".if eden_D001 == 1 B001_1"
+  ]
+ },
+ ".endScroll": {
+  "total": 52,
+  "argc": {
+   "argc=1": 52
+  },
+  "shapes": {
+   "str": 52
+  },
+  "examples": [
+   ".endScroll f",
+   ".endScroll f",
+   ".endScroll f",
+   ".endScroll f"
+  ]
+ },
+ ".chain": {
+  "total": 42,
+  "argc": {
+   "argc=1": 42
+  },
+  "shapes": {
+   "file": 42
+  },
+  "examples": [
+   ".chain B001.sc",
+   ".chain B002.sc",
+   ".chain B003.sc",
+   ".chain B004.sc"
+  ]
+ },
+ ".playSE2": {
+  "total": 38,
+  "argc": {
+   "argc=4": 29,
+   "argc=1": 9
+  },
+  "shapes": {
+   "str str n *": 9,
+   "*": 9,
+   "file str n *": 16,
+   "* str * n": 4
+  },
+  "examples": [
+   ".playSE2 eden_kaze01.ogg[90] t 0 *",
+   ".playSE2 *",
+   ".playSE2 hiro_knock.ogg f 0 *",
+   ".playSE2 fukuro_marumeru.ogg f 0 *"
+  ]
+ },
+ ".setGlobal": {
+  "total": 30,
+  "argc": {
+   "argc=3": 30
+  },
+  "shapes": {
+   "str str n": 30
+  },
+  "examples": [
+   ".setGlobal EYE_SEQ_DEFAULT = 2",
+   ".setGlobal eden_A001 = 1",
+   ".setGlobal EYE_SEQ_DEFAULT = 2",
+   ".setGlobal eden_B003 = 1"
+  ]
+ },
+ ".vscroll": {
+  "total": 25,
+  "argc": {
+   "argc=2": 25
+  },
+  "shapes": {
+   "n n": 25
+  },
+  "examples": [
+   ".vscroll 970 -7",
+   ".vscroll 0 -10",
+   ".vscroll 884 10",
+   ".vscroll 0 -15"
+  ]
+ },
+ ".end": {
+  "total": 22,
+  "argc": {
+   "argc=0": 22
+  },
+  "shapes": {
+   "": 22
+  },
+  "examples": [
+   ".end",
+   ".end",
+   ".end",
+   ".end"
+  ]
+ },
+ ".set": {
+  "total": 22,
+  "argc": {
+   "argc=3": 22
+  },
+  "shapes": {
+   "str str n": 22
+  },
+  "examples": [
+   ".set exitFromEvent = 999",
+   ".set prohibitAutoSave = 1",
+   ".set prohibitSaveLoad = 1",
+   ".set AppendPlaying = 1"
+  ]
+ },
+ ".scroll": {
+  "total": 18,
+  "argc": {
+   "argc=3": 18
+  },
+  "shapes": {
+   "n n n": 18
+  },
+  "examples": [
+   ".scroll 0 0 15",
+   ".scroll 288 260 10",
+   ".scroll 576 0 10",
+   ".scroll 100 200 10"
+  ]
+ },
+ ".playVoice": {
+  "total": 18,
+  "argc": {
+   "argc=1": 10,
+   "argc=3": 8
+  },
+  "shapes": {
+   "*": 8,
+   "* * n": 8,
+   "str": 2
+  },
+  "examples": [
+   ".playVoice *",
+   ".playVoice *",
+   ".playVoice *",
+   ".playVoice * * 5"
+  ]
+ },
+ ".movie": {
+  "total": 11,
+  "argc": {
+   "argc=5": 11
+  },
+  "shapes": {
+   "n file n n str": 11
+  },
+  "examples": [
+   ".movie 9989 op.avi 1024 640 f",
+   ".movie 9991 op.avi 1024 640 t",
+   ".movie 9989 ed.avi 1024 640 f",
+   ".movie 9991 ed.avi 1024 640 t"
+  ]
+ },
+ ".hscroll": {
+  "total": 9,
+  "argc": {
+   "argc=2": 9
+  },
+  "shapes": {
+   "n n": 9
+  },
+  "examples": [
+   ".hscroll 0 -10",
+   ".hscroll 0 -10",
+   ".hscroll 0 -10",
+   ".hscroll 0 -10"
+  ]
+ },
+ ".goto": {
+  "total": 8,
+  "argc": {
+   "argc=1": 8
+  },
+  "shapes": {
+   "str": 8
+  },
+  "examples": [
+   ".goto B003_04",
+   ".goto B003_04",
+   ".goto D001_03",
+   ".goto D001_03"
+  ]
+ },
+ ".shakeScreen": {
+  "total": 8,
+  "argc": {
+   "argc=3": 8
+  },
+  "shapes": {
+   "str n n": 8
+  },
+  "examples": [
+   ".shakeScreen R 100 100",
+   ".shakeScreen R 100 100",
+   ".shakeScreen Z 100 100",
+   ".shakeScreen R 100 100"
+  ]
+ },
+ ".effect": {
+  "total": 4,
+  "argc": {
+   "argc=4": 2,
+   "argc=1": 2
+  },
+  "shapes": {
+   "str str n n": 2,
+   "str": 2
+  },
+  "examples": [
+   ".effect Firefly Firefly 30 6000",
+   ".effect end",
+   ".effect Firefly Firefly 30 6000",
+   ".effect end"
+  ]
+ },
+ "<bare>": {
+  "total": 0,
+  "argc": {},
+  "shapes": {},
+  "examples": []
+ }
+}
