@@ -34,3 +34,6 @@ artifacts/
 __pycache__/
 *.pyc
 .venv/
+
+# Generated asset dumps
+reports/sys_paz/

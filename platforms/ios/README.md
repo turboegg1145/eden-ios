@@ -75,8 +75,13 @@ download path:
 
 ```bash
 gh release download ci-latest \
-  -p 'Eden-iOS-arm64.ipa' -p 'ipa_report.json' -D artifacts
+  -p 'Eden-iOS-arm64.ipa' -p 'ipa_report.json' -D artifacts --clobber
 ```
+
+`ipa_report.json` pins the source commit, IPA size/SHA-256, Mach-O arch and
+minimum OS, signature presence and the exported engine/FFmpeg symbols. The
+current Stage 3 package is arm64-only, min iOS 12.0, and includes the
+pixel-aligned native UI, OST list, dialog HUD/cursor and radial menu.
 
 When the artifact quota is available, `gh run download <run-id> --name
 Eden-iOS-arm64 -D artifacts` works as well.
@@ -96,12 +101,16 @@ bundle id is `cool.codebuddy.eden`.
   `EdenBackend` key in `NSUserDefaults`). If the preferred backend cannot
   create its device/pipeline, the host automatically tries the other one.
 - The app boots into the title screen (`eden_engine_ui_open(engine, 0)`),
-  built from the real `sys.paz` art: start main story, PLUS+MOSAIC, load,
-  CG/music Extra, config. In-game the same state machine provides the 10-slot
-  save/load grid with live thumbnails, backlog with voice replay, CG gallery,
-  music room, auto/skip/hide-text controls.
-- Gestures: tap = advance / activate, drag = scroll (backlog or gallery),
-  swipe up = open backlog, two-finger tap = hide the text box and UI.
+  built 1:1 from the real `sys.paz` art: three title artworks with per-row
+  hover sprites, start main story, PLUS+MOSAIC, load, CG/music Extra, config.
+  In-game the same state machine provides the 9-page 10-slot save/load grid
+  (plus QuickSave) with native card frames and live thumbnails, backlog with
+  voice replay, CG gallery, 36-track OST list, config checkboxes, the
+  `gameMenuBack*.png` radial menu, the message-panel HUD
+  (`icons.png` / `iconson.png`) and the animated click-wait cursor.
+- Gestures: tap = advance / activate, right click / long press = radial menu,
+  drag = scroll (backlog or gallery), swipe up = open backlog, two-finger tap
+  = hide the text box and UI.
 - The 1024×640 stage is aspect-fit with black letterboxing. Both backends
   upload the same RGBA8 buffer; there is no GPU-side game logic.
 - `AVAudioSessionCategoryPlayback`, 44.1 kHz, 1024-frame IO buffer. The
