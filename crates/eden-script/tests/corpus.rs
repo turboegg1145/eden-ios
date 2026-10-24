@@ -153,6 +153,10 @@ fn gbk_trailing_5c_survives_the_parser() {
 #[test]
 fn real_a001_script_runs_and_save_load_roundtrips() {
     let (scripts, _) = load_all();
+    if !scripts.iter().any(|s| s.name == "A001.sc") {
+        eprintln!("skip: A001.sc missing (private game data)");
+        return;
+    }
     let mut set = MemoryScripts::new();
     for s in scripts {
         set.insert(s);
