@@ -216,6 +216,33 @@ mod tests {
     }
 
     #[test]
+    fn bundled_ios_font_covers_chinese() {
+        // The iOS host copies this file to Payload/Eden.app/font.ttf.
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../platforms/ios/EdenApp/font.ttf");
+        if !path.exists() {
+            eprintln!("skip: bundled font missing");
+            return;
+        }
+        let font = FontRenderer::from_path(&path).expect("bundled font must parse");
+        for ch in "中文测试，。！？「」…—ABCDEFG0123".chars() {
+            assert!(
+                font.advance(ch, 28.0) > 0.0,
+                "bundled font has no advance for {ch:?}"
+            );
+        }
+        let mut img = RgbaImage::filled(400, 120, [0, 0, 0, 255]);
+        let layout = font.draw_text(&mut img, "中文测试", 8.0, 8.0, 32.0, [255; 4], 380.0);
+        assert_eq!(layout.lines, vec!["中文测试"]);
+        let lit = img
+            .data
+            .chunks_exact(4)
+            .filter(|p| p[0] > 0 || p[1] > 0 || p[2] > 0)
+            .count();
+        assert!(lit > 300, "bundled font rendered only {lit} lit pixels");
+    }
+
+    #[test]
     fn newline_forces_a_line() {
         let Some(font) = FontRenderer::load_system() else {
             return;

@@ -118,6 +118,20 @@ fi
 
 APP="${DERIVED}/Build/Products/${CONFIGURATION}-iphoneos/Eden.app"
 echo "==> built ${APP}"
+
+# Bundle the CJK font so text never falls back to tofu boxes.
+if [[ -f "${SCRIPT_DIR}/EdenApp/font.ttf" ]]; then
+    cp "${SCRIPT_DIR}/EdenApp/font.ttf" "${APP}/font.ttf"
+    echo "==> bundled font.ttf ($(du -h "${APP}/font.ttf" | cut -f1))"
+fi
+
+# Optional: embed retail data for a self-contained IPA.
+if [[ -d "${SCRIPT_DIR}/EdenApp/gamedata" ]]; then
+    rm -rf "${APP}/gamedata"
+    cp -R "${SCRIPT_DIR}/EdenApp/gamedata" "${APP}/gamedata"
+    echo "==> embedded gamedata ($(du -sh "${APP}/gamedata" | cut -f1))"
+fi
+
 if command -v ldid >/dev/null 2>&1; then
     ldid -S "${APP}/Eden"
     echo "==> ad-hoc signed with ldid (TrollStore ready)"

@@ -128,6 +128,40 @@ pub unsafe extern "C" fn eden_engine_open(
     }
 }
 
+/// Opens `game_dir` and redirects config/unlocks/save slots to `save_dir`.
+///
+/// Use this on iOS when the archives are inside the read-only app bundle and
+/// saves must go to `Documents/saves`. `save_dir` may be NULL, which keeps the
+/// temporary-directory default of [`eden_engine_open`]. Returns 0 on success.
+#[no_mangle]
+pub unsafe extern "C" fn eden_engine_open_with_save_dir(
+    engine: *mut EdenEngine,
+    game_dir: *const c_char,
+    exe_path: *const c_char,
+    save_dir: *const c_char,
+) -> i32 {
+    let Some(mut inner) = lock(engine) else {
+        return -1;
+    };
+    let Some(dir) = cstr(game_dir) else {
+        set_error(&mut inner, "game_dir is NULL or not UTF-8");
+        return -1;
+    };
+    let exe = cstr(exe_path).map(|p| Path::new(&p).to_path_buf());
+    let saves = cstr(save_dir).map(|p| Path::new(&p).to_path_buf());
+    match Runtime::open_with_save_dir(&dir, exe.as_deref(), saves.as_deref()) {
+        Ok(runtime) => {
+            inner.runtime = Some(runtime);
+            clear_error(&mut inner);
+            0
+        }
+        Err(e) => {
+            set_error(&mut inner, e.to_string());
+            -1
+        }
+    }
+}
+
 /// Starts a script by file name (`A001.sc`). Returns 0 on success.
 #[no_mangle]
 pub unsafe extern "C" fn eden_engine_start_script(

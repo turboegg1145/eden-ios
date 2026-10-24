@@ -580,6 +580,19 @@ impl Runtime {
     /// Opens `scr.paz`, `bg.paz`, `sys.paz` and every optional archive in
     /// `game_dir`. `exe` is only needed for archives with an unknown id.
     pub fn open(dir: impl AsRef<Path>, exe: Option<&Path>) -> Result<Self> {
+        Self::open_with_save_dir(dir, exe, None)
+    }
+
+    /// Like [`Runtime::open`], but stores `config.json`, `unlocks.json` and
+    /// the save slots in `save_dir` instead of the temporary directory.
+    ///
+    /// The iOS host passes `Documents/saves` here: the game data may live in
+    /// the read-only app bundle, while saves must survive reinstalls.
+    pub fn open_with_save_dir(
+        dir: impl AsRef<Path>,
+        exe: Option<&Path>,
+        save_dir: Option<&Path>,
+    ) -> Result<Self> {
         let dir = dir.as_ref().to_path_buf();
         if !dir.is_dir() {
             return Err(RuntimeError::Io(format!(
@@ -628,8 +641,20 @@ impl Runtime {
                 .unwrap_or_default(),
         ];
         ui_assets.title_edition = if edition == eden_paz::Edition::PlusMosaic { 1 } else { 0 };
-        let save_dir = std::env::temp_dir().join("eden-saves");
-        let _ = std::fs::create_dir_all(&save_dir);
+        let save_dir = match save_dir {
+            Some(path) => {
+                let path = path.to_path_buf();
+                std::fs::create_dir_all(&path).map_err(|e| {
+                    RuntimeError::Io(format!("cannot create save directory {}: {e}", path.display()))
+                })?;
+                path
+            }
+            None => {
+                let path = std::env::temp_dir().join("eden-saves");
+                let _ = std::fs::create_dir_all(&path);
+                path
+            }
+        };
         let mut runtime = Self {
             game_dir: dir,
             assets,
@@ -2563,6 +2588,25 @@ mod tests {
     fn game_dir() -> Option<PathBuf> {
         let path = PathBuf::from("/mnt/f/gal/【PC硬盘】【官中】eden");
         path.exists().then_some(path)
+    }
+
+    #[test]
+    fn open_with_save_dir_keeps_writes_out_of_the_game_directory() {
+        let Some(dir) = game_dir() else {
+            eprintln!("skip: game dir missing");
+            return;
+        };
+        let save_dir =
+            std::env::temp_dir().join(format!("eden-saves-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&save_dir);
+        let mut runtime = Runtime::open_with_save_dir(&dir, None, Some(&save_dir)).unwrap();
+        assert_eq!(runtime.save_dir, save_dir);
+        runtime.unlock_music("test-track.ogg");
+        runtime.save_unlocks();
+        let text = std::fs::read_to_string(save_dir.join("unlocks.json")).unwrap();
+        assert!(text.contains("test-track.ogg"));
+        assert!(!dir.join("unlocks.json").exists());
+        let _ = std::fs::remove_dir_all(&save_dir);
     }
 
     #[test]

@@ -5,9 +5,19 @@ on:
     branches: [main]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      embed:
+        description: "Retail data to embed (downloads the assets-cache release)"
+        required: false
+        default: none
+        type: choice
+        options: [none, main, pm, all]
 
 permissions:
   contents: write
+
+env:
+  EMBED: ${{ github.event_name == 'workflow_dispatch' && inputs.embed || 'none' }}
 
 jobs:
   ipa:
@@ -71,6 +81,32 @@ jobs:
           file "${APP}/Eden"
           otool -L "${APP}/Eden" | head -20
 
+      - name: Bundle CJK font and optional retail data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          APP="platforms/ios/build/Build/Products/Release-iphoneos/Eden.app"
+          cp platforms/ios/EdenApp/font.ttf "${APP}/font.ttf"
+          echo "font.ttf: $(stat -f%z "${APP}/font.ttf") bytes"
+          if [ "${EMBED}" != "none" ]; then
+            mkdir -p build-cache
+            case "${EMBED}" in
+              main|all)
+                gh release download assets-cache -p 'gamedata-main.part*' -D build-cache --clobber
+                cat build-cache/gamedata-main.part* | tar -x -C "${APP}"
+                ;;
+            esac
+            case "${EMBED}" in
+              pm|all)
+                gh release download assets-cache -p 'gamedata-pm.part*' -D build-cache --clobber
+                cat build-cache/gamedata-pm.part* | tar -x -C "${APP}"
+                ;;
+            esac
+            du -sh "${APP}/gamedata"
+            ls -lh "${APP}/gamedata"
+          fi
+
       - name: Pseudo-sign with ldid (TrollStore / jailbroken iOS 12–14.4)
         run: |
           set -euo pipefail
@@ -82,15 +118,37 @@ jobs:
           echo "==> entitlements"
           ldid -e "${APP}/Eden" || true
 
-      - name: Package Payload/Eden.app -> Eden-iOS-arm64.ipa
+      - name: Package Payload/Eden.app -> IPA
         run: |
           set -euo pipefail
+          case "${EMBED}" in
+            main) IPA="Eden-Full-Main-iOS-arm64.ipa" ;;
+            pm)   IPA="Eden-Full-PlusMosaic-iOS-arm64.ipa" ;;
+            all)  IPA="Eden-Full-AllInOne-iOS-arm64.ipa" ;;
+            *)    IPA="Eden-iOS-arm64.ipa" ;;
+          esac
+          echo "IPA_NAME=${IPA}" >> "${GITHUB_ENV}"
           rm -rf Payload artifacts
           mkdir -p Payload artifacts
           cp -R platforms/ios/build/Build/Products/Release-iphoneos/Eden.app Payload/
-          zip -qry artifacts/Eden-iOS-arm64.ipa Payload
-          ls -lh artifacts/Eden-iOS-arm64.ipa
-          unzip -l artifacts/Eden-iOS-arm64.ipa | head -20
+          chmod 755 Payload/Eden.app/Eden
+          if [ "${EMBED}" = "none" ]; then
+            zip -qry -X "artifacts/${IPA}" Payload
+          else
+            # .paz archives are already compressed; store them (fast + exact).
+            zip -qry -X -0 "artifacts/${IPA}" Payload
+          fi
+          unzip -l "artifacts/${IPA}" | tail -5
+          SIZE=$(stat -f%z "artifacts/${IPA}")
+          echo "ipa bytes: ${SIZE}"
+          # GitHub Release caps every asset at 2 GiB (2,147,483,648 bytes).
+          if [ "${SIZE}" -gt 2040109465 ]; then
+            ( cd artifacts && split -b 1900m "${IPA}" "${IPA}.part" )
+            rm -f "artifacts/${IPA}"
+            ls -lh artifacts
+          else
+            ls -lh "artifacts/${IPA}"
+          fi
 
       - name: Upload IPA artifact
         # The account-wide Actions artifact quota can be exhausted; the release
@@ -100,17 +158,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Eden-iOS-arm64
-          path: artifacts/Eden-iOS-arm64.ipa
+          path: artifacts/*
           if-no-files-found: error
 
       - name: Write IPA verification report
         run: |
           set -euo pipefail
           mkdir -p reports
-          python3 - artifacts/Eden-iOS-arm64.ipa Payload/Eden.app/Eden <<'PY'
-          import datetime, hashlib, json, os, struct, subprocess, sys
+          python3 - "${IPA_NAME}" Payload/Eden.app/Eden artifacts <<'PY'
+          import datetime, glob, hashlib, json, os, struct, subprocess, sys
 
-          ipa, binary = sys.argv[1], sys.argv[2]
+          name, binary, artdir = sys.argv[1], sys.argv[2], sys.argv[3]
           data = open(binary, "rb").read()
           magic, cpu, sub, ftype, ncmds, sizeofcmds, flags, _ = struct.unpack_from("<IiiIIIII", data, 0)
           assert magic == 0xFEEDFACF, hex(magic)
@@ -124,10 +182,45 @@ jobs:
                   code_signature = struct.unpack_from("<II", data, off + 8)
               off += size
 
+          def digest(path):
+              sha = hashlib.sha256()
+              with open(path, "rb") as fh:
+                  for chunk in iter(lambda: fh.read(1 << 20), b""):
+                      sha.update(chunk)
+              return sha.hexdigest()
+
           def symbols(*prefixes):
               out = subprocess.run(["nm", "-gU", binary], capture_output=True, text=True).stdout
               return sorted({line.split()[-1] for line in out.splitlines()
                              if line.strip() and line.split()[-1].startswith(prefixes)})
+
+          parts = sorted(glob.glob(os.path.join(artdir, name + ".part*")))
+          if parts:
+              files = [{"file": os.path.basename(p), "bytes": os.path.getsize(p)} for p in parts]
+              combined = hashlib.sha256()
+              for path in parts:
+                  with open(path, "rb") as fh:
+                      for chunk in iter(lambda: fh.read(1 << 20), b""):
+                          combined.update(chunk)
+              ipa_info = {
+                  "file": name,
+                  "bytes": sum(f["bytes"] for f in files),
+                  "sha256": combined.hexdigest(),
+                  "parts": files,
+              }
+          else:
+              path = os.path.join(artdir, name)
+              ipa_info = {"file": name, "bytes": os.path.getsize(path), "sha256": digest(path)}
+
+          gamedata = {"present": False}
+          root = "Payload/Eden.app/gamedata"
+          if os.path.isdir(root):
+              total, count = 0, 0
+              for base, _, filenames in os.walk(root):
+                  for filename in filenames:
+                      total += os.path.getsize(os.path.join(base, filename))
+                      count += 1
+              gamedata = {"present": True, "files": count, "bytes": total}
 
           report = {
               "generated_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -135,10 +228,12 @@ jobs:
               "commit": os.environ.get("GITHUB_SHA"),
               "run_id": os.environ.get("GITHUB_RUN_ID"),
               "run_url": f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}",
-              "ipa": {
-                  "file": os.path.basename(ipa),
-                  "bytes": os.path.getsize(ipa),
-                  "sha256": hashlib.sha256(open(ipa, "rb").read()).hexdigest(),
+              "embedded": os.environ.get("EMBED", "none"),
+              "ipa": ipa_info,
+              "gamedata": gamedata,
+              "font": {
+                  "file": "Payload/Eden.app/font.ttf",
+                  "bytes": os.path.getsize("Payload/Eden.app/font.ttf"),
               },
               "macho": {
                   "file": "Payload/Eden.app/Eden",
@@ -168,8 +263,7 @@ jobs:
             gh release create ci-latest --prerelease \
               --title "CI latest" \
               --notes "Rolling unsigned arm64 IPA built from main by ios-ipa.yml."
-          gh release upload ci-latest \
-            artifacts/Eden-iOS-arm64.ipa reports/ipa_report.json --clobber
+          gh release upload ci-latest artifacts/* reports/ipa_report.json --clobber
           gh release view ci-latest --json assets --jq '.assets[] | [.name,.size] | @tsv'
 
       - name: Attach IPA to tag release
@@ -177,6 +271,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/Eden-iOS-arm64.ipa
+            artifacts/*
             reports/ipa_report.json
           generate_release_notes: true

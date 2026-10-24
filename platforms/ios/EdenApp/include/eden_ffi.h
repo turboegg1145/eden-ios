@@ -73,6 +73,18 @@ EDEN_FFI_API int eden_engine_open(EdenEngine *engine,
                                   const char *game_dir,
                                   const char *exe_path);
 
+/*
+ * Same as eden_engine_open(), but redirects config.json, unlocks.json and the
+ * save slots to save_dir (for example Documents/saves on iOS, where game_dir
+ * may be the read-only app bundle). save_dir may be NULL to keep the default.
+ *
+ * Returns 0 on success, -1 on error.
+ */
+EDEN_FFI_API int eden_engine_open_with_save_dir(EdenEngine *engine,
+                                                const char *game_dir,
+                                                const char *exe_path,
+                                                const char *save_dir);
+
 /* Starts a script such as "A001.sc". Returns 0 on success. */
 EDEN_FFI_API int eden_engine_start_script(EdenEngine *engine,
                                           const char *script_name);

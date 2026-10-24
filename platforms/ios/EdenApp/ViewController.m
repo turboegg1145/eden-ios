@@ -102,11 +102,11 @@
     if (gameDirectory == nil) {
         [self showMessage:
                   @"未找到游戏数据。\n"
-                  @"请用 Finder / 文件 App / Filza 将原版 eden* 的\n"
+                  @"此安装包未内嵌 gamedata，请用 Finder / 文件 App / Filza 将\n"
                   @"scr.paz、bg.paz、sys.paz、st.paz、bgm.paz、se.paz、voice.paz\n"
                   @"复制到“我的 iPhone/Eden/eden/”后重新启动。\n\n"
-                  @"Game data not found. Copy the retail .paz files to\n"
-                  @"Documents/eden/ via iTunes file sharing, Files or Filza."];
+                  @"Game data not found. Use the full IPA, or copy the retail .paz\n"
+                  @"files to Documents/eden/ via iTunes file sharing, Files or Filza."];
         return;
     }
     NSLog(@"Eden: game directory = %@", gameDirectory);
@@ -121,6 +121,11 @@
         return;
     }
 
+    // The archives may live in the read-only app bundle (self-contained IPA),
+    // so config/unlocks/save slots always go to Documents/saves.
+    NSString *savesDirectory = [self savesDirectory];
+    NSLog(@"Eden: save directory = %@", savesDirectory);
+
     NSString *exePath = nil;
     for (NSString *name in @[ @"eden.exe", @"eden_pm_en.exe" ]) {
         NSString *candidate = [gameDirectory stringByAppendingPathComponent:name];
@@ -129,9 +134,10 @@
             break;
         }
     }
-    if (eden_engine_open(self.engine,
-                         gameDirectory.fileSystemRepresentation,
-                         exePath.fileSystemRepresentation) != 0) {
+    if (eden_engine_open_with_save_dir(self.engine,
+                                       gameDirectory.fileSystemRepresentation,
+                                       exePath.fileSystemRepresentation,
+                                       savesDirectory.fileSystemRepresentation) != 0) {
         [self showMessage:[NSString stringWithFormat:@"无法打开游戏数据：\n%s",
                            eden_engine_last_error(self.engine)]];
         [self destroyEngine];
@@ -141,7 +147,10 @@
     NSString *fontPath = [self bundledFontPath];
     if (fontPath != nil) {
         if (eden_engine_load_font(self.engine, fontPath.fileSystemRepresentation) != 0) {
-            NSLog(@"Eden: font load failed: %s", eden_engine_last_error(self.engine));
+            NSLog(@"Eden: font load failed (%@): %s",
+                  fontPath.lastPathComponent, eden_engine_last_error(self.engine));
+        } else {
+            NSLog(@"Eden: font = %@", fontPath);
         }
     }
 
@@ -392,10 +401,25 @@
 
 - (NSString *)savePath
 {
+    return [[self savesDirectory] stringByAppendingPathComponent:@"eden_save.json"];
+}
+
+/// Writable location for config, unlocks, slots and the resume snapshot.
+/// Never inside the app bundle: that is read-only on a signed install.
+- (NSString *)savesDirectory
+{
     NSString *documents = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                               NSUserDomainMask,
                                                               YES).firstObject;
-    return [documents stringByAppendingPathComponent:@"eden_save.json"];
+    if (documents == nil) {
+        documents = NSTemporaryDirectory();
+    }
+    NSString *saves = [documents stringByAppendingPathComponent:@"saves"];
+    [[NSFileManager defaultManager] createDirectoryAtPath:saves
+                              withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:NULL];
+    return saves;
 }
 
 #pragma mark - Game data
@@ -404,6 +428,19 @@
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSMutableArray<NSString *> *candidates = [NSMutableArray array];
+
+    // 1. Archives embedded in the app bundle (self-contained IPA). This is
+    //    read-only, which is fine: the engine only reads .paz from here.
+    NSString *resources = [NSBundle mainBundle].resourcePath;
+    if (resources != nil) {
+        NSString *gamedata = [resources stringByAppendingPathComponent:@"gamedata"];
+        [candidates addObject:gamedata];
+        [candidates addObject:[gamedata stringByAppendingPathComponent:@"eden PLUS MOSAIC"]];
+        [candidates addObject:resources];
+        [candidates addObject:[resources stringByAppendingPathComponent:@"eden"]];
+    }
+
+    // 2. Writable sandbox, for sideloaded data.
     NSString *documents = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                               NSUserDomainMask,
                                                               YES).firstObject;
@@ -417,10 +454,6 @@
     if (support != nil) {
         [candidates addObject:[support stringByAppendingPathComponent:@"eden"]];
     }
-    NSString *bundled = [[NSBundle mainBundle] pathForResource:@"eden" ofType:nil];
-    if (bundled != nil) {
-        [candidates addObject:bundled];
-    }
 
     for (NSString *candidate in candidates) {
         NSString *scr = [candidate stringByAppendingPathComponent:@"scr.paz"];
@@ -433,7 +466,8 @@
 
 - (NSString *)bundledFontPath
 {
-    NSArray<NSString *> *names = @[ @"GameFont.ttf", @"GameFont.otf",
+    NSArray<NSString *> *names = @[ @"font.ttf", @"font.otf",
+                                    @"GameFont.ttf", @"GameFont.otf",
                                     @"NotoSansCJK-Regular.ttc", @"SourceHanSansSC-Regular.otf" ];
     for (NSString *name in names) {
         NSString *stem = [name stringByDeletingPathExtension];
