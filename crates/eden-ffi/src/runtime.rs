@@ -19,7 +19,8 @@ use eden_audio::{
 };
 use eden_paz::{AniFile, PazArchive, PazEntry, RgbaImage};
 use eden_render::ui::{
-    self, GalleryEntry, MusicEntry, SaveSlot, UiAssets, UiCommand, UiModel, UiScreen,
+    self, GalleryEntry, MusicEntry, SaveSlot, TitleSet, UiAssets, UiCommand, UiModel, UiScreen,
+    OST_TRACKS, QUICK_SLOT, SLOT_COUNT, SLOT_PAGES,
 };
 use eden_render::{MessageOverlay, Scene, ShakeKind, SoftwareRenderer, TextureCache, Transition};
 use eden_script::{
@@ -290,13 +291,49 @@ pub fn load_scripts(archive: &PazArchive) -> Result<MemoryScripts> {
     Ok(set)
 }
 
+/// Load the three title artworks (and their native hover variants) from one
+/// edition's `sys.paz`. Also lifts the PLUS+MOSAIC row as an alpha mask so the
+/// main artwork can show the retail PM entry without re-rendering text.
+fn load_title_set(dir: &Path) -> Option<TitleSet> {
+    let archive = PazArchive::open(dir.join("sys.paz")).ok()?;
+    let mut art = Vec::new();
+    let mut over = Vec::new();
+    for i in 0..3 {
+        if let Ok(image) = archive.decode_png(&format!("topmenu{i}.png")) {
+            art.push(Arc::new(image));
+        }
+        if let Ok(image) = archive.decode_png(&format!("topmenu{i}over.png")) {
+            over.push(Arc::new(image));
+        }
+    }
+    // Extract `PLUS+MOSAIC` (x 856..983, y 223..236) from the PM artwork.
+    let plus_mosaic = art.first().map(|base| {
+        let (x0, y0, x1, y1) = (856u32, 223u32, 983u32, 236u32);
+        let w = x1 - x0;
+        let h = y1 - y0;
+        let mut mask = RgbaImage::new(w, h);
+        for y in 0..h {
+            for x in 0..w {
+                let p = base.pixel(x0 + x, y0 + y);
+                let luma = (u32::from(p[0]) * 3 + u32::from(p[1]) * 6 + u32::from(p[2])) / 10;
+                let alpha = luma.saturating_sub(140).saturating_mul(255) / 110;
+                mask.set_pixel(x, y, [255, 244, 214, alpha.min(255) as u8]);
+            }
+        }
+        Arc::new(mask)
+    });
+    Some(TitleSet {
+        art,
+        over,
+        plus_mosaic,
+    })
+}
+
 fn load_ui_assets(assets: &mut Assets, edition: eden_paz::Edition) -> UiAssets {
     let mut image = |name: &str| assets.image(name).ok();
     let mut ui = UiAssets {
-        title: ["topmenu0.png", "topmenu1.png", "topmenu2.png"]
-            .iter()
-            .filter_map(|n| image(n))
-            .collect(),
+        title_sets: Vec::new(),
+        title_edition: if edition == eden_paz::Edition::PlusMosaic { 1 } else { 0 },
         save_base: ["saveBase0.png", "saveBase1.png"]
             .iter()
             .filter_map(|n| image(n))
@@ -305,8 +342,21 @@ fn load_ui_assets(assets: &mut Assets, edition: eden_paz::Edition) -> UiAssets {
             .iter()
             .filter_map(|n| image(n))
             .collect(),
+        save_menu: ["slmenu0.png", "slmenu1.png"]
+            .iter()
+            .filter_map(|n| image(n))
+            .collect(),
+        save_pages: (0..10)
+            .filter_map(|i| image(&format!("slpage{i:02}.png")))
+            .collect(),
+        slot_select: image("saveloadSelect.png"),
+        notsaved: image("notsaved.png"),
         music_base: image("musicBase.png"),
         music_pages: ["music1.png", "music2.png", "music3.png"]
+            .iter()
+            .filter_map(|n| image(n))
+            .collect(),
+        music_pages_over: ["music1Over.png", "music2Over.png", "music3Over.png"]
             .iter()
             .filter_map(|n| image(n))
             .collect(),
@@ -324,6 +374,8 @@ fn load_ui_assets(assets: &mut Assets, edition: eden_paz::Edition) -> UiAssets {
             .collect(),
         cg_mode: if edition == eden_paz::Edition::PlusMosaic { 1 } else { 0 },
         config_base: image("configBase.png"),
+        checkmark: image("checkmark_small.png"),
+        knob: image("knob.png"),
         msg_panel: image("msgPanel.png"),
         backlog_gauge: image("backlogGauge.png"),
         icon_auto: image("gameMenuAuto.png"),
@@ -332,6 +384,22 @@ fn load_ui_assets(assets: &mut Assets, edition: eden_paz::Edition) -> UiAssets {
         icon_load: image("gameMenuLoad.png"),
         icon_system: image("gameMenuSystem.png"),
         icon_back: image("gameMenuBack.png"),
+        msg_icons: image("icons.png"),
+        msg_icon_son: image("iconson.png"),
+        wait_cursor: image("pauseAnime.png"),
+        next_cursor: image("pauseAnimeNextPage.png"),
+        select_focus: image("SelectFocus.png"),
+        select_active: image("SelectActive.png"),
+        select_blur: image("SelectBLur.png"),
+        music_level: image("MusicLevelMeter.png"),
+        music_note: image("musicNote.png"),
+        album_back: image("albumBack.png"),
+        album_next: image("albumNext.png"),
+        ball: image("ball.png"),
+        radial_menu: ["gameMenuBack.png", "gameMenuBackAuto.png"]
+            .iter()
+            .filter_map(|n| image(n))
+            .collect(),
         select: image("saveloadSelect.png"),
         extra: image("memories.png").or_else(|| image("memscene.png")),
     };
@@ -453,6 +521,15 @@ struct BgmFade {
     stop_after: bool,
 }
 
+/// One decoded voice or sound effect emitted by the VM, for shell-side
+/// playback (the web player streams these as base64 WAV).
+#[derive(Clone)]
+pub struct AudioEvent {
+    pub kind: &'static str,
+    pub name: String,
+    pub clip: Arc<AudioClip>,
+}
+
 /// The complete 60 Hz Musica runtime.
 pub struct Runtime {
     game_dir: PathBuf,
@@ -472,6 +549,10 @@ pub struct Runtime {
     se1: Option<AudioPlayer>,
     se2: Option<AudioPlayer>,
     bgm: Option<AudioPlayer>,
+    bgm_name: Option<String>,
+    bgm_start_frame: u64,
+    /// Voice/SE clips emitted since the last `drain_audio_events` call.
+    audio_events: Vec<AudioEvent>,
     bgm_fade: Option<BgmFade>,
     movie: Option<MoviePlayback>,
     video_enabled: bool,
@@ -538,7 +619,15 @@ impl Runtime {
         let edition = assets.scr.edition();
         let provider = Arc::new(load_scripts(&assets.scr)?);
         let renderer = SoftwareRenderer::new(1024, 640).with_system_font();
-        let ui_assets = load_ui_assets(&mut assets, edition);
+        let mut ui_assets = load_ui_assets(&mut assets, edition);
+        ui_assets.title_sets = vec![
+            load_title_set(&main_dir).unwrap_or_default(),
+            pm_dir
+                .as_deref()
+                .and_then(load_title_set)
+                .unwrap_or_default(),
+        ];
+        ui_assets.title_edition = if edition == eden_paz::Edition::PlusMosaic { 1 } else { 0 };
         let save_dir = std::env::temp_dir().join("eden-saves");
         let _ = std::fs::create_dir_all(&save_dir);
         let mut runtime = Self {
@@ -559,6 +648,9 @@ impl Runtime {
             se1: None,
             se2: None,
             bgm: None,
+            bgm_name: None,
+            bgm_start_frame: 0,
+            audio_events: Vec::new(),
             bgm_fade: None,
             movie: None,
             video_enabled: true,
@@ -581,6 +673,7 @@ impl Runtime {
             stats: RuntimeStats::default(),
         };
         runtime.load_unlocks();
+        runtime.load_config();
         runtime.refresh_ui_lists();
         runtime.refresh_slots();
         Ok(runtime)
@@ -702,6 +795,132 @@ impl Runtime {
         self.unlocked_music.insert(file.to_string());
     }
 
+    fn toggle_config(&mut self, index: usize) {
+        match index {
+            0 => {
+                self.ui.config.fullscreen = !self.ui.config.fullscreen;
+            }
+            1 => {
+                self.ui.config.fullscreen = false;
+            }
+            2 => self.ui.config.show_cg_in_skip = !self.ui.config.show_cg_in_skip,
+            3 => self.ui.config.special_effects = !self.ui.config.special_effects,
+            4 => self.ui.config.text_shadow = !self.ui.config.text_shadow,
+            5 => self.ui.config.animation_effects = !self.ui.config.animation_effects,
+            6 => self.ui.config.play_voice_in_backlog = !self.ui.config.play_voice_in_backlog,
+            7 => self.ui.config.stop_voice_next_line = !self.ui.config.stop_voice_next_line,
+            8 => self.ui.config.keep_running = !self.ui.config.keep_running,
+            9 => {
+                self.ui.config.auto_mode = !self.ui.config.auto_mode;
+                self.set_auto_advance(self.ui.config.auto_mode);
+                self.ui.auto = self.auto_advance;
+            }
+            10 => {
+                self.ui.config.skip_mode = !self.ui.config.skip_mode;
+                self.skip_mode = self.ui.config.skip_mode;
+                self.ui.skip = self.skip_mode;
+                if self.skip_mode {
+                    self.set_auto_advance(true);
+                    self.ui.auto = true;
+                }
+            }
+            11 => {
+                self.ui.config.mute_bgm = !self.ui.config.mute_bgm;
+                if let Some(player) = &mut self.bgm {
+                    let mut params = player.params();
+                    params.volume = if self.ui.config.mute_bgm {
+                        0.0
+                    } else {
+                        self.ui.config.bgm_volume as f32 / 100.0
+                    };
+                    player.set_params(params);
+                }
+            }
+            12 => self.ui.config.mute_voice = !self.ui.config.mute_voice,
+            13 => self.ui.config.mute_se = !self.ui.config.mute_se,
+            14..=21 => {
+                let actor = index - 14;
+                self.ui.config.voice_actors[actor] = !self.ui.config.voice_actors[actor];
+            }
+            _ => {}
+        }
+    }
+
+    pub fn save_config(&self) {
+        let c = &self.ui.config;
+        let value = serde_json::json!({
+            "bgm_volume": c.bgm_volume,
+            "se_volume": c.se_volume,
+            "voice_volume": c.voice_volume,
+            "text_speed_unread": c.text_speed_unread,
+            "text_speed_read": c.text_speed_read,
+            "auto_speed": c.auto_speed,
+            "fullscreen": c.fullscreen,
+            "show_cg_in_skip": c.show_cg_in_skip,
+            "special_effects": c.special_effects,
+            "text_shadow": c.text_shadow,
+            "animation_effects": c.animation_effects,
+            "play_voice_in_backlog": c.play_voice_in_backlog,
+            "stop_voice_next_line": c.stop_voice_next_line,
+            "keep_running": c.keep_running,
+            "mute_bgm": c.mute_bgm,
+            "mute_voice": c.mute_voice,
+            "mute_se": c.mute_se,
+            "font_index": c.font_index,
+            "voice_actors": c.voice_actors,
+        });
+        if let Ok(text) = serde_json::to_string_pretty(&value) {
+            let _ = std::fs::write(self.save_dir.join("config.json"), text);
+        }
+    }
+
+    pub fn load_config(&mut self) {
+        let Ok(text) = std::fs::read_to_string(self.save_dir.join("config.json")) else {
+            return;
+        };
+        let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) else {
+            return;
+        };
+        let c = &mut self.ui.config;
+        let u8v = |key: &str, dst: &mut u8| {
+            if let Some(n) = v.get(key).and_then(|x| x.as_u64()) {
+                *dst = n.min(100) as u8;
+            }
+        };
+        u8v("bgm_volume", &mut c.bgm_volume);
+        u8v("se_volume", &mut c.se_volume);
+        u8v("voice_volume", &mut c.voice_volume);
+        u8v("text_speed_unread", &mut c.text_speed_unread);
+        u8v("text_speed_read", &mut c.text_speed_read);
+        u8v("auto_speed", &mut c.auto_speed);
+        let flag = |key: &str, dst: &mut bool| {
+            if let Some(b) = v.get(key).and_then(|x| x.as_bool()) {
+                *dst = b;
+            }
+        };
+        flag("fullscreen", &mut c.fullscreen);
+        flag("show_cg_in_skip", &mut c.show_cg_in_skip);
+        flag("special_effects", &mut c.special_effects);
+        flag("text_shadow", &mut c.text_shadow);
+        flag("animation_effects", &mut c.animation_effects);
+        flag("play_voice_in_backlog", &mut c.play_voice_in_backlog);
+        flag("stop_voice_next_line", &mut c.stop_voice_next_line);
+        flag("keep_running", &mut c.keep_running);
+        flag("mute_bgm", &mut c.mute_bgm);
+        flag("mute_voice", &mut c.mute_voice);
+        flag("mute_se", &mut c.mute_se);
+        if let Some(n) = v.get("font_index").and_then(|x| x.as_u64()) {
+            c.font_index = (n as usize) % 3;
+        }
+        if let Some(items) = v.get("voice_actors").and_then(|x| x.as_array()) {
+            for (i, item) in items.iter().take(8).enumerate() {
+                if let Some(b) = item.as_bool() {
+                    c.voice_actors[i] = b;
+                }
+            }
+        }
+    }
+
     fn step_music(&mut self, delta: i32) {
         let len = self.ui.music.len();
         if len == 0 {
@@ -716,6 +935,7 @@ impl Runtime {
             }
             let file = entry.file.clone();
             self.ui.selected_music = Some(index as usize);
+            self.ui.playing_music = Some(index as usize);
             self.ui.page = index as usize / 16;
             self.unlock_music(&file);
             if let Err(e) = self.play_bgm(&file, self.ui.config.bgm_volume as i32, 0) {
@@ -749,20 +969,20 @@ impl Runtime {
 
         let mut music = Vec::new();
         if let Some(bgm) = &self.assets.bgm {
-            for entry in bgm.entries() {
-                let lower = entry.name.to_ascii_lowercase();
-                if !lower.ends_with(".ogg") {
+            // The retail music room is exactly the 36 tracks printed on
+            // music1/2/3.png, in that order. `edenBGM_H*.ogg` and the unused
+            // `edenBGM026_B.ogg` are not listed.
+            for (file, title) in OST_TRACKS {
+                if bgm.entry(file).is_none() {
                     continue;
                 }
-                let title = entry.name.trim_end_matches(".ogg").to_string();
                 music.push(MusicEntry {
-                    file: entry.name.clone(),
-                    title,
-                    unlocked: self.unlocked_music.contains(&entry.name),
+                    file: file.to_string(),
+                    title: title.to_string(),
+                    unlocked: self.unlocked_music.contains(file),
                 });
             }
         }
-        music.sort_by(|a, b| a.file.cmp(&b.file));
         self.ui.music = music;
     }
 
@@ -794,8 +1014,8 @@ impl Runtime {
     }
 
     pub fn refresh_slots(&mut self) {
-        if self.ui.slots.len() < 10 {
-            self.ui.slots = (0..10)
+        if self.ui.slots.len() < SLOT_COUNT + 1 {
+            self.ui.slots = (0..SLOT_COUNT + 1)
                 .map(|index| SaveSlot {
                     index,
                     empty: true,
@@ -803,7 +1023,7 @@ impl Runtime {
                 })
                 .collect();
         }
-        for index in 0..10 {
+        for index in 0..SLOT_COUNT + 1 {
             let state_path = self.save_dir.join(format!("slot_{index:02}.json"));
             let meta_path = self.save_dir.join(format!("slot_{index:02}.meta.json"));
             let thumb_path = self.save_dir.join(format!("slot_{index:02}.png"));
@@ -855,7 +1075,7 @@ impl Runtime {
     }
 
     pub fn save_slot(&mut self, index: usize) -> Result<()> {
-        if index >= 10 {
+        if index > QUICK_SLOT {
             return Err(RuntimeError::Parse(format!("invalid save slot {index}")));
         }
         let (json, script, summary, message_id) = {
@@ -909,7 +1129,7 @@ impl Runtime {
         }
         self.load_from(path)?;
         self.ui.screen = UiScreen::Game;
-        self.ui_visible = false;
+        self.ui_visible = true;
         self.ui.hide_ui = false;
         Ok(())
     }
@@ -937,8 +1157,19 @@ impl Runtime {
         };
         self.assets = Assets::open(&dir, exe.as_deref())?;
         self.provider = Arc::new(load_scripts(&self.assets.scr)?);
-        self.ui_assets = load_ui_assets(&mut self.assets, edition);
+        let mut ui_assets = load_ui_assets(&mut self.assets, edition);
+        ui_assets.title_sets = vec![
+            load_title_set(&self.main_dir).unwrap_or_default(),
+            self.pm_dir
+                .as_deref()
+                .and_then(load_title_set)
+                .unwrap_or_default(),
+        ];
+        ui_assets.title_edition = if edition == eden_paz::Edition::PlusMosaic { 1 } else { 0 };
+        let title_edition = ui_assets.title_edition;
+        self.ui_assets = ui_assets;
         self.edition = edition;
+        self.ui.set_title_edition(title_edition);
         self.game_dir = dir;
         self.vm = None;
         self.scene = Scene::new(1024, 640);
@@ -981,6 +1212,17 @@ impl Runtime {
         self.render_now();
     }
 
+    /// Secondary click: open/target the native radial menu. Returns whether a
+    /// menu command was produced.
+    pub fn ui_right_click(&mut self, x: i32, y: i32) -> bool {
+        if let Some(command) = self.ui.right_click(x, y) {
+            self.handle_ui_command(command);
+            self.render_now();
+            return true;
+        }
+        false
+    }
+
     pub fn ui_swipe_up(&mut self) {
         if self.ui.screen == UiScreen::Game {
             self.ui.open(UiScreen::Backlog);
@@ -1001,13 +1243,36 @@ impl Runtime {
             self.ensure_gallery_thumbs();
         }
         self.ui.open(screen);
-        self.ui_visible = screen != UiScreen::Game;
+        self.ui_visible = true;
         self.render_now();
+    }
+
+    /// Return to the retail title screen (used by the desktop player and the
+    /// iOS host when no script is running).
+    pub fn show_title(&mut self) {
+        self.ui.screen = UiScreen::Title;
+        self.ui.previous = UiScreen::Title;
+        self.ui.hide_ui = false;
+        self.ui.title_edition = self.ui_assets.title_edition;
+        self.ui_visible = true;
+        self.render_now();
+    }
+
+    /// Switch the displayed title artwork between main and PLUS+MOSAIC.
+    pub fn set_title_edition(&mut self, edition: usize) {
+        self.ui.set_title_edition(edition.min(1));
+        self.render_now();
+    }
+
+    /// Encode the current composited frame as PNG (for HTTP streaming).
+    pub fn frame_png(&mut self) -> Result<Vec<u8>> {
+        self.render_now();
+        Ok(eden_paz::encode_png(&self.frame)?)
     }
 
     pub fn close_ui(&mut self) {
         self.ui.screen = UiScreen::Game;
-        self.ui_visible = false;
+        self.ui_visible = true;
         self.render_now();
     }
 
@@ -1104,24 +1369,33 @@ impl Runtime {
                 }
                 self.ui_visible = true;
             }
-            UiCommand::PrevPage => {
-                self.ui.page = self.ui.page.saturating_sub(1);
-            }
-            UiCommand::NextPage => {
-                let per_page = if self.ui.screen == UiScreen::Gallery {
-                    25
-                } else {
-                    16
-                };
-                let len = if self.ui.screen == UiScreen::Gallery {
-                    self.ui.gallery.len()
-                } else {
-                    self.ui.music.len()
-                };
-                if (self.ui.page + 1) * per_page < len {
-                    self.ui.page += 1;
+            UiCommand::PrevPage => match self.ui.screen {
+                UiScreen::Save | UiScreen::Load => {
+                    self.ui.page = self.ui.page.saturating_sub(1);
                 }
-            }
+                _ => {
+                    self.ui.page = self.ui.page.saturating_sub(1);
+                }
+            },
+            UiCommand::NextPage => match self.ui.screen {
+                UiScreen::Save | UiScreen::Load => {
+                    if self.ui.page + 1 < SLOT_PAGES {
+                        self.ui.page += 1;
+                    }
+                }
+                UiScreen::Gallery => {
+                    let per_page = 25;
+                    if (self.ui.page + 1) * per_page < self.ui.gallery.len() {
+                        self.ui.page += 1;
+                    }
+                }
+                _ => {
+                    let per_page = 16;
+                    if (self.ui.page + 1) * per_page < self.ui.music.len() {
+                        self.ui.page += 1;
+                    }
+                }
+            },
             UiCommand::PrevMusic => self.step_music(-1),
             UiCommand::NextMusic => self.step_music(1),
             UiCommand::PlayMovie => {
@@ -1141,6 +1415,10 @@ impl Runtime {
                 Ok(()) => self.ui.toast(format!("Saved slot {:02}", index + 1)),
                 Err(e) => self.ui.toast(e.to_string()),
             },
+            UiCommand::QuickSave => match self.save_slot(QUICK_SLOT) {
+                Ok(()) => self.ui.toast("QuickSave"),
+                Err(e) => self.ui.toast(e.to_string()),
+            },
             UiCommand::LoadSlot(index) => {
                 if let Err(e) = self.load_slot(index) {
                     self.ui.toast(e.to_string());
@@ -1153,7 +1431,7 @@ impl Runtime {
                 } else {
                     self.ui.back();
                     if self.ui.screen == UiScreen::Game {
-                        self.ui_visible = false;
+                        self.ui_visible = true;
                     }
                 }
             }
@@ -1161,6 +1439,8 @@ impl Runtime {
                 self.unlock_music(&file);
                 if let Some(index) = self.ui.music.iter().position(|m| m.file == file) {
                     self.ui.selected_music = Some(index);
+                    self.ui.playing_music = Some(index);
+                    self.ui.page = index / 16;
                     self.ui.music[index].unlocked = true;
                 }
                 if let Err(e) = self.play_bgm(&file, self.ui.config.bgm_volume as i32, 0) {
@@ -1170,6 +1450,7 @@ impl Runtime {
             }
             UiCommand::StopMusic => {
                 self.stop_bgm(0);
+                self.ui.playing_music = None;
             }
             UiCommand::PlayVoice(name) => {
                 if let Err(e) = self.play_voice(&name, None) {
@@ -1179,6 +1460,7 @@ impl Runtime {
             UiCommand::SetAuto(_) => {
                 self.set_auto_advance(!self.auto_advance);
                 self.ui.auto = self.auto_advance;
+                self.ui.config.auto_mode = self.auto_advance;
                 self.ui.toast(if self.auto_advance {
                     "Auto mode ON"
                 } else {
@@ -1188,6 +1470,7 @@ impl Runtime {
             UiCommand::SetSkip(_) => {
                 self.skip_mode = !self.skip_mode;
                 self.ui.skip = self.skip_mode;
+                self.ui.config.skip_mode = self.skip_mode;
                 if self.skip_mode {
                     self.set_auto_advance(true);
                     self.ui.auto = true;
@@ -1206,16 +1489,60 @@ impl Runtime {
                     0 => apply(&mut self.ui.config.bgm_volume, delta),
                     1 => apply(&mut self.ui.config.se_volume, delta),
                     2 => apply(&mut self.ui.config.voice_volume, delta),
-                    3 => apply(&mut self.ui.config.text_speed, delta),
-                    4 => apply(&mut self.ui.config.auto_speed, delta),
+                    3 => apply(&mut self.ui.config.text_speed_unread, delta),
+                    4 => apply(&mut self.ui.config.text_speed_read, delta),
+                    5 => apply(&mut self.ui.config.auto_speed, delta),
                     _ => {}
                 }
                 if let Some(player) = &mut self.bgm {
                     let mut params = player.params();
-                    params.volume = self.ui.config.bgm_volume as f32 / 100.0;
+                    let volume = if self.ui.config.mute_bgm {
+                        0.0
+                    } else {
+                        self.ui.config.bgm_volume as f32 / 100.0
+                    };
+                    params.volume = volume;
                     player.set_params(params);
                 }
             }
+            UiCommand::ConfigToggle(index) => self.toggle_config(index),
+            UiCommand::ConfigTest(index) => {
+                let name = match index {
+                    0 => "BGMtest.wav",
+                    1 => "VOICEtest.wav",
+                    _ => "SEtest.wav",
+                };
+                if let Err(e) = self.play_system_sound(name) {
+                    self.ui.toast(e.to_string());
+                }
+            }
+            UiCommand::ConfigFont(delta) => {
+                let next = self.ui.config.font_index as i32 + delta;
+                self.ui.config.font_index = next.rem_euclid(3) as usize;
+            }
+            UiCommand::ConfigConfirm => {
+                self.save_config();
+                self.ui.back();
+                self.ui_visible = true;
+            }
+            UiCommand::ConfigCancel => {
+                self.load_config();
+                self.ui.back();
+                self.ui_visible = true;
+            }
+            UiCommand::TitleEdition(edition) => {
+                self.ui.set_title_edition(edition);
+            }
+            UiCommand::TitleArt(delta) => {
+                let count = self
+                    .ui_assets
+                    .title_sets
+                    .get(self.ui.title_edition)
+                    .map(|s| s.art.len())
+                    .unwrap_or(0);
+                self.ui.cycle_title_art(delta, count);
+            }
+            UiCommand::RadialOpen(_, _) | UiCommand::RadialClose => {}
             UiCommand::Quit => {
                 self.quit_requested = true;
             }
@@ -1254,7 +1581,7 @@ impl Runtime {
         self.vm = Some(vm);
         self.stop_movie();
         self.ui.screen = UiScreen::Game;
-        self.ui_visible = false;
+        self.ui_visible = true;
         self.ui.hide_ui = false;
         self.ui.skip = false;
         self.skip_mode = false;
@@ -1382,6 +1709,7 @@ impl Runtime {
         self.events = events;
         self.sync_from_vm()?;
         self.ui.tick();
+        self.update_audio_ui();
         self.scene.clear_subpixel();
         Ok(())
     }
@@ -1492,6 +1820,8 @@ impl Runtime {
 
     /// Render the current scene without advancing the VM.
     pub fn render_now(&mut self) {
+        self.update_audio_ui();
+        self.ui.panel_visible &= !self.ui.hide_ui;
         let base = self.renderer.render(&self.scene);
         if self.ui_visible {
             self.frame = ui::render(
@@ -1930,6 +2260,11 @@ impl Runtime {
             .unwrap_or(4);
         let params =
             PlaybackParams::from_percent(volume.unwrap_or(100).clamp(0, 100) as u32, 0.0, false);
+        self.audio_events.push(AudioEvent {
+            kind: "voice",
+            name: name.to_string(),
+            clip: clip.clone(),
+        });
         self.voice = Some(VoicePlayback::new(clip, params, frames));
         Ok(())
     }
@@ -1953,6 +2288,8 @@ impl Runtime {
         let start = if fade > 0 { 0.0 } else { target };
         let params = PlaybackParams::from_percent((start * 100.0) as u32, 0.0, true);
         self.bgm = Some(AudioPlayer::new(clip, params));
+        self.bgm_name = Some(name.to_string());
+        self.bgm_start_frame = self.ui.frames;
         self.bgm_fade = if fade > 0 {
             Some(BgmFade {
                 from: 0.0,
@@ -1972,6 +2309,7 @@ impl Runtime {
         let fade = fade_frames.max(0) as u32;
         if fade == 0 {
             self.bgm = None;
+            self.bgm_name = None;
             self.bgm_fade = None;
             return;
         }
@@ -2002,6 +2340,7 @@ impl Runtime {
             self.bgm_fade = None;
             if stop {
                 self.bgm = None;
+                self.bgm_name = None;
             }
         }
     }
@@ -2024,6 +2363,11 @@ impl Runtime {
             .ok_or_else(|| RuntimeError::Missing("se.paz".into()))?;
         let clip = Arc::new(decode_paz_entry(archive, name)?);
         let params = PlaybackParams::from_script(volume, pan, looping);
+        self.audio_events.push(AudioEvent {
+            kind: "se",
+            name: name.to_string(),
+            clip: clip.clone(),
+        });
         let player = AudioPlayer::new(clip, params);
         match channel {
             1 => self.se1 = Some(player),
@@ -2031,6 +2375,77 @@ impl Runtime {
             _ => {}
         }
         Ok(())
+    }
+
+    /// Play a WAV shipped inside `sys.paz` (BGMtest/VOICEtest/SEtest).
+    pub fn play_system_sound(&mut self, name: &str) -> Result<()> {
+        let clip = Arc::new(decode_paz_entry(&self.assets.sys, name)?);
+        let params = PlaybackParams::from_percent(100, 0.0, false);
+        self.audio_events.push(AudioEvent {
+            kind: "se",
+            name: name.to_string(),
+            clip: clip.clone(),
+        });
+        self.se1 = Some(AudioPlayer::new(clip, params));
+        Ok(())
+    }
+
+    pub fn bgm_name(&self) -> Option<&str> {
+        self.bgm_name.as_deref()
+    }
+
+    pub fn bgm_clip(&self) -> Option<Arc<AudioClip>> {
+        self.bgm.as_ref().map(|p| p.clip_arc())
+    }
+
+    pub fn bgm_position(&self) -> (usize, usize) {
+        self.bgm
+            .as_ref()
+            .map(|p| (p.position(), p.clip().frames()))
+            .unwrap_or((0, 0))
+    }
+
+    pub fn drain_audio_events(&mut self) -> Vec<AudioEvent> {
+        std::mem::take(&mut self.audio_events)
+    }
+
+    fn update_audio_ui(&mut self) {
+        self.ui.panel_visible = self.scene.panel.visible;
+        self.ui.waiting = self
+            .vm
+            .as_ref()
+            .map(|vm| matches!(vm.state(), VmState::WaitClick))
+            .unwrap_or(false);
+        let Some(index) = self.ui.playing_music else {
+            self.ui.music_progress = 0.0;
+            self.ui.music_energy = 0.0;
+            return;
+        };
+        let Some(clip) = self.bgm_clip() else {
+            return;
+        };
+        let frames = clip.frames().max(1);
+        let elapsed = self.ui.frames.saturating_sub(self.bgm_start_frame);
+        let pos = ((elapsed as f64 / 60.0) * f64::from(clip.sample_rate)) as usize % frames;
+        self.ui.music_progress = pos as f32 / frames as f32;
+        // 30 ms RMS window around the current position.
+        let window = (clip.sample_rate as usize / 33).max(64).min(2048);
+        let channels = usize::from(clip.channels).max(1);
+        let mut sum = 0.0f64;
+        let mut count = 0usize;
+        for i in 0..window {
+            let frame = (pos + i) % frames;
+            let base = frame * channels;
+            for c in 0..channels {
+                if let Some(sample) = clip.samples.get(base + c) {
+                    sum += f64::from(*sample) * f64::from(*sample);
+                    count += 1;
+                }
+            }
+        }
+        let rms = if count > 0 { (sum / count as f64).sqrt() } else { 0.0 };
+        self.ui.music_energy = (rms * 3.5).clamp(0.0, 1.0) as f32;
+        let _ = index;
     }
 
     /// Mix BGM/SE/Voice into interleaved stereo frames and update the lip-sync
@@ -2106,7 +2521,7 @@ impl Runtime {
         self.vm = Some(vm);
         self.stop_movie();
         self.ui.screen = UiScreen::Game;
-        self.ui_visible = false;
+        self.ui_visible = true;
         self.stage_key = None;
         self.stage_ani = None;
         self.panel_key = None;

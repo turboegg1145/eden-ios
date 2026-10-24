@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>eden* — pure-Rust player</title>
+<style>
+  :root {
+    --ink: #e8eef2;
+    --dim: #8fa0ac;
+    --panel: #131a20;
+    --edge: #26333d;
+    --pink: #f3b7c5;
+    --green: #9fd3a8;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 700px at 70% -10%, #22313a 0%, #0b1015 55%, #070a0d 100%);
+    color: var(--ink);
+    font: 13px/1.4 "Segoe UI", "Noto Sans SC", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--edge);
+    background: rgba(10, 15, 20, .82);
+    backdrop-filter: blur(8px);
+    flex-wrap: wrap;
+  }
+  .brand { font-size: 19px; letter-spacing: .5px; white-space: nowrap; }
+  .brand b { color: var(--pink); font-weight: 600; }
+  .brand em { color: var(--dim); font-style: normal; font-size: 11px; margin-left: 6px; letter-spacing: 1.4px; text-transform: uppercase; }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  button {
+    font: inherit;
+    color: var(--ink);
+    background: #1a242c;
+    border: 1px solid var(--edge);
+    border-radius: 7px;
+    padding: 6px 11px;
+    cursor: pointer;
+    transition: background .12s, border-color .12s, color .12s;
+    white-space: nowrap;
+  }
+  button:hover { background: #23313b; border-color: #3b5162; }
+  button.on { background: #3a2630; border-color: #7c4b5b; color: var(--pink); }
+  button.pm.on { background: #24382b; border-color: #4c7a5a; color: var(--green); }
+  .sep { width: 1px; align-self: stretch; background: var(--edge); margin: 2px 4px; }
+  main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+  #stage {
+    position: relative;
+    width: min(100%, calc((100vh - 128px) * 1.6));
+    aspect-ratio: 1024 / 640;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, .62), 0 0 0 1px #2a3944 inset;
+    touch-action: none;
+    user-select: none;
+  }
+  #screen { display: block; width: 100%; height: 100%; object-fit: fill; }
+  #splash {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--dim); letter-spacing: 2px; font-size: 12px;
+    background: #05080a;
+    pointer-events: none;
+  }
+  #live {
+    position: absolute; top: 10px; right: 12px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; letter-spacing: 1.4px; color: #d8e6dd;
+    text-shadow: 0 1px 4px #000;
+    pointer-events: none;
+    opacity: .75;
+  }
+  #live i { width: 6px; height: 6px; border-radius: 50%; background: #7ee28e; box-shadow: 0 0 8px #7ee28e; }
+  footer {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 7px 18px;
+    border-top: 1px solid var(--edge);
+    color: var(--dim);
+    font-size: 11.5px;
+    background: rgba(10, 15, 20, .82);
+    flex-wrap: wrap;
+  }
+  footer b { color: var(--ink); font-weight: 500; }
+  footer .hint { margin-left: auto; color: #74838e; }
+  #err { color: #ff9c9c; }
+  @media (max-width: 760px) {
+    header { gap: 8px; padding: 8px; }
+    .brand em { display: none; }
+    footer .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>eden*</b><em>pure-rust player</em></div>
+  <nav>
+    <button data-action="new">新游戏</button>
+    <button data-action="continue">继续</button>
+    <div class="sep"></div>
+    <button data-action="save">存档</button>
+    <button data-action="load">读档</button>
+    <button data-action="backlog">回想</button>
+    <button data-action="config">设置</button>
+    <button data-action="title">标题</button>
+    <div class="sep"></div>
+    <button data-action="auto">自动</button>
+    <button data-action="skip">跳过</button>
+    <button data-action="mute">静音</button>
+    <button data-action="fullscreen">全屏</button>
+    <div class="sep"></div>
+    <button data-action="main" class="main">eden*</button>
+    <button data-action="pm" class="pm">PLUS+MOSAIC</button>
+  </nav>
+</header>
+<main>
+  <div id="stage">
+    <canvas id="screen" width="1024" height="640"></canvas>
+    <div id="splash">正在连接运行时…</div>
+    <div id="live"><i></i>LIVE</div>
+  </div>
+</main>
+<footer>
+  <span>画面 <b id="screen-name">—</b></span>
+  <span>版本 <b id="edition">—</b></span>
+  <span>BGM <b id="bgm">—</b></span>
+  <span><b id="stats">—</b></span>
+  <span id="err"></span>
+  <span class="hint">左键推进 · 右键菜单 · 滚轮回想 · Space 推进 · Esc 返回 · A 自动 · K 跳过 · M 静音 · F 全屏</span>
+</footer>
+<audio id="bgm-audio" loop preload="auto"></audio>
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const view = document.getElementById('screen');
+  const bgmEl = document.getElementById('bgm-audio');
+  const splash = document.getElementById('splash');
+  const errEl = document.getElementById('err');
+  const btnMute = document.querySelector('[data-action="mute"]');
+
+  let muted = false;
+  let unlocked = false;
+  let bgmName = null;
+  let pendingSeek = 0;
+  let lastSeq = 0;
+  let pointerDown = null;
+  let lastMove = 0;
+  const voices = new Set();
+
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+  function coords(ev) {
+    const r = stage.getBoundingClientRect();
+    return {
+      x: clamp(Math.round((ev.clientX - r.left) * 1024 / r.width), 0, 1023),
+      y: clamp(Math.round((ev.clientY - r.top) * 640 / r.height), 0, 639),
+    };
+  }
+
+  function post(path, body) {
+    return fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      keepalive: true,
+    }).catch(() => {});
+  }
+
+  const tap = (x, y) => post('/input', { type: 'tap', x, y });
+  const action = (name, slot) => post('/api/action', { action: name, slot });
+
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    playBgm();
+  }
+
+  function playBgm() {
+    if (muted || !bgmName) return;
+    bgmEl.play().catch(() => {});
+  }
+
+  stage.addEventListener('pointerdown', (ev) => {
+    if (ev.button === 2) return;
+    unlock();
+    pointerDown = { ...coords(ev), at: performance.now() };
+  });
+
+  stage.addEventListener('pointerup', (ev) => {
+    if (!pointerDown) return;
+    const p = coords(ev);
+    const moved = Math.hypot(p.x - pointerDown.x, p.y - pointerDown.y);
+    if (moved < 14 && performance.now() - pointerDown.at < 900) tap(p.x, p.y);
+    pointerDown = null;
+  });
+
+  stage.addEventListener('pointermove', (ev) => {
+    const now = performance.now();
+    if (now - lastMove < 45) return;
+    lastMove = now;
+    const p = coords(ev);
+    post('/input', { type: 'move', x: p.x, y: p.y });
+  });
+
+  stage.addEventListener('contextmenu', (ev) => {
+    ev.preventDefault();
+    const p = coords(ev);
+    post('/input', { type: 'right', x: p.x, y: p.y });
+  });
+
+  stage.addEventListener('wheel', (ev) => {
+    ev.preventDefault();
+    post('/input', { type: 'wheel', delta: Math.sign(ev.deltaY) });
+  }, { passive: false });
+
+  window.addEventListener('keydown', (ev) => {
+    if (ev.repeat) return;
+    switch (ev.key) {
+      case ' ':
+      case 'Enter':
+        ev.preventDefault();
+        tap(512, 360);
+        break;
+      case 'Escape': action('back'); break;
+      case 'b': case 'B': action('backlog'); break;
+      case 'a': case 'A': action('auto'); break;
+      case 'k': case 'K': action('skip'); break;
+      case 'm': case 'M': toggleMute(); break;
+      case 'f': case 'F': fullscreen(); break;
+    }
+  });
+
+  document.querySelectorAll('[data-action]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const name = button.dataset.action;
+      if (name === 'mute') return toggleMute();
+      if (name === 'fullscreen') return fullscreen();
+      action(name);
+    });
+  });
+
+  function toggleMute() {
+    muted = !muted;
+    bgmEl.muted = muted;
+    btnMute.classList.toggle('on', muted);
+  }
+
+  function fullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else document.documentElement.requestFullscreen().catch(() => {});
+  }
+
+  bgmEl.addEventListener('loadedmetadata', () => {
+    if (pendingSeek > 0.02 && Number.isFinite(bgmEl.duration)) {
+      bgmEl.currentTime = pendingSeek * bgmEl.duration;
+    }
+    pendingSeek = 0;
+    playBgm();
+  });
+
+  const ctx = view.getContext('2d', { alpha: false });
+  const FRAME_BYTES = 1024 * 640 * 4;
+
+  async function rawStream() {
+    const pending = new Uint8Array(FRAME_BYTES + 4);
+    let filled = 0;
+    try {
+      const response = await fetch('/rawstream', { cache: 'no-store' });
+      const reader = response.body.getReader();
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        let src = 0;
+        while (src < value.length) {
+          const take = Math.min(pending.length - filled, value.length - src);
+          pending.set(value.subarray(src, src + take), filled);
+          filled += take;
+          src += take;
+          if (filled === pending.length) {
+            const size = new DataView(pending.buffer).getUint32(0, true);
+            filled = 0;
+            if (size !== FRAME_BYTES) return rawStream();
+            const pixels = new Uint8ClampedArray(pending.buffer, 4, FRAME_BYTES);
+            ctx.putImageData(new ImageData(pixels, 1024, 640), 0, 0);
+            if (splash.parentNode) splash.remove();
+          }
+        }
+      }
+    } catch (e) {}
+    setTimeout(rawStream, 900);
+  }
+  rawStream();
+
+  async function poll() {
+    try {
+      const response = await fetch('/api/state?since=' + lastSeq, { cache: 'no-store' });
+      const state = await response.json();
+      document.getElementById('screen-name').textContent = state.screen || '—';
+      document.getElementById('edition').textContent = state.edition === 'pm' ? 'PLUS+MOSAIC' : 'eden*';
+      document.getElementById('stats').textContent =
+        `${(state.fps || 0).toFixed(0)} fps · ${(state.encode_ms || 0).toFixed(1)} ms`;
+      document.getElementById('bgm').textContent = state.bgm || '—';
+      errEl.textContent = state.error || '';
+      document.querySelector('[data-action="auto"]').classList.toggle('on', !!state.auto);
+      document.querySelector('[data-action="skip"]').classList.toggle('on', !!state.skip);
+      document.querySelector('[data-action="main"]').classList.toggle('on', state.edition !== 'pm');
+      document.querySelector('[data-action="pm"]').classList.toggle('on', state.edition === 'pm');
+
+      if (state.bgm !== bgmName) {
+        bgmName = state.bgm;
+        if (bgmName) {
+          bgmEl.src = '/audio/clip?name=' + encodeURIComponent(bgmName);
+          pendingSeek = state.bgm_progress || 0;
+          bgmEl.load();
+          playBgm();
+        } else {
+          bgmEl.pause();
+          bgmEl.removeAttribute('src');
+        }
+      } else if (bgmName && Number.isFinite(bgmEl.duration) && bgmEl.duration > 0 && !bgmEl.seeking) {
+        const target = (state.bgm_progress || 0) * bgmEl.duration;
+        if (Math.abs(bgmEl.currentTime - target) > 1.4) bgmEl.currentTime = target;
+      }
+
+      for (const event of state.events || []) {
+        lastSeq = Math.max(lastSeq, event.seq);
+        if (muted || event.kind === 'bgm') continue;
+        const clip = new Audio('/audio/clip?name=' + encodeURIComponent(event.name));
+        voices.add(clip);
+        clip.onended = () => voices.delete(clip);
+        clip.onerror = () => voices.delete(clip);
+        clip.play().catch(() => voices.delete(clip));
+      }
+    } catch (e) {
+      errEl.textContent = '运行时未响应，重试中…';
+    }
+    setTimeout(poll, 300);
+  }
+
+  poll();
+})();
+</script>
+</body>
+</html>

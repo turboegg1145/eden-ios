@@ -3,6 +3,8 @@
 //! Every command operates on the retail `.paz` archives. There are no
 //! synthetic assets, no recorded traces and no mocked decoders.
 
+mod serve;
+
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -44,11 +46,13 @@ fn run(args: &[String]) -> Result<(), String> {
         "trace" => cmd_trace(rest),
         "shot" | "screenshot" => cmd_shot(rest),
         "list" => cmd_list(rest),
+        "catalog" => cmd_catalog(rest),
         "audio" => cmd_audio(rest),
         "movie" => cmd_movie(rest),
         "ui" => cmd_ui(rest),
         "display" => cmd_display(rest),
         "walkthrough" => cmd_walkthrough(rest),
+        "serve" => serve::run(rest),
         "help" | "-h" | "--help" => {
             print_help();
             Ok(())
@@ -66,11 +70,13 @@ USAGE:
   eden trace  [--game DIR] [--script NAME] [--frames N] [--json PATH] [--pm] [--events]
   eden shot   [--game DIR] [--out DIR] [--max-frames N]
   eden list   <archive.paz> [--filter TEXT]
+  eden catalog [--game DIR] [--out PATH] [--extract DIR]
   eden audio  [--game DIR] [--voice NAME] [--json PATH]
   eden movie  [--game DIR] [--out DIR] [--time SECONDS] [--all]
   eden ui     [--game DIR] [--out DIR] [--frames N]
   eden display [--game DIR] [--out DIR]
   eden walkthrough [--game DIR] [--json PATH] [--max-frames N] [--edition main|pm]
+  eden serve  [--game DIR] [--bind 127.0.0.1:8787] [--fps N] [--save-dir DIR] [--pm] [--open]
 
 DEFAULTS:
   game dir   $EDEN_GAME_DIR or {DEFAULT_GAME_DIR}
@@ -132,7 +138,7 @@ impl Opts {
 }
 
 fn is_flag(name: &str) -> bool {
-    matches!(name, "pm" | "events" | "skip-samples" | "quick")
+    matches!(name, "pm" | "events" | "skip-samples" | "quick" | "open")
 }
 
 fn game_dir(opts: &Opts) -> PathBuf {
@@ -1623,6 +1629,19 @@ fn cmd_ui(args: &[String]) -> Result<(), String> {
 
     runtime.open_ui(UiScreen::Music);
     runtime.ui_mut().clear_toast();
+    // Start the first unlocked track so the audit shot shows the native
+    // playing highlight, note marker, level meter and progress bar.
+    if let Some(index) = runtime.ui().music.iter().position(|m| m.unlocked) {
+        for _ in 0..index / 16 {
+            runtime.ui_tap(780, 594);
+        }
+        let row = index % 16;
+        runtime.ui_tap(200, 42 + 32 * row as i32 + 6);
+        for _ in 0..150 {
+            runtime.ui_mut().tick();
+        }
+    }
+    runtime.ui_mut().clear_toast();
     let music_shot = snap_ui(&mut runtime, &out_dir, "20_ui_music.png")?;
     let music_tracks = runtime.ui().music.len();
     if music_tracks == 0 {
@@ -2030,6 +2049,103 @@ fn cmd_list(args: &[String]) -> Result<(), String> {
                 entry.name, entry.offset, entry.unpacked_size, entry.size
             );
         }
+    }
+    Ok(())
+}
+
+/// Export a complete catalogue of `sys.paz`: names, dimensions and `.ani`
+/// frame metadata. Optionally extracts every decoded image for visual review.
+fn cmd_catalog(args: &[String]) -> Result<(), String> {
+    let opts = Opts::parse(args);
+    let game = game_dir(&opts);
+    let path = game.join("sys.paz");
+    let archive = PazArchive::open(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let extract = opts.value("extract").map(PathBuf::from);
+    if let Some(dir) = &extract {
+        fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    }
+    let mut files = Vec::new();
+    let mut kinds = BTreeMap::<String, usize>::new();
+    for entry in archive.entries() {
+        let ext = entry.extension();
+        *kinds.entry(ext.clone()).or_default() += 1;
+        let mut item = json!({
+            "name": entry.name,
+            "ext": ext,
+            "bytes": entry.unpacked_size,
+        });
+        match ext.as_str() {
+            "png" => match archive.decode_png(&entry.name) {
+                Ok(img) => {
+                    item["width"] = json!(img.width);
+                    item["height"] = json!(img.height);
+                    if let Some(dir) = &extract {
+                        let rel = entry.name.replace('\\', "/");
+                        let out = dir.join(rel);
+                        if let Some(parent) = out.parent() {
+                            fs::create_dir_all(parent)
+                                .map_err(|e| format!("{}: {e}", parent.display()))?;
+                        }
+                        fs::write(&out, encode_png(&img).map_err(|e| e.to_string())?)
+                            .map_err(|e| format!("{}: {e}", out.display()))?;
+                    }
+                }
+                Err(e) => item["error"] = json!(e.to_string()),
+            },
+            "ani" => match archive.parse_ani(&entry.name) {
+                Ok(ani) => {
+                    let frames: Vec<Value> = ani
+                        .frames
+                        .iter()
+                        .map(|f| {
+                            json!({
+                                "label": f.label,
+                                "width": f.width,
+                                "height": f.height,
+                                "bpp": f.bpp,
+                                "origin_x": f.origin_x,
+                                "origin_y": f.origin_y,
+                            })
+                        })
+                        .collect();
+                    item["version"] = json!(ani.version);
+                    item["frame_count"] = json!(ani.frames.len());
+                    item["frames"] = json!(frames);
+                    if let Some(dir) = &extract {
+                        let rel = entry.name.replace('\\', "/");
+                        let out = dir.join(format!("{rel}.json"));
+                        if let Some(parent) = out.parent() {
+                            fs::create_dir_all(parent)
+                                .map_err(|e| format!("{}: {e}", parent.display()))?;
+                        }
+                        fs::write(&out, serde_json::to_vec_pretty(&frames).unwrap())
+                            .map_err(|e| format!("{}: {e}", out.display()))?;
+                    }
+                }
+                Err(e) => item["error"] = json!(e.to_string()),
+            },
+            _ => {}
+        }
+        files.push(item);
+    }
+    let report = json!({
+        "archive": path.display().to_string(),
+        "ident": archive.ident(),
+        "edition": format!("{:?}", archive.edition()),
+        "entry_count": archive.len(),
+        "kinds": kinds,
+        "files": files,
+    });
+    let out = PathBuf::from(opts.value("out").unwrap_or("reports/sys_paz_catalog.json"));
+    write_json(&out, &report)?;
+    println!(
+        "catalog: {} entries -> {} ({} kinds)",
+        archive.len(),
+        out.display(),
+        report["kinds"].as_object().map(|m| m.len()).unwrap_or(0)
+    );
+    if let Some(dir) = extract {
+        println!("extracted to {}", dir.display());
     }
     Ok(())
 }

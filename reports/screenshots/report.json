@@ -12,17 +12,17 @@
     {
       "file": "reports/screenshots/02_a001_vscroll_text_panel.png",
       "height": 640,
-      "png_bytes": 938998,
-      "sha256_png": "fc4afd30cc14bf1361ce9da7ee7bac06ee1f36e1acd3b43f804be41165578757",
-      "sha256_rgba": "096bceea6702a864f59f41c3220531af603ecea938569b425c8221ef10892f30",
+      "png_bytes": 944134,
+      "sha256_png": "b19f21a0448e2d9c04a88b3e734dd7a35c31a0aaab9a1c84cfb4ba5f2df3b595",
+      "sha256_rgba": "8ad3c69967075d2ed6ad3412d839954eae7ea30ca4c4ae48d19ea2d4e8a29e7b",
       "width": 1024
     },
     {
       "file": "reports/screenshots/03_b006_mask_transition.png",
       "height": 640,
-      "png_bytes": 558732,
-      "sha256_png": "a621be6fd9f072b9f77ccee55d11efe14b5575cad09d129502610849fca057cd",
-      "sha256_rgba": "e69dfe246f2b43356c38002ad4eb2fc6dff0475e1c90daa19717630e62e95c79",
+      "png_bytes": 565728,
+      "sha256_png": "7a74a070025390205b5c27edb3641d02c8490463ce970d331c951bdcd884b447",
+      "sha256_rgba": "d22eb21b12d9d349b264369a8fd8fb812e6678515729f565eb57c13446da66d4",
       "width": 1024
     },
     {
@@ -67,7 +67,7 @@
     }
   ],
   "game_dir": "/mnt/f/gal/【PC硬盘】【官中】eden",
-  "generated_unix": 1792872397,
+  "generated_unix": 1792878046,
   "notes": [
     "A001 frame 3649: stage=ev007a01.png view_y=200 .ani=4 frames",
     "A001 frame 3718: stage=ev007a01.png view_y=884 message=590 panel=1 transition=1.00",

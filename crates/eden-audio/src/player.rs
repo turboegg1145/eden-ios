@@ -89,6 +89,10 @@ impl AudioPlayer {
         &self.clip
     }
 
+    pub fn clip_arc(&self) -> Arc<AudioClip> {
+        self.clip.clone()
+    }
+
     pub fn params(&self) -> PlaybackParams {
         self.params
     }
