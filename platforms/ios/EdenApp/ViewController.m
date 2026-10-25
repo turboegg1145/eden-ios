@@ -156,10 +156,10 @@
         }
     }
 
-    BOOL autoAdvance = [[NSUserDefaults standardUserDefaults] objectForKey:@"EdenAutoAdvance"] == nil
-        ? YES
-        : [[NSUserDefaults standardUserDefaults] boolForKey:@"EdenAutoAdvance"];
-    eden_engine_set_auto_advance(self.engine, autoAdvance ? 1 : 0);
+    // Never auto-advance on a real device by default: the in-game AUTO button
+    // is the only way to enable the timed auto-read mode. `auto_advance` in the
+    // runtime is the headless per-frame skip used by CLI smoke tests.
+    eden_engine_set_auto_advance(self.engine, 0);
 
     // Boot into the retail title screen; its menu starts A001.sc (main) or
     // the PLUS+MOSAIC edition through the same UI state machine as desktop.

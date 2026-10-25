@@ -544,7 +544,10 @@ pub struct Runtime {
     stage_key: Option<String>,
     stage_ani: Option<Arc<AniFile>>,
     panel_key: Option<String>,
+    /// Headless/CLI mode: advance every `WaitClick` immediately (no delay).
     auto_advance: bool,
+    /// Frames spent on the current line in the in-game AUTO reading mode.
+    auto_wait_frames: u32,
     voice: Option<VoicePlayback>,
     se1: Option<AudioPlayer>,
     se2: Option<AudioPlayer>,
@@ -574,6 +577,16 @@ pub struct Runtime {
     /// Wall-clock remainder between 60 Hz logical ticks (120 Hz display link).
     display_accum: f64,
     stats: RuntimeStats,
+}
+
+/// Frames a line stays on screen in AUTO mode: 75 base frames plus 3 frames
+/// per visible character, scaled by `auto_speed` (100 = fastest), clamped to
+/// 1–4 seconds at 60 Hz.
+fn auto_advance_frames(chars: usize, auto_speed: u8) -> u32 {
+    let base = 75 + chars as u64 * 3;
+    let speed = u64::from(auto_speed.min(100));
+    let scaled = base * (160 - speed) / 100;
+    scaled.clamp(60, 240) as u32
 }
 
 impl Runtime {
@@ -669,6 +682,7 @@ impl Runtime {
             stage_ani: None,
             panel_key: None,
             auto_advance: false,
+            auto_wait_frames: 0,
             voice: None,
             se1: None,
             se2: None,
@@ -837,18 +851,20 @@ impl Runtime {
             8 => self.ui.config.keep_running = !self.ui.config.keep_running,
             9 => {
                 self.ui.config.auto_mode = !self.ui.config.auto_mode;
-                self.set_auto_advance(self.ui.config.auto_mode);
-                self.ui.auto = self.auto_advance;
-            }
-            10 => {
-                self.ui.config.skip_mode = !self.ui.config.skip_mode;
-                self.skip_mode = self.ui.config.skip_mode;
-                self.ui.skip = self.skip_mode;
-                if self.skip_mode {
-                    self.set_auto_advance(true);
-                    self.ui.auto = true;
+                if self.ui_visible {
+                    // In-game AUTO: timed reading mode, never the headless
+                    // per-frame instant skip.
+                    self.ui.auto = self.ui.config.auto_mode;
+                    self.auto_wait_frames = 0;
+                    if let Some(vm) = &mut self.vm {
+                        vm.set_auto_advance_clicks(false);
+                    }
+                } else {
+                    self.set_auto_advance(self.ui.config.auto_mode);
+                    self.ui.auto = self.auto_advance;
                 }
             }
+            10 => self.set_skip_mode(!self.ui.config.skip_mode),
             11 => {
                 self.ui.config.mute_bgm = !self.ui.config.mute_bgm;
                 if let Some(player) = &mut self.bgm {
@@ -1219,7 +1235,12 @@ impl Runtime {
     }
 
     pub fn ui_tap(&mut self, x: i32, y: i32) -> bool {
-        if let Some(command) = self.ui.tap(x, y) {
+        let command = self.ui.tap(x, y);
+        // Any tap outside the SKIP button cancels fast-forward immediately.
+        if self.skip_mode && !matches!(command, Some(UiCommand::SetSkip(_))) {
+            self.set_skip_mode(false);
+        }
+        if let Some(command) = command {
             self.handle_ui_command(command);
             self.render_now();
             return true;
@@ -1483,24 +1504,35 @@ impl Runtime {
                 }
             }
             UiCommand::SetAuto(_) => {
-                self.set_auto_advance(!self.auto_advance);
-                self.ui.auto = self.auto_advance;
-                self.ui.config.auto_mode = self.auto_advance;
-                self.ui.toast(if self.auto_advance {
-                    "Auto mode ON"
+                if self.ui_visible {
+                    // Timed in-game AUTO reading mode.
+                    self.ui.auto = !self.ui.auto;
+                    self.ui.config.auto_mode = self.ui.auto;
+                    self.auto_wait_frames = 0;
+                    if let Some(vm) = &mut self.vm {
+                        vm.set_auto_advance_clicks(false);
+                    }
+                    self.ui.toast(if self.ui.auto {
+                        "Auto mode ON"
+                    } else {
+                        "Auto mode OFF"
+                    });
                 } else {
-                    "Auto mode OFF"
-                });
+                    self.set_auto_advance(!self.auto_advance);
+                    self.ui.auto = self.auto_advance;
+                    self.ui.config.auto_mode = self.auto_advance;
+                    self.ui.toast(if self.auto_advance {
+                        "Auto mode ON"
+                    } else {
+                        "Auto mode OFF"
+                    });
+                }
             }
             UiCommand::SetSkip(_) => {
-                self.skip_mode = !self.skip_mode;
-                self.ui.skip = self.skip_mode;
-                self.ui.config.skip_mode = self.skip_mode;
-                if self.skip_mode {
-                    self.set_auto_advance(true);
-                    self.ui.auto = true;
-                }
-                self.ui.toast(if self.skip_mode { "Skip ON" } else { "Skip OFF" });
+                let enabled = !self.skip_mode;
+                self.set_skip_mode(enabled);
+                self.ui
+                    .toast(if self.skip_mode { "Skip ON" } else { "Skip OFF" });
             }
             UiCommand::ToggleHideUi => {
                 self.ui.hide_ui = !self.ui.hide_ui;
@@ -1609,8 +1641,10 @@ impl Runtime {
         self.ui_visible = true;
         self.ui.hide_ui = false;
         self.ui.skip = false;
+        self.ui.config.skip_mode = false;
         self.skip_mode = false;
-        self.ui.auto = self.auto_advance;
+        self.auto_wait_frames = 0;
+        self.ui.auto = self.auto_advance || self.ui.config.auto_mode;
         self.scene = Scene::new(1024, 640);
         self.stage_key = None;
         self.stage_ani = None;
@@ -1644,6 +1678,54 @@ impl Runtime {
 
     pub fn auto_advance(&self) -> bool {
         self.auto_advance
+    }
+
+    /// In-game fast-forward. Unlike the headless `auto_advance` flag this does
+    /// not touch the VM's per-frame click flag; `tick_vm` clicks the waiting
+    /// message itself so every line is still shown (at 4x speed).
+    fn set_skip_mode(&mut self, enabled: bool) {
+        self.skip_mode = enabled;
+        self.ui.skip = enabled;
+        self.ui.config.skip_mode = enabled;
+        self.auto_wait_frames = 0;
+        if !enabled {
+            // Back to normal wait-for-click (or timed AUTO) semantics.
+            if let Some(vm) = &mut self.vm {
+                vm.set_auto_advance_clicks(false);
+            }
+        }
+    }
+
+    /// Timed AUTO reading: waits for the voice to finish, then holds the line
+    /// for a length-dependent number of frames before clicking.
+    fn update_auto_advance(&mut self) {
+        let Some(vm) = &self.vm else {
+            self.auto_wait_frames = 0;
+            return;
+        };
+        if self.skip_mode || !self.ui.auto || !matches!(vm.state(), VmState::WaitClick) {
+            self.auto_wait_frames = 0;
+            return;
+        }
+        let voice_done = self
+            .voice
+            .as_ref()
+            .map(|v| v.player.is_finished())
+            .unwrap_or(true);
+        if !voice_done {
+            // Reading time starts only after the voiced line has played out.
+            self.auto_wait_frames = 0;
+            return;
+        }
+        let chars = vm.message().map(|m| m.text.visible_len()).unwrap_or(0);
+        let target = auto_advance_frames(chars, self.ui.config.auto_speed);
+        self.auto_wait_frames = self.auto_wait_frames.saturating_add(1);
+        if self.auto_wait_frames >= target {
+            self.auto_wait_frames = 0;
+            if let Some(vm) = &mut self.vm {
+                vm.click();
+            }
+        }
     }
 
     pub fn click(&mut self) {
@@ -1712,6 +1794,15 @@ impl Runtime {
                 }
             }
         }
+        if self.skip_mode {
+            // Fast-forward: release the current text box so this tick can
+            // advance to the next line.
+            if let Some(vm) = &mut self.vm {
+                if matches!(vm.state(), VmState::WaitClick) {
+                    vm.click();
+                }
+            }
+        }
         let events = {
             let vm = self
                 .vm
@@ -1733,6 +1824,7 @@ impl Runtime {
         }
         self.events = events;
         self.sync_from_vm()?;
+        self.update_auto_advance();
         self.ui.tick();
         self.update_audio_ui();
         self.scene.clear_subpixel();
@@ -2547,6 +2639,11 @@ impl Runtime {
         self.stop_movie();
         self.ui.screen = UiScreen::Game;
         self.ui_visible = true;
+        self.ui.skip = false;
+        self.ui.config.skip_mode = false;
+        self.skip_mode = false;
+        self.auto_wait_frames = 0;
+        self.ui.auto = self.auto_advance || self.ui.config.auto_mode;
         self.stage_key = None;
         self.stage_ani = None;
         self.panel_key = None;
