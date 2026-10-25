@@ -133,6 +133,9 @@ if [[ -d "${SCRIPT_DIR}/EdenApp/gamedata" ]]; then
 fi
 
 if command -v ldid >/dev/null 2>&1; then
-    ldid -S "${APP}/Eden"
-    echo "==> ad-hoc signed with ldid (TrollStore ready)"
+    # Sandbox-safe entitlements only (get-task-allow). Never sign with
+    # platform-application / no-container: that strips GPU access.
+    ldid -S"${SCRIPT_DIR}/Entitlements.plist" "${APP}/Eden"
+    echo "==> ad-hoc signed with ldid (sandbox-safe entitlements)"
+    ldid -e "${APP}/Eden" || true
 fi

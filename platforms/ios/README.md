@@ -10,13 +10,14 @@ platforms/ios/
 ├── Eden.xcodeproj/                 # checked-in project (Xcode 12.5+)
 ├── build_ios.sh                    # cargo + xcodebuild + optional ldid
 ├── build_ffmpeg_ios.sh             # minimal arm64 FFmpeg (WMV3/MPEG-4/MP3)
-├── Entitlements.plist              # TrollStore / jailbreak pseudo-signing
+├── Entitlements.plist              # sandbox-safe (get-task-allow only)
 └── EdenApp/
     ├── main.m / AppDelegate.*
     ├── ViewController.*            # display link (60/120Hz), gestures, save/load
     ├── EdenRenderer.h/.m           # backend factory
     ├── EdenMetalRenderer.h/.m      # Metal 2.0 + MTKView
-    ├── EdenGLRenderer.h/.m         # OpenGL ES 3.0 + CAEAGLLayer
+    ├── EdenGLRenderer.h/.m         # OpenGL ES 3.0 -> ES 2.0 + CAEAGLLayer
+    ├── EdenCGRenderer.h/.m         # CoreGraphics/CALayer last-resort backend
     ├── EdenAudio.h/.m              # AVAudioSession + RemoteIO AudioUnit
     ├── EdenVideo.h/.m              # libavcodec / AVAssetReader decoder bridge
     ├── Shaders/eden.metal          # fullscreen textured triangle
@@ -64,7 +65,9 @@ cd platforms/ios
    search paths and `-lavformat -lavcodec -lswscale -lavutil`;
 4. runs `xcodebuild -sdk iphoneos -destination generic/platform=iOS` with
    signing disabled;
-5. optionally ad-hoc signs with `ldid -S platforms/ios/Entitlements.plist`.
+5. optionally ad-hoc signs with
+   `ldid -S platforms/ios/Entitlements.plist` (sandbox-safe
+   `get-task-allow` only; never `platform-application` / `no-container`).
 
 The same steps run in the cloud in `.github/workflows/ios-ipa.yml`
 (`macos-14`), which uploads `Eden-iOS-arm64.ipa` as a build artifact and
@@ -96,10 +99,13 @@ bundle id is `cool.codebuddy.eden`.
   `eden_engine_tick_display(dt)` advances the fixed 60 Hz VM and computes a
   sub-pixel offset for the current scroll/transition; `eden_engine_render()`
   rasterises at the interpolated position.
-- Metal is the default backend. Force OpenGL ES 3.0 with
+- Metal is the default backend and compiles `Shaders/eden.metal` at runtime if
+  the bundled `default.metallib` is missing or stale. Force OpenGL ES with
   `defaults write cool.codebuddy.eden EdenBackend gles` (or change the
-  `EdenBackend` key in `NSUserDefaults`). If the preferred backend cannot
-  create its device/pipeline, the host automatically tries the other one.
+  `EdenBackend` key in `NSUserDefaults`). The host tries Metal, then OpenGL ES
+  3.0, then OpenGL ES 2.0, then CoreGraphics (`EdenCGRenderer`, which assigns a
+  `CGImage` to `CALayer.contents`); the last one needs no GPU API and always
+  presents a frame.
 - The app boots into the title screen (`eden_engine_ui_open(engine, 0)`),
   built 1:1 from the real `sys.paz` art: three title artworks with per-row
   hover sprites, start main story, PLUS+MOSAIC, load, CG/music Extra, config.
@@ -111,7 +117,7 @@ bundle id is `cool.codebuddy.eden`.
 - Gestures: tap = advance / activate, right click / long press = radial menu,
   drag = scroll (backlog or gallery), swipe up = open backlog, two-finger tap
   = hide the text box and UI.
-- The 1024×640 stage is aspect-fit with black letterboxing. Both backends
+- The 1024×640 stage is aspect-fit with black letterboxing. All backends
   upload the same RGBA8 buffer; there is no GPU-side game logic.
 - `AVAudioSessionCategoryPlayback`, 44.1 kHz, 1024-frame IO buffer. The
   RemoteIO callback calls `eden_engine_mix_audio()`; BGM, SE1/SE2 and voice

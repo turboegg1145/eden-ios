@@ -96,9 +96,10 @@ gh release download ci-latest \
   -p 'Eden-iOS-arm64.ipa' -p 'ipa_report.json' -D artifacts --clobber
 ```
 
-The package is arm64-only, deployment target 12.0, and pseudo-signed with
-`platform-application` / `get-task-allow` entitlements (TrollStore and
-jailbroken devices install it directly). For a normal device, open
+The package is arm64-only, deployment target 12.0, and pseudo-signed with the
+sandbox-safe `get-task-allow` entitlement only. It intentionally omits
+`platform-application` / `com.apple.private.security.no-container`: those strip
+GPU driver access and break Metal/OpenGL ES. For a normal device, open
 `platforms/ios/Eden.xcodeproj`, select your team and run from Xcode.
 
 Copy the retail archives into the app's Documents folder after installing:

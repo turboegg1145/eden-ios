@@ -27,6 +27,7 @@
 		A00000000000000000000051 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000072 /* Assets.xcassets */; };
 		A00000000000000000000052 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000006E /* LaunchScreen.storyboard */; };
 		A00000000000000000000053 /* EdenVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000007C /* EdenVideo.m */; };
+		A00000000000000000000054 /* EdenCGRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000007F /* EdenCGRenderer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,8 @@
 		A0000000000000000000007B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A0000000000000000000007C /* EdenVideo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EdenVideo.m; sourceTree = "<group>"; };
 		A0000000000000000000007D /* EdenVideo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdenVideo.h; sourceTree = "<group>"; };
+		A0000000000000000000007E /* EdenCGRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdenCGRenderer.h; sourceTree = "<group>"; };
+		A0000000000000000000007F /* EdenCGRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EdenCGRenderer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +108,8 @@
 				A00000000000000000000068 /* EdenMetalRenderer.m */,
 				A00000000000000000000069 /* EdenGLRenderer.h */,
 				A0000000000000000000006A /* EdenGLRenderer.m */,
+				A0000000000000000000007E /* EdenCGRenderer.h */,
+				A0000000000000000000007F /* EdenCGRenderer.m */,
 				A0000000000000000000006B /* EdenAudio.h */,
 				A0000000000000000000006C /* EdenAudio.m */,
 				A0000000000000000000007C /* EdenVideo.m */,
@@ -233,6 +238,7 @@
 				A00000000000000000000043 /* EdenRenderer.m in Sources */,
 				A00000000000000000000044 /* EdenMetalRenderer.m in Sources */,
 				A00000000000000000000045 /* EdenGLRenderer.m in Sources */,
+				A00000000000000000000054 /* EdenCGRenderer.m in Sources */,
 				A00000000000000000000046 /* EdenAudio.m in Sources */,
 				A00000000000000000000053 /* EdenVideo.m in Sources */,
 				A00000000000000000000047 /* eden.metal in Sources */,

@@ -56,7 +56,7 @@ jobs:
           chmod +x platforms/ios/build_ffmpeg_ios.sh
           platforms/ios/build_ffmpeg_ios.sh
 
-      - name: Build Eden.app (Metal 2.0 + OpenGL ES 3.0 host)
+      - name: Build Eden.app (Metal 2.0 + GLES 3/2 + CoreGraphics host)
         run: |
           set -euo pipefail
           cd platforms/ios
@@ -114,9 +114,18 @@ jobs:
             brew install ldid
           fi
           APP="platforms/ios/build/Build/Products/Release-iphoneos/Eden.app"
-          ldid -Splatforms/ios/Entitlements.plist "${APP}/Eden"
+          # Sandbox-safe entitlements only. platform-application and
+          # com.apple.private.security.no-container revoke GPU access.
+          ldid -S"platforms/ios/Entitlements.plist" "${APP}/Eden"
           echo "==> entitlements"
-          ldid -e "${APP}/Eden" || true
+          ENTITLEMENTS="$(ldid -e "${APP}/Eden")"
+          echo "${ENTITLEMENTS}"
+          # These pseudo-daemon entitlements revoke GPU (AGX/IOSurface) access
+          # and cause MTLCreateSystemDefaultDevice()/EAGLContext to return nil.
+          if echo "${ENTITLEMENTS}" | grep -qE 'platform-application|no-container|container-required'; then
+            echo "error: GPU-breaking entitlement found in signature" >&2
+            exit 1
+          fi
 
       - name: Package Payload/Eden.app -> IPA
         run: |

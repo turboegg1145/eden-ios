@@ -185,41 +185,49 @@
 
 - (BOOL)createRenderer
 {
-    NSString *preferred = [[NSUserDefaults standardUserDefaults] stringForKey:@"EdenBackend"] ?: @"metal";
-    NSError *error = nil;
-    id<EdenRenderer> renderer = EdenCreateRenderer(preferred, self.view.bounds, &error);
-    if (renderer != nil) {
+    NSString *preferred = ([[NSUserDefaults standardUserDefaults] stringForKey:@"EdenBackend"]
+                           ?: @"metal").lowercaseString;
+    NSMutableArray<NSString *> *order = [NSMutableArray array];
+    if ([preferred isEqualToString:@"gles"] || [preferred isEqualToString:@"gl"]) {
+        [order addObjectsFromArray:@[ @"gles", @"metal", @"cg" ]];
+    } else if ([preferred isEqualToString:@"cg"] || [preferred isEqualToString:@"coregraphics"]) {
+        [order addObjectsFromArray:@[ @"cg", @"metal", @"gles" ]];
+    } else {
+        // Default chain: Metal -> OpenGL ES (3.0 then 2.0) -> CoreGraphics.
+        [order addObjectsFromArray:@[ @"metal", @"gles", @"cg" ]];
+    }
+
+    // Keep one error per backend; never let a later failure hide an earlier one.
+    NSMutableArray<NSString *> *failures = [NSMutableArray array];
+    for (NSString *backend in order) {
+        NSError *createError = nil;
+        id<EdenRenderer> renderer = EdenCreateRenderer(backend, self.view.bounds, &createError);
+        if (renderer == nil) {
+            NSString *reason = createError.localizedDescription ?: @"renderer creation failed";
+            NSLog(@"Eden: %@ unavailable: %@", backend, reason);
+            [failures addObject:[NSString stringWithFormat:@"%@: %@", backend, reason]];
+            continue;
+        }
+
         UIView *view = renderer.view;
         view.frame = self.view.bounds;
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self.view addSubview:view];
-        if ([renderer prepareWithError:&error]) {
+
+        NSError *prepareError = nil;
+        if ([renderer prepareWithError:&prepareError]) {
             self.renderer = renderer;
             NSLog(@"Eden: renderer = %@", NSStringFromClass([renderer class]));
             return YES;
         }
-        NSLog(@"Eden: %@ prepare failed: %@", NSStringFromClass([renderer class]), error.localizedDescription);
-        [view removeFromSuperview];
-    }
-
-    // Fall back to the other backend.
-    NSString *fallback = [preferred.lowercaseString isEqualToString:@"gles"] ? @"metal" : @"gles";
-    renderer = EdenCreateRenderer(fallback, self.view.bounds, &error);
-    if (renderer != nil) {
-        UIView *view = renderer.view;
-        view.frame = self.view.bounds;
-        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self.view addSubview:view];
-        if ([renderer prepareWithError:&error]) {
-            self.renderer = renderer;
-            NSLog(@"Eden: renderer fallback = %@", NSStringFromClass([renderer class]));
-            return YES;
-        }
+        NSString *reason = prepareError.localizedDescription ?: @"prepare failed";
+        NSLog(@"Eden: %@ prepare failed: %@", backend, reason);
+        [failures addObject:[NSString stringWithFormat:@"%@: %@", backend, reason]];
         [view removeFromSuperview];
     }
 
     [self showMessage:[NSString stringWithFormat:@"没有可用的渲染后端：\n%@",
-                       error.localizedDescription ?: @"Metal / OpenGL ES unavailable"]];
+                       [failures componentsJoinedByString:@"\n"]]];
     return NO;
 }
 

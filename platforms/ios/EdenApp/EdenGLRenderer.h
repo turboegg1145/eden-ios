@@ -2,8 +2,9 @@
 //  EdenGLRenderer.h
 //  Eden
 //
-//  OpenGL ES 3.0 backend using CAEAGLLayer. Kept as a fallback for devices
-//  where Metal is unavailable or disabled by the user.
+//  OpenGL ES backend using CAEAGLLayer. Tries an ES 3.0 context first and
+//  falls back to ES 2.0 with GLSL ES 1.00 shaders. Kept as a fallback for
+//  devices where Metal is unavailable or disabled by the user.
 //
 
 #import <UIKit/UIKit.h>

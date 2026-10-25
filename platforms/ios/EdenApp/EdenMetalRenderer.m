@@ -7,6 +7,39 @@
 
 #import <QuartzCore/CAMetalLayer.h>
 
+/// Mirrors EdenApp/Shaders/eden.metal. Compiled at runtime when the bundled
+/// default.metallib is missing, stale or does not contain the expected
+/// functions, so an Xcode/SDK packaging mismatch can never leave the app
+/// without a Metal pipeline.
+static NSString *const kEdenMetalInlineSource =
+    @"#include <metal_stdlib>\n"
+    @"using namespace metal;\n"
+    @"struct EdenVertexOut {\n"
+    @"    float4 position [[position]];\n"
+    @"    float2 uv;\n"
+    @"};\n"
+    @"vertex EdenVertexOut eden_vertex(uint vertexID [[vertex_id]]) {\n"
+    @"    const float2 positions[3] = {\n"
+    @"        float2(-1.0, -1.0),\n"
+    @"        float2( 3.0, -1.0),\n"
+    @"        float2(-1.0,  3.0),\n"
+    @"    };\n"
+    @"    const float2 uvs[3] = {\n"
+    @"        float2(0.0, 1.0),\n"
+    @"        float2(2.0, 1.0),\n"
+    @"        float2(0.0, -1.0),\n"
+    @"    };\n"
+    @"    EdenVertexOut out;\n"
+    @"    out.position = float4(positions[vertexID], 0.0, 1.0);\n"
+    @"    out.uv = uvs[vertexID];\n"
+    @"    return out;\n"
+    @"}\n"
+    @"fragment float4 eden_fragment(EdenVertexOut in [[stage_in]],\n"
+    @"                              texture2d<float> stage [[texture(0)]],\n"
+    @"                              sampler linearSampler [[sampler(0)]]) {\n"
+    @"    return stage.sample(linearSampler, in.uv);\n"
+    @"}\n";
+
 @interface EdenMetalRenderer ()
 @property (nonatomic, strong) id<MTLCommandQueue> queue;
 @property (nonatomic, strong) id<MTLRenderPipelineState> pipeline;
@@ -71,22 +104,57 @@
     }
 
     id<MTLLibrary> library = [device newDefaultLibrary];
-    if (library == nil) {
-        if (error) {
-            *error = [NSError errorWithDomain:@"EdenMetal"
-                                         code:3
-                                     userInfo:@{NSLocalizedDescriptionKey: @"default.metallib missing"}];
+    id<MTLFunction> vertex = nil;
+    id<MTLFunction> fragment = nil;
+    NSError *libraryError = nil;
+
+    if (library != nil) {
+        vertex = [library newFunctionWithName:@"eden_vertex"];
+        fragment = [library newFunctionWithName:@"eden_fragment"];
+        if (vertex == nil || fragment == nil) {
+            libraryError = [NSError errorWithDomain:@"EdenMetal"
+                                               code:3
+                                           userInfo:@{NSLocalizedDescriptionKey:
+                                                          @"default.metallib is missing eden_vertex/eden_fragment"}];
         }
-        return NO;
+    } else {
+        libraryError = [NSError errorWithDomain:@"EdenMetal"
+                                           code:3
+                                       userInfo:@{NSLocalizedDescriptionKey: @"default.metallib missing"}];
     }
 
-    id<MTLFunction> vertex = [library newFunctionWithName:@"eden_vertex"];
-    id<MTLFunction> fragment = [library newFunctionWithName:@"eden_fragment"];
+    if (vertex == nil || fragment == nil) {
+        // Level 2: compile the inline copy of eden.metal at runtime. This is
+        // independent of how (or whether) Xcode emitted default.metallib.
+        NSError *compileError = nil;
+        id<MTLLibrary> inlineLibrary = [device newLibraryWithSource:kEdenMetalInlineSource
+                                                            options:nil
+                                                              error:&compileError];
+        if (inlineLibrary != nil) {
+            id<MTLFunction> inlineVertex = [inlineLibrary newFunctionWithName:@"eden_vertex"];
+            id<MTLFunction> inlineFragment = [inlineLibrary newFunctionWithName:@"eden_fragment"];
+            if (inlineVertex != nil && inlineFragment != nil) {
+                vertex = inlineVertex;
+                fragment = inlineFragment;
+                NSLog(@"Eden: Metal default library unusable (%@); compiled inline eden.metal",
+                      libraryError.localizedDescription);
+            } else {
+                libraryError = [NSError errorWithDomain:@"EdenMetal"
+                                                   code:4
+                                               userInfo:@{NSLocalizedDescriptionKey:
+                                                              @"inline eden.metal is missing eden_vertex/eden_fragment"}];
+            }
+        } else {
+            libraryError = compileError ?: [NSError errorWithDomain:@"EdenMetal"
+                                                               code:4
+                                                           userInfo:@{NSLocalizedDescriptionKey:
+                                                                          @"inline eden.metal compilation failed"}];
+        }
+    }
+
     if (vertex == nil || fragment == nil) {
         if (error) {
-            *error = [NSError errorWithDomain:@"EdenMetal"
-                                         code:4
-                                     userInfo:@{NSLocalizedDescriptionKey: @"eden_vertex/eden_fragment missing"}];
+            *error = libraryError;
         }
         return NO;
     }

@@ -2,20 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- TrollStore / jailbroken device pseudo-signing (ldid -S). -->
-	<key>platform-application</key>
-	<true/>
-	<key>com.apple.private.security.no-container</key>
-	<true/>
-	<key>com.apple.private.security.container-required</key>
-	<false/>
+	<!--
+	  Standard sandboxed application. Do NOT add platform-application or
+	  com.apple.private.security.no-container / container-required: iOS then
+	  treats the process as a container-less daemon, revokes access to the GPU
+	  driver (AGXDeviceUserClient / IOSurface) and breaks the Documents
+	  container. MTLCreateSystemDefaultDevice() and EAGLContext both return
+	  nil in that state, which is exactly the black-screen failure this
+	  file must avoid.
+	-->
 	<key>get-task-allow</key>
-	<true/>
-	<key>com.apple.security.cs.allow-jit</key>
-	<true/>
-	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-	<true/>
-	<key>com.apple.security.cs.disable-library-validation</key>
 	<true/>
 </dict>
 </plist>
