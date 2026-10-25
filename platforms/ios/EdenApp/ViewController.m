@@ -57,6 +57,7 @@
 @property (nonatomic, assign) NSInteger maxTouchCount;
 @property (nonatomic, assign) CGFloat panAccum;
 @property (nonatomic, assign) BOOL gestureHandled;
+@property (nonatomic, assign) BOOL didScrollInTouch;
 
 @end
 
@@ -79,6 +80,7 @@
     UIView *view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     view.backgroundColor = [UIColor blackColor];
     view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    view.multipleTouchEnabled = YES;
     self.view = view;
 }
 
@@ -212,6 +214,9 @@
         UIView *view = renderer.view;
         view.frame = self.view.bounds;
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        // Keep every touch (single and multi) on ViewController.view; MTKView
+        // must never swallow them.
+        view.userInteractionEnabled = NO;
         [self.view addSubview:view];
 
         NSError *prepareError = nil;
@@ -311,6 +316,11 @@
     self.maxTouchCount = (NSInteger)event.allTouches.count;
     self.panAccum = 0.0;
     self.gestureHandled = NO;
+    self.didScrollInTouch = NO;
+    if (self.engineReady) {
+        CGPoint stage = [self stagePoint:self.touchStart];
+        eden_engine_ui_move(self.engine, (int)lround(stage.x), (int)lround(stage.y));
+    }
 }
 
 - (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
@@ -326,11 +336,16 @@
     CGPoint point = [touch locationInView:self.view];
     self.panAccum += point.y - self.lastPan.y;
     self.lastPan = point;
+    CGPoint stage = [self stagePoint:point];
+    eden_engine_ui_move(self.engine, (int)lround(stage.x), (int)lround(stage.y));
     const CGFloat step = 26.0;
     if (fabs(self.panAccum) >= step) {
         int steps = (int)(-self.panAccum / step);
         self.panAccum -= steps * step;
-        eden_engine_ui_scroll(self.engine, steps);
+        if (steps != 0) {
+            eden_engine_ui_scroll(self.engine, steps);
+            self.didScrollInTouch = YES;
+        }
     }
 }
 
@@ -360,7 +375,7 @@
         eden_engine_ui_swipe_up(self.engine);
         return;
     }
-    if (hypot(dx, dy) < 14.0 && elapsed < 0.9) {
+    if (!self.didScrollInTouch && hypot(dx, dy) < 32.0 && elapsed < 1.5) {
         CGPoint stage = [self stagePoint:end];
         self.gestureHandled = YES;
         eden_engine_ui_tap(self.engine, (int)lround(stage.x), (int)lround(stage.y));

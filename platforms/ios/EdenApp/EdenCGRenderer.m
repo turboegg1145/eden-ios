@@ -91,9 +91,4 @@
     }
 }
 
-- (void)setPaused:(BOOL)paused
-{
-    self.suspended = paused;
-}
-
 @end

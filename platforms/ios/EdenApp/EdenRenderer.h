@@ -27,7 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
                height:(uint32_t)height;
 
 /// Suspends presentation (the render loop keeps ticking the VM).
-- (void)setPaused:(BOOL)paused;
+/// Deliberately not named `setPaused:`: MTKView already owns `paused` and
+/// calls it from its own lifecycle notifications.
+- (void)setSuspended:(BOOL)suspended;
 
 @end
 

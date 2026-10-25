@@ -53,11 +53,10 @@ impl FontRenderer {
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
                 "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
                 "/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc",
-                "/System/Library/Fonts/PingFang.ttc",
-                // iOS 12–14 system font locations.
-                "/System/Library/Fonts/LanguageSupport/PingFang.ttc",
-                "/System/Library/Fonts/Core/PingFang.ttc",
-                "/System/Library/Fonts/Supplemental/Songti.ttc",
+                // No /System/Library/Fonts/*.ttc here on purpose: on iOS those
+                // are ~100 MB CJK collections and the host immediately loads
+                // the 4 MB bundled font.ttf via eden_engine_load_font, so
+                // reading them would only stall startup.
                 "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
                 "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
             ]

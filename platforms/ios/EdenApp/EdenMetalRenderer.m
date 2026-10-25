@@ -46,6 +46,9 @@ static NSString *const kEdenMetalInlineSource =
 @property (nonatomic, strong) id<MTLSamplerState> sampler;
 @property (nonatomic, strong) id<MTLTexture> texture;
 @property (nonatomic, assign) BOOL prepared;
+/// Mirrors EdenGLRenderer/EdenCGRenderer. MTKView's own `paused` must stay YES
+/// so its internal timer never runs; this flag is the real pause switch.
+@property (nonatomic, assign) BOOL suspended;
 @end
 
 @implementation EdenMetalRenderer
@@ -62,8 +65,11 @@ static NSString *const kEdenMetalInlineSource =
     }
     self.device = device;
     self.delegate = self;
-    self.paused = YES;                 // driven by the shared CADisplayLink
+    // Drive every frame from the shared CADisplayLink: MTKView's internal timer
+    // stays off, and `suspended` is what actually gates drawing.
+    self.paused = YES;
     self.enableSetNeedsDisplay = NO;
+    self.suspended = NO;
     self.framebufferOnly = YES;
     self.autoResizeDrawable = YES;
     self.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -207,7 +213,7 @@ static NSString *const kEdenMetalInlineSource =
                 width:(uint32_t)width
                height:(uint32_t)height
 {
-    if (!self.prepared || self.paused || pixels == NULL) {
+    if (!self.prepared || self.suspended || pixels == NULL) {
         return;
     }
     if (width != EDEN_STAGE_WIDTH || height != EDEN_STAGE_HEIGHT) {
@@ -217,20 +223,25 @@ static NSString *const kEdenMetalInlineSource =
                     mipmapLevel:0
                       withBytes:pixels
                     bytesPerRow:(NSUInteger)width * 4];
+    // Keep MTKView's own timer off; the frame is drawn explicitly below.
+    self.paused = YES;
     [self draw];
-}
-
-- (void)setPaused:(BOOL)paused
-{
-    // MTKView already exposes `paused`; forward to its setter instead of
-    // recursing into this override.
-    [super setPaused:paused];
 }
 
 - (void)drawInMTKView:(MTKView *)view
 {
-    if (!self.prepared || self.paused) {
+    if (!self.prepared || self.suspended) {
         return;
+    }
+    if (view.drawableSize.width <= 0.0 || view.drawableSize.height <= 0.0) {
+        // The first frame can arrive before the layer has a size; a zero
+        // drawable would give a degenerate viewport and no visible output.
+        CGFloat scale = view.contentScaleFactor;
+        if (!(scale > 0.0)) {
+            scale = [UIScreen mainScreen].scale;
+        }
+        CGSize bounds = view.bounds.size;
+        view.drawableSize = CGSizeMake(bounds.width * scale, bounds.height * scale);
     }
     MTLRenderPassDescriptor *pass = view.currentRenderPassDescriptor;
     id<CAMetalDrawable> drawable = view.currentDrawable;

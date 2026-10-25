@@ -379,11 +379,6 @@ static const GLchar *kEdenFragmentShaderES2 =
     [self.context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
-- (void)setPaused:(BOOL)paused
-{
-    self.suspended = paused;
-}
-
 - (void)dealloc
 {
     if (!self.prepared) {
