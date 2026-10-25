@@ -105,6 +105,8 @@ jobs:
             esac
             du -sh "${APP}/gamedata"
             ls -lh "${APP}/gamedata"
+            # Free ~2.5 GiB before the IPA is built (runner disk is tight).
+            rm -rf build-cache
           fi
 
       - name: Pseudo-sign with ldid (TrollStore / jailbroken iOS 12–14.4)
@@ -137,6 +139,7 @@ jobs:
             *)    IPA="Eden-iOS-arm64.ipa" ;;
           esac
           echo "IPA_NAME=${IPA}" >> "${GITHUB_ENV}"
+          echo "ARTIFACT_NAME=${IPA%.ipa}" >> "${GITHUB_ENV}"
           rm -rf Payload artifacts
           mkdir -p Payload artifacts
           cp -R platforms/ios/build/Build/Products/Release-iphoneos/Eden.app Payload/
@@ -150,25 +153,29 @@ jobs:
           unzip -l "artifacts/${IPA}" | tail -5
           SIZE=$(stat -f%z "artifacts/${IPA}")
           echo "ipa bytes: ${SIZE}"
-          # GitHub Release caps every asset at 2 GiB (2,147,483,648 bytes).
-          if [ "${SIZE}" -gt 2040109465 ]; then
-            ( cd artifacts && split -b 1900m "${IPA}" "${IPA}.part" )
-            rm -f "artifacts/${IPA}"
-            ls -lh artifacts
-          else
-            ls -lh "artifacts/${IPA}"
-          fi
+          ls -lh "artifacts/${IPA}"
 
       - name: Upload IPA artifact
-        # The account-wide Actions artifact quota can be exhausted; the release
-        # asset below is the durable delivery path. Keep trying so the artifact
-        # appears automatically once the quota resets.
-        continue-on-error: true
+        # Public repo: no account-wide artifact quota, one artifact per run
+        # (up to 10 GiB) holding the complete, unsplit IPA.
         uses: actions/upload-artifact@v4
         with:
-          name: Eden-iOS-arm64
-          path: artifacts/*
+          name: ${{ env.ARTIFACT_NAME }}
+          path: artifacts/${{ env.IPA_NAME }}
+          compression-level: 0
           if-no-files-found: error
+
+      - name: Split IPA for GitHub Release (2 GiB asset cap)
+        # Only the release asset needs volumes; the artifact above keeps the
+        # single unmodified .ipa file.
+        run: |
+          set -euo pipefail
+          SIZE=$(stat -f%z "artifacts/${IPA_NAME}")
+          if [ "${SIZE}" -gt 2040109465 ]; then
+            ( cd artifacts && split -b 1900m "${IPA_NAME}" "${IPA_NAME}.part" )
+            rm -f "artifacts/${IPA_NAME}"
+          fi
+          ls -lh artifacts
 
       - name: Write IPA verification report
         run: |
